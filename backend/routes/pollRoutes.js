@@ -1,50 +1,68 @@
-const e = require('express');
 const express = require('express')
 const Poll = require("../models/pollModel")
 
 const router = express.Router();
 
 router.get("/:id", async (req, res) => {
-    const id = router.params.id
+    const id = req.params.id;
 
-    const poll = await Poll.findOne({id})
+    try {
+        var poll = await Poll.find({_id: id})
+    } catch (error) {
+        console.log(error);
+        return;
+    }
 
     if (poll) {
-        res.status(200).json(poll)
+        res.status(201).json(poll);
+    } else {
+        res.status(400).send("Enter an id")
     }
+
+
 });
 
 
 router.post("/create", async (req, res) => {
     const {title} = req.body;
 
-    const poll = await Poll.create({title: title})
+    if (title) {
+        var poll = await Poll.create({title: title})
+    } else {
+        console.log(title)
+        res.status(400).send("error enter title")
+        return;
+    }
+
 
     if (poll) {
-        res.status(201).json({_id: poll.id})
+        res.status(201).json({id: poll.id})
     } else {
-        res.status(400);
-        throw new Error("Error?")
+        res.status(400).send("Error");
     }
 })
 
+
+
 router.post("/option", async (req, res) => {
-    const {id, option} = req.body;
+    const {id, optionTitle} = req.body;
+    if (optionTitle)
+        var poll = await Poll.find({_id: id})
+    else {
+        res.status(400).send("Error")  
+        return;
 
-    const poll = await Poll.find({_id: id})
-
+    }
+    
     if (poll) {
-        const updateDocument = {
+        const result = await Poll.updateOne({_id: id}, {
             $push: {
-               options: {body: option, votes: 0},
+               options: {optionTitle: optionTitle, votes: 0},
             },
-        };
-
-        const result = await Poll.updateOne({_id: id}, updateDocument);
+        });
         res.status(201).json(result);
     } else {
-        res.status(400)
-        throw new Error("Error")
+        res.status(400).send("Error")
     }
 
 })
@@ -63,11 +81,12 @@ router.delete("/option", async (req, res) => {
 
         res.status(201).json(result);
     } else {
-        res.status(400)
-        throw new Error("Error")
+        res.status(400).send("Error")
     }
 
 })
+
+
 
 router.put("/vote", async (req, res) => {
     const {id, optionId} = req.body;
@@ -81,10 +100,12 @@ router.put("/vote", async (req, res) => {
         });
         
         res.status(201).json(result);
+        
     } else {
-        res.status(400)
-        throw new Error("Error")
+        res.status(400).send("Error")
     }
+
+    
 
 })
 
@@ -98,11 +119,10 @@ router.delete("/vote", async (req, res) => {
                "options.$.votes": -1
             },
         });
-        
+
         res.status(201).json(result);
     } else {
-        res.status(400)
-        throw new Error("Error")
+        res.status(400).send("Error")
     }
 
 })
