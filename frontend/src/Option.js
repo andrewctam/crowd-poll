@@ -1,9 +1,13 @@
 import react, {useState} from 'react'
 
 function Option(props) {
-    const incrementVote = async (e) => {    
-        const url = "http://localhost:5001/api/polls/vote"
+    const [color, setColor] = useState("bg-slate-300");
 
+    const incrementVote = async () => {    
+        localStorage.setItem(props.optionId, "1")
+        const url = "http://localhost:5001/api/polls/vote"
+        
+        setColor("bg-emerald-300");
         const response = await fetch(url, {
           method: "put",
           headers: {
@@ -11,22 +15,48 @@ function Option(props) {
           },
           body: JSON.stringify({id: props.pollId, optionId: props.optionId})
         })   
-        .then(props.getPoll());   
-    
-    
-    
+
+    }
+
+    const decrementVote = async () => {   
+      localStorage.removeItem(props.optionId)
+      const url = "http://localhost:5001/api/polls/vote"
+
+      setColor("bg-slate-300");
+      const response = await fetch(url, {
+        method: "delete",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({id: props.pollId, optionId: props.optionId})
+      })   
+
+  }
+
+
+    const castVote = () => {
+      if (localStorage.getItem(props.optionId))
+        decrementVote();
+      else
+        incrementVote();
     }
 
 
+
     const voteCount = props.votes + (props.votes === 1 ? " vote" : " votes");
-    return <div className = "border rounded-lg bg-slate-300 border-black p-5 my-2 grid grid-flow-co items-center">
-        <div className = "col-span-1 w-fu;;">
-            <button onClick = {incrementVote} className='border border-black p-1 rounded bg-slate-50'>Vote</button>
-            <div className=''>{voteCount}</div>
+
+    return <button onClick = {castVote} className = {"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
+        <div className = "text-lg p-5">
+          {props.optionTitle}
+
         </div>
 
-        <div className = "col-span-4 w-full">{props.optionTitle}</div>
-    </div>
+        <div className = "inline border-t border-t-black w-full px-3 py-2 rounded">
+            {voteCount}
+        </div>
+
+
+    </button>
     
 
     

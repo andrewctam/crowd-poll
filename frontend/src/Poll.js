@@ -23,15 +23,15 @@ function Poll(props) {
         },
         body: JSON.stringify({optionTitle: optionTitle, id: props.id})
       })   
-      .then(() => props.getPoll());
       
       optionInput.current.value = "";
     }
 
 
     const sorted = props.options.sort(  (a, b) => { return a["votes"] > b["votes"]  } )
-
+    
     const options = sorted.map(obj => <Option 
+      key = {obj["_id"]}
       pollId = {props.id} 
       votes = {obj["votes"]} 
       optionTitle = {obj["optionTitle"]} 
@@ -40,18 +40,28 @@ function Poll(props) {
 
 
 
-    return <div className = "h-screen bg-slate-400">
-        <div className = "text-3xl bold p-5 text-white">{props.title}</div>
-        
-        <div className = "h-4/6 overflow-y-auto p-5 ">{options}</div>
+    return <div className = "h-screen ">
+        <div className = "bg-slate-600 h-2/6">
+          <div className = "text-3xl bold p-5 text-white">{props.title}</div>
+          <form className = "py-10 " onSubmit={addOption}>
+            <input ref = {optionInput} required = {true} className = "h-10 w-96 rounded text-black text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..."/>
+            <br />
+            <button type="submit" className = "bg-black text-gray-200 border border-black p-2 m-2 rounded" >Add Option</button>
 
-        <form className = "py-10" onSubmit={addOption}>
-          <input ref = {optionInput} required = "true" className = "h-10 w-96 rounded text-black text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..."/>
-          <br />
-          <button type="submit" className = "bg-black text-gray-200 border border-black p-2 m-2 rounded" >Add Option</button>
-        </form>
+          </form>
+          
+        </div>
+
+        <div className = "h-4/6 overflow-y-auto px-5 py-2 bg-slate-500"> 
+        { options.length === 0 ? null : 
+            <p className='text-xl bold text-white mb-2'>Click on an option to vote. Click again to remove your vote.</p>
+        }
+          {options}
+        </div>
+
 
         
+
         </div>
 
     
