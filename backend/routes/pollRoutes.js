@@ -3,43 +3,65 @@ var ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("../models/pollModel")
 const router = express.Router();
 
+//hashmap where pollId -> res set. In the res set is all the res from SSE.
+var connected = new Map();
 
-var updated = null;
-router.get("/updates", async (req, res) => {
+const sendUpdates = async (pollId) => {
+    const requests = connected.get(pollId);
+    
+    try {
+        var poll = await Poll.find({_id: pollId})
+        console.log("New Update for " + pollId)
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+
+    requests.forEach(res => {
+        res.write('event: update\n'); 
+        res.write(`data:${JSON.stringify(poll[0])}`)
+        res.write("\n\n");   
+    })
+}
+
+router.get("/updates/:id", async (req, res) => {
     res.writeHead(200, {
         "Connection": "keep-alive",
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
       });
 
-    console.log('Client Connected')
+    const id = req.params.id
+    console.log("User Connected")
+   
 
-    let repeat = setInterval( async () => {
-        if (updated) {
-            try {
-                var poll = await Poll.find({_id: updated})
-            } catch (error) {
-                console.log(error);
-            }
-    
-            updated = null;
+    //see if the poll already has a set.
+    if (connected.get(id)) {
+        connected.get(id).add(res);
+    } else {
+        //create new set and add res.
+        const requests = new Set();
+        requests.add(res);
+        connected.set(id, requests);
+    } 
+        
 
-            if (poll) {
-                console.log("New Update")
-                res.write('event: update\n'); 
-                res.write(`data:${JSON.stringify(poll[0])}`)
-                res.write("\n\n");    
-            } 
-        }
-    }, 100);
+
 
     res.on('close', () => {
-        console.log('Client Disconnected');
-        clearInterval(repeat);
+        console.log('User Disconnected');
+
+        if (connected[id].size === 1)
+            delete connected[id]
+        else
+            connected[id].delete(res);
+
         res.end();
     });
 
 })
+
+
 
 router.get("/:id", async (req, res) => {
     const id = req.params.id;
@@ -53,7 +75,6 @@ router.get("/:id", async (req, res) => {
         }
 
         if (poll) {
-            updated = id;
             res.status(201).json(poll);
         }  else {
             res.status(400).send("Enter an id")
@@ -102,7 +123,7 @@ router.post("/option", async (req, res) => {
                options: {optionTitle: optionTitle, votes: 0},
             },
         });
-        updated = id;
+        sendUpdates(id)
         res.status(201).json(result);
     } else {
         res.status(400).send("Error")
@@ -121,7 +142,7 @@ router.delete("/option", async (req, res) => {
                options: {_id: optionId},
             },
         });
-        updated = id;
+        sendUpdates(id);
         res.status(201).json(result);
     } else {
         res.status(400).send("Error")
@@ -141,7 +162,7 @@ router.put("/vote", async (req, res) => {
                "options.$.votes": 1
             },
         });
-        updated = id;
+        sendUpdates(id)
         res.status(201).json(result);
         
     } else {
@@ -162,7 +183,7 @@ router.delete("/vote", async (req, res) => {
                "options.$.votes": -1
             },
         });
-        updated = id;
+        sendUpdates(id)
         res.status(201).json(result);
     } else {
         res.status(400).send("Error")

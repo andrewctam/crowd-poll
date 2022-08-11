@@ -17,19 +17,6 @@ function App() {
       setPollId(idParam);
     }
 
-    const eventSource = new EventSource("http://localhost:5001/api/polls/updates");
-    eventSource.addEventListener('update', e => {
-      console.log(e)
-      const info = JSON.parse(e.data);
-      setPoll(<Poll id = {info["_id"]}
-                    title = {info["title"]}
-                    options = {info["options"]}
-                    getPoll = {getPoll} />)
-
-      console.log("msg"); 
-      
-    });
-
   }, [])
 
   useEffect(() => { if (pollId) getPoll() }, [pollId])
@@ -52,6 +39,21 @@ function App() {
                   title = {info["title"]}
                   options = {info["options"]}
                   getPoll = {getPoll} />)
+
+
+    //subscribe to updates
+    const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}`);
+    eventSource.addEventListener('update', e => {
+      console.log(e)
+      const info = JSON.parse(e.data);
+      setPoll(<Poll id = {info["_id"]}
+                    title = {info["title"]}
+                    options = {info["options"]}
+                    getPoll = {getPoll} />)
+
+      console.log("Update recieved"); 
+      
+    });
 
   }
 

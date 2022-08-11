@@ -28,9 +28,9 @@ function Poll(props) {
     }
 
 
-    const sorted = props.options.sort(  (a, b) => { return a["votes"] > b["votes"]  } )
+    //const sorted = props.options.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
     
-    const options = sorted.map(obj => <Option 
+    const options = props.options.map(obj => <Option 
       key = {obj["_id"]}
       pollId = {props.id} 
       votes = {obj["votes"]} 

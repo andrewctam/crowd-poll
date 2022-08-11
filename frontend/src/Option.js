@@ -1,7 +1,7 @@
 import react, {useState} from 'react'
 
 function Option(props) {
-    const [color, setColor] = useState("bg-slate-300");
+    const [color, setColor] = useState(localStorage.getItem(props.optionId) ? "bg-emerald-300" : "bg-slate-300");
 
     const incrementVote = async () => {    
         localStorage.setItem(props.optionId, "1")
