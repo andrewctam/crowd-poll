@@ -1,5 +1,5 @@
 import "./index.css"
-import {useState, useRef, useEffect} from "react";
+import {useRef} from "react";
 
 function Welcome(props) {
   const titleInput = useRef(null);
@@ -8,7 +8,7 @@ function Welcome(props) {
   const createPoll = async (e) => {
     e.preventDefault();
     
-    const url = "http://localhost:5001/api/polls/create"
+    const url = "https://grouppoll.herokuapp.com/api/polls/create"
     const title = titleInput.current.value
     if (title === "") {
       alert("Enter title")

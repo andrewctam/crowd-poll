@@ -8,7 +8,12 @@ var connected = new Map();
 
 const sendUpdates = async (pollId) => {
     const requests = connected.get(pollId);
-    console.log(connected)
+
+    if (!requests) {
+        console.log("error");
+        return;
+    }
+
     try {
         var poll = await Poll.find({_id: pollId})
         console.log("New Update for " + pollId)
@@ -44,7 +49,6 @@ router.get("/updates/:id", async (req, res) => {
         connected.set(id, requests);
     } 
         
-
     res.on('close', () => {
         console.log('User Disconnected');
 
@@ -111,7 +115,6 @@ router.post("/option", async (req, res) => {
     else {
         res.status(400).send("Error")  
         return;
-
     }
     
     if (poll) {
@@ -120,6 +123,7 @@ router.post("/option", async (req, res) => {
                options: {optionTitle: optionTitle, votes: 0},
             },
         });
+
         sendUpdates(id)
         res.status(201).json(result);
     } else {

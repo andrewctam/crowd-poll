@@ -1,4 +1,4 @@
-import react, {useState, useRef} from 'react'
+import {useRef} from 'react'
 import Option from "./Option"
 
 
@@ -8,7 +8,7 @@ function Poll(props) {
     const addOption = async (e) => {
       e.preventDefault();
 
-      const url = "http://localhost:5001/api/polls/option"
+      const url = "https://grouppoll.herokuapp.com/api/polls/option"
       const optionTitle = optionInput.current.value
 
       if (optionTitle === "") {

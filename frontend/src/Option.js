@@ -1,11 +1,11 @@
-import react, {useState} from 'react'
+import {useState} from 'react'
 
 function Option(props) {
     const [color, setColor] = useState(localStorage.getItem(props.optionId) ? "bg-emerald-300" : "bg-slate-300");
 
     const incrementVote = async () => {    
         localStorage.setItem(props.optionId, "1")
-        const url = "http://localhost:5001/api/polls/vote"
+        const url = "https://grouppoll.herokuapp.com/api/polls/vote"
         
         setColor("bg-emerald-300");
         const response = await fetch(url, {
@@ -20,7 +20,7 @@ function Option(props) {
 
     const decrementVote = async () => {   
       localStorage.removeItem(props.optionId)
-      const url = "http://localhost:5001/api/polls/vote"
+      const url = "https://grouppoll.herokuapp.com/api/polls/vote"
 
       setColor("bg-slate-300");
       const response = await fetch(url, {

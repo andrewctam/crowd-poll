@@ -3,7 +3,6 @@ import {useState, useRef, useEffect} from "react";
 import Poll from "./Poll"
 import Welcome from "./Welcome";
 function App(props) {
-
   const [poll, setPoll] = useState(null);
   const [pollId, setPollId] = useState("")
 
@@ -26,7 +25,7 @@ function App(props) {
       return;
     }
     
-    const url = `http://localhost:5001/api/polls/${pollId}`
+    const url = `https://grouppoll.herokuapp.com/api/polls/${pollId}`
 
     const message = await fetch(url)
       .then((response) => response.json())
@@ -40,7 +39,7 @@ function App(props) {
 
 
     //subscribe to updates
-    const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}`);
+    const eventSource = new EventSource(`https://grouppoll.herokuapp.com/api/polls/updates/${pollId}`);
     eventSource.addEventListener('update', e => {
       const info = JSON.parse(e.data);
       setPoll(<Poll id = {info["_id"]}
