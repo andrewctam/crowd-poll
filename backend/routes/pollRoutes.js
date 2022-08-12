@@ -10,7 +10,7 @@ const sendUpdates = async (pollId) => {
     const requests = connected.get(pollId);
 
     if (!requests) {
-        console.log("error");
+        console.log("Error. res not found");
         return;
     }
 
@@ -49,9 +49,16 @@ router.get("/updates/:id", async (req, res) => {
         connected.set(id, requests);
     } 
         
+    //send a ping every 40 seconds to avoid 55 second timeout 
+    const ping = setTimeout(() => {
+        res.write('event: update'); 
+        res.write("\n\n");   
+    }, 4000)
+
     res.on('close', () => {
         console.log('User Disconnected');
-
+        clearInterval(ping);
+        
         if (connected.get(id).size === 1)
             connected.delete(id)
         else
@@ -78,20 +85,20 @@ router.get("/:id", async (req, res) => {
         if (poll) {
             res.status(201).json(poll);
         }  else {
-            res.status(400).send("Enter an id")
+            res.status(400).send("Poll expired or Invalid ID.")
         }
     } else {
-        console.log(id + " is bad")
-        res.status(400).send("Invalid id")
+        console.log(id + " is not valid")
+        res.status(400).send("Poll expired or Invalid ID.")
     }
 
 });
 
 router.post("/create", async (req, res) => {
-    const {title} = req.body;
+    const {title, owner} = req.body;
     
     if (title) {
-        var poll = await Poll.create({title: title})
+        var poll = await Poll.create({title: title, owner: owner})
     } else {
         console.log(title)
         res.status(400).send("error enter title")
@@ -109,7 +116,8 @@ router.post("/create", async (req, res) => {
 
 
 router.post("/option", async (req, res) => {
-    const {id, optionTitle} = req.body;
+    const {id, optionTitle, userId} = req.body;
+
     if (optionTitle)
         var poll = await Poll.find({_id: id})
     else {
@@ -118,6 +126,12 @@ router.post("/option", async (req, res) => {
     }
     
     if (poll) {
+        console.log(userId)
+        console.log(poll[0]["owner"])
+
+        if (userId == poll.owner)
+            console.log("Hello");
+
         const result = await Poll.updateOne({_id: id}, {
             $push: {
                options: {optionTitle: optionTitle, votes: 0},
@@ -133,7 +147,7 @@ router.post("/option", async (req, res) => {
 })
 
 router.delete("/option", async (req, res) => {
-    const {id, optionId} = req.body;
+    const {id, optionTitle, userId} = req.body;
 
     const poll = await Poll.find({_id: id})
 
