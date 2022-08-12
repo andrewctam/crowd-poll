@@ -8,7 +8,7 @@ var connected = new Map();
 
 const sendUpdates = async (pollId) => {
     const requests = connected.get(pollId);
-    
+    console.log(connected)
     try {
         var poll = await Poll.find({_id: pollId})
         console.log("New Update for " + pollId)
@@ -25,6 +25,7 @@ const sendUpdates = async (pollId) => {
 }
 
 router.get("/updates/:id", async (req, res) => {
+    console.log("User Connected")
     res.writeHead(200, {
         "Connection": "keep-alive",
         "Content-Type": "text/event-stream",
@@ -32,9 +33,7 @@ router.get("/updates/:id", async (req, res) => {
       });
 
     const id = req.params.id
-    console.log("User Connected")
    
-
     //see if the poll already has a set.
     if (connected.get(id)) {
         connected.get(id).add(res);
@@ -46,15 +45,13 @@ router.get("/updates/:id", async (req, res) => {
     } 
         
 
-
-
     res.on('close', () => {
         console.log('User Disconnected');
 
-        if (connected[id].size === 1)
-            delete connected[id]
+        if (connected.get(id).size === 1)
+            connected.delete(id)
         else
-            connected[id].delete(res);
+            connected.get(id).delete(res);
 
         res.end();
     });
@@ -190,11 +187,6 @@ router.delete("/vote", async (req, res) => {
     }
 
 })
-
-
-
-
-
 
 
 module.exports = router
