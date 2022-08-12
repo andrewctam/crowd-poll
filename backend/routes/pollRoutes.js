@@ -6,29 +6,6 @@ const router = express.Router();
 //hashmap where pollId -> res set. In the res set is all the res from SSE.
 var connected = new Map();
 
-const sendUpdates = async (pollId) => {
-    const requests = connected.get(pollId);
-
-    if (!requests) {
-        console.log("Error. res not found");
-        return;
-    }
-
-    try {
-        var poll = await Poll.find({_id: pollId})
-        console.log("New Update for " + pollId)
-    } catch (error) {
-        console.log(error);
-        return;
-    }
-
-    requests.forEach(res => {
-        res.write('event: update\n'); 
-        res.write(`data:${JSON.stringify(poll[0])}`)
-        res.write("\n\n");   
-    })
-}
-
 router.get("/updates/:id", async (req, res) => {
     console.log("User Connected")
     res.writeHead(200, {
@@ -70,25 +47,77 @@ router.get("/updates/:id", async (req, res) => {
 })
 
 
+const sendUpdates = async (pollId) => {
+    const requests = connected.get(pollId);
 
-router.get("/:id", async (req, res) => {
-    const id = req.params.id;
+    if (!requests) {
+        console.log("Error. Res not found");
+        return;
+    }
 
-    if (ObjectId.isValid(id)) {
+    try {
+        var poll = await Poll.find({_id: pollId})
+        console.log("New Update for " + pollId)
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+
+    poll = poll[0]
+    const msg = {
+        id: poll["_id"],
+        title: poll["title"],
+        options: poll["options"],
+        //owner: user === poll["owner"],
+        settings: {
+            limitOneVote: poll["limitOneVote"],
+            approvalRequired: poll["approvalRequired"]
+        }
+    }
+
+
+    requests.forEach(res => {
+        res.write('event: update\n'); 
+        res.write(`data:${JSON.stringify(msg)}`)
+        res.write("\n\n");   
+    })
+}
+
+
+
+router.get("/:id&:user", async (req, res) => {
+    const pollId = req.params.id;
+    const user = req.params.user;
+
+
+    if (ObjectId.isValid(pollId)) {
         try {
-            var poll = await Poll.find({_id: id})
+            var poll = await Poll.find({_id: pollId})
         } catch (error) {
             console.log(error);
             return;
         }
-
+        
         if (poll) {
-            res.status(201).json(poll);
+            
+            poll = poll[0]
+            const msg = {
+                id: poll["_id"],
+                title: poll["title"],
+                options: poll["options"],
+                owner: user === poll["owner"],
+                settings: {
+                    limitOneVote: poll["limitOneVote"],
+                    approvalRequired: poll["approvalRequired"]
+                }
+            }
+
+            res.status(201).json(msg);
         }  else {
             res.status(400).send("Poll expired or Invalid ID.")
         }
     } else {
-        console.log(id + " is not valid")
+        console.log(pollId + " is not valid")
         res.status(400).send("Poll expired or Invalid ID.")
     }
 
@@ -125,13 +154,8 @@ router.post("/option", async (req, res) => {
         return;
     }
     
+
     if (poll) {
-        console.log(userId)
-        console.log(poll[0]["owner"])
-
-        if (userId == poll.owner)
-            console.log("Hello");
-
         const result = await Poll.updateOne({_id: id}, {
             $push: {
                options: {optionTitle: optionTitle, votes: 0},
@@ -147,7 +171,7 @@ router.post("/option", async (req, res) => {
 })
 
 router.delete("/option", async (req, res) => {
-    const {id, optionTitle, userId} = req.body;
+    const {id, userId} = req.body;
 
     const poll = await Poll.find({_id: id})
 
@@ -206,5 +230,42 @@ router.delete("/vote", async (req, res) => {
 
 })
 
+
+
+router.put("/setting", async (req, res) => {
+    const {pollId, userId, setting, newValue} = req.body;
+
+    if (pollId && ObjectId.isValid(pollId))
+        var poll = await Poll.find({_id: pollId})
+
+    if (!poll || poll[0]["owner"] !== userId) {
+        res.status(400).send("Permission Denied");    
+        return;
+    }
+
+    switch (setting) {
+        case "limitOneVote":
+            var result = await Poll.updateOne({_id: pollId}, {
+               limitOneVote: newValue
+            });
+            console.log(result)
+            res.status(201).json(result);
+            sendUpdates(pollId)
+            return;
+            
+        case "approvalRequired":
+            result = await Poll.updateOne({_id: pollId}, {
+                approvalRequired: newValue
+             });
+            res.status(201).json(result);
+            sendUpdates(pollId)
+            return;
+        default:
+            res.status(400).send("Error");
+            return;
+    }
+
+
+});
 
 module.exports = router

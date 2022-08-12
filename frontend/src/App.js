@@ -5,14 +5,13 @@ import Welcome from "./Welcome";
 
 function App(props) {
 	const [poll, setPoll] = useState(null);
+	const [isOwner, setIsOwner] = useState(null);
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
 
 	useEffect(() => {
-
 		const verifyId = async () => {
 			var storedUserId = localStorage.getItem("userId")
-			console.log(storedUserId)
 			if (storedUserId) {
 				//verify that the user id is in the database
 				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
@@ -65,29 +64,39 @@ function App(props) {
 			return;
 		}
 
-		const url = `http://localhost:5001/api/polls/${pollId}`
+		const url = `http://localhost:5001/api/polls/${pollId}&${userId}`
 
 		const message = await fetch(url)
 			.then((response) => response.json())
+			.catch( (error) => {
+				console.log(error)
+			});
 
-		const info = message[0];
-		setPoll(<Poll id={info["_id"]}
-			title={info["title"]}
-			options={info["options"]}
-			getPoll={getPoll} 
+		console.log(message)
+		setPoll(<Poll id={message["id"]}
+			title={message["title"]}
+			options={message["options"]}
+			settings = {message["settings"]}
+			isOwner = {message["owner"]}
 			userId = {userId}
 		/>)
 
+
+		setIsOwner(message["owner"])
 
 		//subscribe to updates
 		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}`);
 		eventSource.addEventListener('update', e => {
 			const info = JSON.parse(e.data);
-			setPoll(<Poll id={info["_id"]}
-				title={info["title"]}
-				options={info["options"]}
-				getPoll={getPoll} 
-				/>)
+
+			setPoll(<Poll id={info["id"]}
+							title={info["title"]}
+							options={info["options"]}
+							settings = {info["settings"]}
+							userId = {userId}
+
+							isOwner = {message["owner"]}
+							/>)
 
 			console.log("Update received");
 		});
