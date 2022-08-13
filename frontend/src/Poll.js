@@ -9,7 +9,7 @@ function Poll(props) {
     const addOption = async (e) => {
         e.preventDefault();
 
-        const url = "http://localhost:5001/api/polls/option"
+        const url = "https://grouppoll.herokuapp.com/api/polls/option"
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
@@ -32,7 +32,7 @@ function Poll(props) {
         const setting = e.target.id;
         const newValue = e.target.checked;
 
-        const url = "http://localhost:5001/api/polls/setting"
+        const url = "https://grouppoll.herokuapp.com/api/polls/setting"
         
         const response = await fetch(url, {
             method: "PUT",
@@ -71,13 +71,13 @@ function Poll(props) {
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
 
             <div className="py-10" >
-                <a href="http://localhost:3000/"><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Group Poll</h1></a>
+                <a href="/"><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Group Poll</h1></a>
 
                 <div className="mt-2">
                     <h1 className="text-xl pt-1 text-gray-300 select-none">Share this link to your poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-96 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
-                    {true || props.isOwner ? 
+                    {props.isOwner ? 
                     <div className = "border border-white mt-4 p-2 w-fit mx-auto rounded-xl">
                         <h1 className='text-white text-2xl mt-1 bold'>Settings</h1>
                         <p className='text-white mb-3'>{"(only you can edit these)"}</p>

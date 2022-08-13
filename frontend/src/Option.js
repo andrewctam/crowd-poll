@@ -3,7 +3,7 @@ import { useState } from 'react'
 function Option(props) {
     const castVote = async () => {
         console.log("voting")
-        const url = "http://localhost:5001/api/polls/vote"
+        const url = "https://grouppoll.herokuapp.com/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -25,7 +25,7 @@ function Option(props) {
     }
 
     const approveDenyOption = async (approved) => {
-        const url = "http://localhost:5001/api/polls/option"
+        const url = "https://grouppoll.herokuapp.com/api/polls/option"
 
         const updatedVotes = await fetch(url, {
             method: "put",
