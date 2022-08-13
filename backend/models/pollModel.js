@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const pollSchema = mongoose.Schema({
     title: String,
     options:[{ optionTitle: String, votes: Number}],
+    votes: [{userId: String, optionIds: [String]}],
     owner: String,
 
     limitOneVote: { type: Boolean, default: false },

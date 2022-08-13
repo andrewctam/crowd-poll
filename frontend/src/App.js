@@ -78,6 +78,7 @@ function App(props) {
 			options={message["options"]}
 			settings = {message["settings"]}
 			isOwner = {message["owner"]}
+			votedFor = {message["votedFor"]}
 			userId = {userId}
 		/>)
 
@@ -93,8 +94,9 @@ function App(props) {
 							title={info["title"]}
 							options={info["options"]}
 							settings = {info["settings"]}
-							userId = {userId}
 
+							//below won't change
+							userId = {userId}
 							isOwner = {message["owner"]}
 							/>)
 

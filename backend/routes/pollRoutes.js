@@ -99,7 +99,26 @@ router.get("/:id&:user", async (req, res) => {
         }
         
         if (poll) {
-            
+
+            //add votes object
+            if (!await Poll.exists({_id: pollId, "votes.userId":user})) {
+                await Poll.updateOne({_id: pollId}, {
+                    $push: {
+                        "votes": {
+                            userId: user,
+                            optionIds: []
+                        }
+                    }
+                });
+                var optionIds = []
+            } else {
+                const ids = poll[0]["votes"]
+                optionIds = ids.find(option => option["userId"] === user)["optionIds"]
+            }
+
+
+    
+
             poll = poll[0]
             const msg = {
                 id: poll["_id"],
@@ -109,7 +128,8 @@ router.get("/:id&:user", async (req, res) => {
                 settings: {
                     limitOneVote: poll["limitOneVote"],
                     approvalRequired: poll["approvalRequired"]
-                }
+                },
+                votedFor: optionIds
             }
 
             res.status(201).json(msg);
@@ -156,6 +176,7 @@ router.post("/option", async (req, res) => {
     
 
     if (poll) {
+
         const result = await Poll.updateOne({_id: id}, {
             $push: {
                options: {optionTitle: optionTitle, votes: 0},
@@ -192,44 +213,58 @@ router.delete("/option", async (req, res) => {
 
 
 router.put("/vote", async (req, res) => {
-    const {id, optionId} = req.body;
+    const {id, optionId, userId} = req.body;
 
     const poll = await Poll.find({_id: id})
+    
     if (poll) {
-        const result = await Poll.updateOne({_id: id, "options._id": optionId}, {
+        const limitOneVote = poll[0]["limitOneVote"];
+        const ids = poll[0]["votes"]
+        
+        const optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+        
+        const optionIdLocation = optionIds.findIndex(element => element === optionId)
+        if (optionIdLocation === -1) { //vote
+            if (limitOneVote && optionIds.length >= 1) {
+               res.status(400).json("Limit 1 vote!")
+               return;
+            } else {
+                //    votes: [{userId: String, optionIds: [String]}],
+                await Poll.updateOne({_id: id, "votes.userId": userId}, {
+                    $push: {
+                        "votes.$.optionIds": optionId
+                    }
+                });
+                var change = 1;
+                optionIds.push(optionId)
+            }
+        } else {
+            await Poll.updateOne({_id: id, "votes.userId": userId}, {
+                $pull: {
+                    "votes.$.optionIds": optionId
+                }
+            });
+            change = -1;
+            optionIds.splice(optionIdLocation, 1)
+        }
+
+        //    options: [{ optionTitle: String, votes: Number}],
+        await Poll.updateOne({_id: id, "options._id": optionId}, {
             $inc: {
-               "options.$.votes": 1
+                "options.$.votes": change
             },
         });
+        
         sendUpdates(id)
-        res.status(201).json(result);
+        res.status(201).json(optionIds);
         
     } else {
-        res.status(400).send("Error")
+        res.status(404).send("Error. Poll not found?")
     }
 
     
 
 })
-
-router.delete("/vote", async (req, res) => {
-    const {id, optionId} = req.body;
-
-    const poll = await Poll.find({_id: id})
-    if (poll) {
-        const result = await Poll.updateOne({_id: id, "options._id": optionId}, {
-            $inc: {
-               "options.$.votes": -1
-            },
-        });
-        sendUpdates(id)
-        res.status(201).json(result);
-    } else {
-        res.status(400).send("Error")
-    }
-
-})
-
 
 
 router.put("/setting", async (req, res) => {

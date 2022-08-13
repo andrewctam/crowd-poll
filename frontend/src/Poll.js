@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import Option from "./Option"
 
 
 function Poll(props) {
     const optionInput = useRef(null);
+    const [votedFor, setVotedFor] = useState(props.votedFor);
 
     const addOption = async (e) => {
         e.preventDefault();
@@ -58,10 +59,12 @@ function Poll(props) {
         votes={obj["votes"]}
         optionTitle={obj["optionTitle"]}
         optionId={obj["_id"]}
-        getPoll={props.getPoll} />);
+        userId = {props.userId}
+        setVotedFor = {setVotedFor}
+         />);
 
     
-console.log(props.settings)
+    //console.log(props.settings)
     return (
 
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
