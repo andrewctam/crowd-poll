@@ -78,7 +78,7 @@ function App(props) {
 			options={message["options"]}
 			settings = {message["settings"]}
 			isOwner = {message["owner"]}
-			votedFor = {message["votedFor"]}
+			defaultVotedFor = {message["votedFor"]}
 			userId = {userId}
 		/>)
 
@@ -86,7 +86,7 @@ function App(props) {
 		setIsOwner(message["owner"])
 
 		//subscribe to updates
-		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}`);
+		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
 			const info = JSON.parse(e.data);
 
@@ -96,6 +96,7 @@ function App(props) {
 							settings = {info["settings"]}
 
 							//below won't change
+							//defaultVotedFor will not change. State updated in Poll.js
 							userId = {userId}
 							isOwner = {message["owner"]}
 							/>)

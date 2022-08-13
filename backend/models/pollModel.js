@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const pollSchema = mongoose.Schema({
     title: String,
-    options:[{ optionTitle: String, votes: Number}],
+    options:[{ optionTitle: String, votes: Number, approved: Boolean}],
     votes: [{userId: String, optionIds: [String]}],
     owner: String,
 

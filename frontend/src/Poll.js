@@ -4,7 +4,7 @@ import Option from "./Option"
 
 function Poll(props) {
     const optionInput = useRef(null);
-    const [votedFor, setVotedFor] = useState(props.votedFor);
+    const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
 
     const addOption = async (e) => {
         e.preventDefault();
@@ -51,16 +51,17 @@ function Poll(props) {
     } 
 
     //var sorted = props.options//.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
-
     const options = props.options.map(obj =>
         <Option
-        key={obj["_id"]}
-        pollId={props.id}
-        votes={obj["votes"]}
-        optionTitle={obj["optionTitle"]}
-        optionId={obj["_id"]}
-        userId = {props.userId}
-        setVotedFor = {setVotedFor}
+            key={obj["_id"]}
+            pollId={props.id}
+            votes={obj["votes"]}
+            optionTitle={obj["optionTitle"]}
+            optionId={obj["_id"]}
+            userId = {props.userId}
+            setVotedFor = {setVotedFor}
+            voted = {votedFor.includes(obj["_id"])}
+            approved = {obj["approved"]}
          />);
 
     
@@ -76,7 +77,7 @@ function Poll(props) {
                     <h1 className="text-xl pt-1 text-gray-300 select-none">Share this link to your poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-96 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
-                    {props.isOwner ? 
+                    {true || props.isOwner ? 
                     <div className = "border border-white mt-4 p-2 w-fit mx-auto rounded-xl">
                         <h1 className='text-white text-2xl mt-1 bold'>Settings</h1>
                         <p className='text-white mb-3'>{"(only you can edit these)"}</p>
@@ -91,6 +92,7 @@ function Poll(props) {
                             <label className = "px-1" htmlFor="approvalRequired" >New Options Require Your Approval</label>
                             <input id="approvalRequired" type="checkbox" onChange = {setSetting} checked = {props.settings["approvalRequired"]}></input>
                         </div>
+                        
 
                         
                         
