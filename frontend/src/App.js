@@ -14,7 +14,7 @@ function App(props) {
 			var storedUserId = localStorage.getItem("userId")
 			if (storedUserId) {
 				//verify that the user id is in the database
-				const message = await fetch(`https://grouppoll.herokuapp.com/api/users/${storedUserId}`)
+				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
 					.then((response) => {
 						if (response.status === 404)
 							return response.json();
@@ -32,7 +32,7 @@ function App(props) {
 				}
 	
 			} else {
-				const message = await fetch("https://grouppoll.herokuapp.com/api/users/")
+				const message = await fetch("http://localhost:5001/api/users/")
 					.then((response) => response.json())
 
 				localStorage.setItem("userId", storedUserId)
@@ -64,7 +64,7 @@ function App(props) {
 			return;
 		}
 
-		const url = `https://grouppoll.herokuapp.com/api/polls/${pollId}&${userId}`
+		const url = `http://localhost:5001/api/polls/${pollId}&${userId}`
 
 		const message = await fetch(url)
 			.then((response) => response.json())
@@ -86,7 +86,7 @@ function App(props) {
 		setIsOwner(message["owner"])
 
 		//subscribe to updates
-		const eventSource = new EventSource(`https://grouppoll.herokuapp.com/api/polls/updates/${pollId}&${userId}`);
+		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
 			const info = JSON.parse(e.data);
 

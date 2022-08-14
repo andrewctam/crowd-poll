@@ -1,6 +1,6 @@
 {
-  "name": "grouppoll",
-  "homepage": "http://tamandrew.github.io/GroupPoll",
+  "name": "Crowd Poll",
+  "homepage": "http://tamandrew.github.io/Crowd Poll",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

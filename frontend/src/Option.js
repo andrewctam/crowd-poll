@@ -3,7 +3,7 @@ import { useState } from 'react'
 function Option(props) {
     const castVote = async () => {
         console.log("voting")
-        const url = "https://grouppoll.herokuapp.com/api/polls/vote"
+        const url = "http://localhost:5001/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -19,13 +19,14 @@ function Option(props) {
                 return;
             }
         })
+        
         if (updatedVotes)
             props.setVotedFor(updatedVotes)
 
     }
 
     const approveDenyOption = async (approved) => {
-        const url = "https://grouppoll.herokuapp.com/api/polls/option"
+        const url = "http://localhost:5001/api/polls/option"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -41,8 +42,7 @@ function Option(props) {
                 return;
             }
         })
-        if (updatedVotes)
-            props.setVotedFor(updatedVotes)
+      
 
     }
 
@@ -71,8 +71,7 @@ function Option(props) {
             </div>
             
         </button>
-    :
-
+        :
         <div className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
             
         <div className="text-lg p-5">

@@ -1,7 +1,7 @@
 {
-  "short_name": "Group Poll",
-  "name": "Group Poll",
-  "start_url": "https://andrewtam.org/GroupPoll",
+  "short_name": "Crowd Poll",
+  "name": "Crowd Poll",
+  "start_url": "https://andrewtam.org/Crowd Poll",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"

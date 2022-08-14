@@ -5,24 +5,25 @@ import Option from "./Option"
 function Poll(props) {
     const optionInput = useRef(null);
     const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
-
+    const [approveSelf, setApproveSelf] = useState(true);
     const addOption = async (e) => {
         e.preventDefault();
 
-        const url = "https://grouppoll.herokuapp.com/api/polls/option"
+        const url = "http://localhost:5001/api/polls/option"
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
             alert("Enter title")
             return;
         }
+        
 
         const response = await fetch(url, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({optionTitle: optionTitle, id: props.id, userId: props.userId })
+            body: JSON.stringify({optionTitle: optionTitle, id: props.id, userId: approveSelf ? props.userId : ""})
         })
 
         optionInput.current.value = "";
@@ -32,7 +33,7 @@ function Poll(props) {
         const setting = e.target.id;
         const newValue = e.target.checked;
 
-        const url = "https://grouppoll.herokuapp.com/api/polls/setting"
+        const url = "http://localhost:5001/api/polls/setting"
         
         const response = await fetch(url, {
             method: "PUT",
@@ -61,7 +62,7 @@ function Poll(props) {
             userId = {props.userId}
             setVotedFor = {setVotedFor}
             voted = {votedFor.includes(obj["_id"])}
-            approved = {obj["approved"]}
+            approved = {!props.settings["approvalRequired"] || obj["approved"]}
          />);
 
     
@@ -71,7 +72,7 @@ function Poll(props) {
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
 
             <div className="py-10" >
-                <a href="/"><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Group Poll</h1></a>
+                <a href="/"><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</h1></a>
 
                 <div className="mt-2">
                     <h1 className="text-xl pt-1 text-gray-300 select-none">Share this link to your poll:</h1>
@@ -116,6 +117,14 @@ function Poll(props) {
                         <br />
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >Add Option</button>
 
+
+                        {props.isOwner && props.settings["approvalRequired"] ?
+                        <div className = "text-white text-center">
+                            <label className = "px-1" htmlFor="approveSelf" >Auto Approve Your Options</label>
+                            <input id="approveSelf" type="checkbox" onChange = {() => {setApproveSelf(!approveSelf)}} checked = {approveSelf}></input>
+                        </div> 
+                        : null
+                        } 
                     </form>
 
                 </div>
