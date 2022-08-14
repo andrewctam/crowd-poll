@@ -2,9 +2,12 @@ import "./index.css"
 import { useState, useEffect } from "react";
 import Poll from "./Poll"
 import Welcome from "./Welcome";
+import Alert from "./Alert";
 
 function App(props) {
 	const [poll, setPoll] = useState(null);
+	const [alert, setAlert] = useState(null);
+
 	const [isOwner, setIsOwner] = useState(null);
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
@@ -21,9 +24,15 @@ function App(props) {
 
 						else
 							return null; //null means found
-					})
-				
-				if (message) {
+					}).catch( (error) => {
+						setAlert(<Alert timeout = {10000} title = {"Connection Error"} message = {"Failed to connect to server. Please try again in a moment"} setAlert = {setAlert}/>)
+						console.log(error)
+						return -1;
+					});
+					
+				if (message === -1) 
+					return;
+				else if (message) {
 					storedUserId = message["_id"]
 					localStorage.setItem("userId", storedUserId)
 					console.log("NF. N " + storedUserId)
@@ -69,7 +78,9 @@ function App(props) {
 		const message = await fetch(url)
 			.then((response) => response.json())
 			.catch( (error) => {
+				setAlert(<Alert title = {"Error Getting Poll"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
 				console.log(error)
+				return;
 			});
 
 		console.log(message)
@@ -88,20 +99,25 @@ function App(props) {
 		//subscribe to updates
 		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
+			try {
 			const info = JSON.parse(e.data);
+				setPoll(<Poll id={info["id"]}
+								title={info["title"]}
+								options={info["options"]}
+								settings = {info["settings"]}
 
-			setPoll(<Poll id={info["id"]}
-							title={info["title"]}
-							options={info["options"]}
-							settings = {info["settings"]}
+								//below won't change
+								//defaultVotedFor will not change. State updated in Poll.js
+								userId = {userId}
+								isOwner = {message["owner"]}
+								/>)
 
-							//below won't change
-							//defaultVotedFor will not change. State updated in Poll.js
-							userId = {userId}
-							isOwner = {message["owner"]}
-							/>)
-
-			console.log("Update received");
+				console.log("Update received");
+			} catch (error) {
+				setAlert(<Alert title = {"Error"} message = {"Please try again"} setAlert = {setAlert}/>)
+				console.log("reloading")
+				window.location.reload();
+			}
 		});
 
 	}
@@ -109,7 +125,10 @@ function App(props) {
 
 
 	return (
-		poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>
+		<>
+		{alert}
+		{poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>}
+		</>
 	)
 
 }
