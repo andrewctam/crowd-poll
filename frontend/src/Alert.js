@@ -14,10 +14,10 @@ function Alert(props) {
 
 
     return <div className = "lg:absolute lg:top-0 m-5" >
-    <div class="bg-red-200 text-black font-bold rounded-t px-4 py-2">
+    <div className="bg-red-200 text-black font-bold rounded-t px-4 py-2">
       {props.title}
     </div>
-    <div class="rounded-b bg-red-100 px-4 py-3 text-red-800">
+    <div className="rounded-b bg-red-100 px-4 py-3 text-red-800">
 
       <p>{props.message}</p>
     </div>

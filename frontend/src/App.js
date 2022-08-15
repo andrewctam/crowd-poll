@@ -8,7 +8,6 @@ function App(props) {
 	const [poll, setPoll] = useState(null);
 	const [alert, setAlert] = useState(null);
 
-	const [isOwner, setIsOwner] = useState(null);
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
 
@@ -17,7 +16,7 @@ function App(props) {
 			var storedUserId = localStorage.getItem("userId")
 			if (storedUserId) {
 				//verify that the user id is in the database
-				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
+				const message = await fetch(`https://crowd-poll.herokuapp.com/api/users/${storedUserId}`)
 					.then((response) => {
 						if (response.status === 404)
 							return response.json();
@@ -41,7 +40,7 @@ function App(props) {
 				}
 	
 			} else {
-				const message = await fetch("http://localhost:5001/api/users/")
+				const message = await fetch("https://crowd-poll.herokuapp.com/api/users/")
 					.then((response) => response.json())
 
 				localStorage.setItem("userId", storedUserId)
@@ -59,13 +58,12 @@ function App(props) {
 			setPollId(idParam);
 		}
 
-
-
 	}, [])
 
 	useEffect(() => {
 		if (pollId && userId)
 			getPoll()
+	// eslint-disable-next-line
 	}, [pollId, userId])
 
 	const getPoll = async () => {
@@ -73,12 +71,12 @@ function App(props) {
 			return;
 		}
 
-		const url = `http://localhost:5001/api/polls/${pollId}&${userId}`
+		const url = `https://crowd-poll.herokuapp.com/api/polls/${pollId}&${userId}`
 
 		const message = await fetch(url)
 			.then((response) => response.json())
 			.catch( (error) => {
-				setAlert(<Alert title = {"Error Getting Poll"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
+				setAlert(<Alert timeout = {10000} title = {"Error Getting Poll"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
 				console.log(error)
 				return;
 			});
@@ -94,10 +92,8 @@ function App(props) {
 		/>)
 
 
-		setIsOwner(message["owner"])
-
 		//subscribe to updates
-		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
+		const eventSource = new EventSource(`https://crowd-poll.herokuapp.com/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
 			try {
 			const info = JSON.parse(e.data);
@@ -123,13 +119,11 @@ function App(props) {
 	}
 
 
-
-	return (
-		<>
+	return(
+	<> 
 		{alert}
 		{poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>}
-		</>
-	)
+	</>)
 
 }
 

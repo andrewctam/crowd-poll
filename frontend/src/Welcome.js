@@ -15,7 +15,7 @@ function Welcome(props) {
             return;
         }
         
-        const url = "http://localhost:5001/api/polls/create"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/create"
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -45,7 +45,7 @@ function Welcome(props) {
 
             <div className="bg-slate-600 grid items-center py-10 lg:h-screen">
                 <form className="py-10" onSubmit={createPoll}>
-                    <input ref={titleInput} className="h-10 mx-2 w-96 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
+                    <input ref={titleInput} className="h-10 mx-2 w-3/4 md:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
                     <br />
                     {showError ? <p className="m-1 text-red-200">Title can not be blank. Please enter a title.</p> : null}
                     <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >Create Poll</button>
