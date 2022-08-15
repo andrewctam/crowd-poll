@@ -6,6 +6,8 @@ const router = express.Router();
 //hashmap where pollId -> res set. In the res set is all the res from SSE.
 var connected = new Map();
 
+
+
 router.get("/updates/:id&:userId", async (req, res) => {
     console.log("User Connected")
     res.writeHead(200, {
@@ -69,30 +71,46 @@ const sendUpdates = async (pollId) => {
 
     poll = poll[0]
 
-    if (poll['approvalRequired'])
-        var filtered = poll["options"].filter(element => element["approved"])
+    var ownerOptions = [...poll["options"]]
+    var options = [...poll["options"]]
+
+
+    if (poll['approvalRequired']) {
+        options = options.filter(element => element["approved"])
+    }
+
+    if (poll['hideVotes']) {
+        for (let i = 0; i < options.length; i++) 
+            options[i] =  {...options[i].toObject(), "votes" : -1}
+
+        if (poll["hideVotesForOwner"])  {
+            for (let i = 0; i < ownerOptions.length; i++) {
+                ownerOptions[i] = {...ownerOptions[i].toObject(), "votes" : -1}
+                console.log(ownerOptions[i])
+            }
+        }
+    }
+    
 
     requests.forEach(res => {
         //shortcuts to true if approval is unnecessary
-        const showFiltered = poll["approvalRequired"] && res.req.originalUrl.split("&")[1] !== poll["owner"] 
-
+        const isOwner = res.req.originalUrl.split("&")[1] === poll["owner"];
+        
         res.write('event: update\n'); 
         res.write(`data:${JSON.stringify({
-            id: poll["_id"],
-            title: poll["title"],
-            options: showFiltered ? filtered : poll["options"],
+            options: isOwner ? ownerOptions : options,
 
-            //owner: user === poll["owner"],
             settings: {
                 limitOneVote: poll["limitOneVote"],
-                approvalRequired: poll["approvalRequired"]
-            }
+                approvalRequired: poll["approvalRequired"],
+                hideVotes: poll["hideVotes"],
+                disableVoting: poll["disableVoting"],
+                hideVotesForOwner: poll["hideVotesForOwner"],
+            },
         })}`)
         res.write("\n\n");   
     })
 }
-
-
 
 router.get("/:id&:user", async (req, res) => {
     const pollId = req.params.id;
@@ -127,22 +145,33 @@ router.get("/:id&:user", async (req, res) => {
             poll = poll[0]
             
 
-    
+            const isOwner = user === poll["owner"]
+            var options = poll["options"]
 
+            if (isOwner) {
+                if (poll["hideVotes"] && poll["hideVotesForOwner"])
+                    options.forEach(option => option["votes"] = - 1)
+
+            } else {
+                if (poll['approvalRequired'])
+                    options = options.filter(element => element["approved"])
             
-            if (poll['approvalRequired'] && user !== poll["owner"] )
-                var options = poll["options"].filter(element => element["approved"])
-            else
-                options = poll["options"];
+                if (poll['hideVotes']) {
+                    options.forEach(option => option["votes"] = - 1)
+                }
+            }
                 
             const msg = {
                 id: poll["_id"],
                 title: poll["title"],
                 options: options,
-                owner: user === poll["owner"],
+                owner: isOwner,
                 settings: {
                     limitOneVote: poll["limitOneVote"],
-                    approvalRequired: poll["approvalRequired"]
+                    approvalRequired: poll["approvalRequired"],
+                    hideVotes: poll["hideVotes"],
+                    disableVoting: poll["disableVoting"],
+                    hideVotesForOwner: poll["hideVotesForOwner"],
                 },
                 votedFor: optionIds
             }
@@ -265,7 +294,7 @@ router.put("/vote", async (req, res) => {
 
     const poll = await Poll.find({_id: id})
     
-    if (poll) {
+    if (poll && !poll[0]["disableVoting"]) {
         const limitOneVote = poll[0]["limitOneVote"];
         const ids = poll[0]["votes"]
         
@@ -307,7 +336,7 @@ router.put("/vote", async (req, res) => {
         res.status(201).json(optionIds);
         
     } else {
-        res.status(404).send("Error. Poll not found?")
+        res.status(404).send("Error. Poll not found or voting disabled.")
     }
 
     
@@ -328,25 +357,30 @@ router.put("/setting", async (req, res) => {
 
     switch (setting) {
         case "limitOneVote":
-            var result = await Poll.updateOne({_id: pollId}, {
-               limitOneVote: newValue
-            });
-            console.log(result)
-            res.status(201).json(result);
-            sendUpdates(pollId)
-            return;
-            
+            var update = { limitOneVote: newValue }; 
+            break;
         case "approvalRequired":
-            result = await Poll.updateOne({_id: pollId}, {
-                approvalRequired: newValue
-             });
-            res.status(201).json(result);
-            sendUpdates(pollId)
-            return;
+            update = { approvalRequired: newValue };
+            break;
+        case "hideVotes":
+            update = { hideVotes: newValue };
+            break;
+        case "hideVotesForOwner":
+            update = { hideVotesForOwner: newValue };
+            break;
+        case "disableVoting":
+            update = { disableVoting: newValue };
+            break;
         default:
             res.status(400).send("Error");
             return;
     }
+
+    const result = await Poll.updateOne({_id: pollId}, update);
+        
+    res.status(201).json(result);
+    sendUpdates(pollId)
+    return;
 
 
 });

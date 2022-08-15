@@ -8,6 +8,10 @@ const pollSchema = mongoose.Schema({
 
     limitOneVote: { type: Boolean, default: false },
     approvalRequired: { type: Boolean, default: false },
+    hideVotes: { type: Boolean, default: false },
+    hideVotesForOwner: { type: Boolean, default: true },
+    disableVoting: { type: Boolean, default: false },
+    
 })
     
 module.exports = mongoose.model("poll", pollSchema)

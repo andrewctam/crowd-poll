@@ -15,7 +15,7 @@ function Welcome(props) {
             return;
         }
         
-        const url = "https://crowd-poll.herokuapp.com/api/polls/create"
+        const url = "http://localhost:5001/api/polls/create"
         const response = await fetch(url, {
             method: "POST",
             headers: {

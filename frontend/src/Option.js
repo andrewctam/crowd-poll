@@ -3,7 +3,7 @@ import { useState } from 'react'
 function Option(props) {
     const castVote = async () => {
         console.log("voting")
-        const url = "https://crowd-poll.herokuapp.com/api/polls/vote"
+        const url = "http://localhost:5001/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -26,7 +26,7 @@ function Option(props) {
     }
 
     const approveDenyOption = async (approved) => {
-        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
+        const url = "http://localhost:5001/api/polls/option"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -67,7 +67,7 @@ function Option(props) {
             </div>
             
             <div className="inline border-t border-t-black w-full px-3 py-2 rounded">
-                {voteCount}
+                {props.votes >= 0 ? voteCount : "Votes Hidden"}
             </div>
             
         </button>

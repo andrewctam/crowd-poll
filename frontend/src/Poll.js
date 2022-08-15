@@ -10,7 +10,7 @@ function Poll(props) {
     const addOption = async (e) => {
         e.preventDefault();
 
-        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
+        const url = "http://localhost:5001/api/polls/option"
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
@@ -26,7 +26,11 @@ function Poll(props) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({optionTitle: optionTitle, id: props.id, userId: approveSelf ? props.userId : ""})
+            body: JSON.stringify({
+                optionTitle: optionTitle, 
+                id: props.id, 
+                userId: approveSelf ? props.userId : ""
+            })
         })
 
         optionInput.current.value = "";
@@ -36,7 +40,7 @@ function Poll(props) {
         const setting = e.target.id;
         const newValue = e.target.checked;
 
-        const url = "https://crowd-poll.herokuapp.com/api/polls/setting"
+        const url = "http://localhost:5001/api/polls/setting"
         
         const response = await fetch(url, {
             method: "PUT",
@@ -72,7 +76,7 @@ function Poll(props) {
     //console.log(props.settings)
     return (
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             
 
             <div className="lg:h-screen flex flex-col">
@@ -81,21 +85,49 @@ function Poll(props) {
                     <h1 className="text-xl pt-1 text-white select-none">Link to the poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
-                    {props.isOwner ? 
-                    <div className = "border border-white mt-4 p-2 w-fit mx-auto rounded-xl">
+                    <div className = "border border-white mt-4 p-3 w-fit mx-auto rounded-xl">
                         <h1 className='text-white text-2xl mt-1 bold'>Settings</h1>
-                        <p className='text-white mb-3'>{"(only you can edit these)"}</p>
+
+                        <p className='text-white mb-3'>
+                            {props.isOwner ? "(only you can edit these)" 
+                                           : "(only the owner can edit these)"}
+                        </p>
+                        
 
                         <div className = "text-white text-right">
-                            <label className = "px-1" htmlFor="limitOneVote" >Limit Respondents To One Vote</label>
-                            <input id="limitOneVote" type="checkbox" onChange = {setSetting} checked = {props.settings["limitOneVote"]}></input>
+                            <label className = "px-1 float-left mr-1" htmlFor="disableVoting" >Disable Voting</label>
+                            <input className = "w-4 h-4" id="disableVoting" type="checkbox" onChange = {setSetting} checked = {props.settings["disableVoting"]}></input>
+                        </div>
+                        <div className = "text-white text-right">
+                            <label className = "px-1 float-left mr-1" htmlFor="hideVotes" >Hide Vote Count</label>
+                            <input className = "w-4 h-4" id="hideVotes" type="checkbox" onChange = {setSetting} checked = {props.settings["hideVotes"]}></input>
+                        </div>
+                        {props.settings["hideVotes"] ?
+                        <div className = "text-gray-300 text-right">
+                            <label className = "px-1 float-left mr-1" htmlFor="hideVotesForOwner" >&emsp; Hide Vote Count For You</label>
+                            <input className = "w-4 h-4" id="hideVotesForOwner" type="checkbox" onChange = {setSetting} checked = {props.settings["hideVotesForOwner"]}></input>
+                        </div> : null}
+
+                        <div className = "text-white text-right">
+                            <label className = "px-1 float-left mr-1" htmlFor="limitOneVote" >Limit Users To One Vote</label>
+                            <input className = "w-4 h-4" id="limitOneVote" type="checkbox" onChange = {setSetting} checked = {props.settings["limitOneVote"]}></input>
                         </div>
 
                         <div className = "text-white text-right">
-                            <label className = "px-1" htmlFor="approvalRequired" >New Options Require Your Approval</label>
-                            <input id="approvalRequired" type="checkbox" onChange = {setSetting} checked = {props.settings["approvalRequired"]}></input>
+                            <label className = "px-1 float-left mr-1" htmlFor="approvalRequired" >New Options Require Approval</label>
+                            <input className = "w-4 h-4" id="approvalRequired" type="checkbox" onChange = {setSetting} checked = {props.settings["approvalRequired"]}></input>
                         </div>
-                    </div> : null}
+
+                        {props.isOwner && props.settings["approvalRequired"] ?
+                        <div className = "text-gray-300 text-right">
+                            <label className = "px-1 float-left mr-1" htmlFor="approveSelf" >&emsp; Auto Approve Your Options</label>
+                            <input className = "w-4 h-4" id="approveSelf" type="checkbox" onChange = {() => {setApproveSelf(!approveSelf)}} checked = {approveSelf}></input>
+                        </div> 
+                        : null
+                        } 
+
+                       
+                    </div>
 
                 </div>
 
@@ -107,13 +139,6 @@ function Poll(props) {
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
 
 
-                        {props.isOwner && props.settings["approvalRequired"] ?
-                        <div className = "text-white text-center">
-                            <label className = "px-1" htmlFor="approveSelf" >Auto Approve Your Own Options</label>
-                            <input id="approveSelf" type="checkbox" onChange = {() => {setApproveSelf(!approveSelf)}} checked = {approveSelf}></input>
-                        </div> 
-                        : null
-                        } 
                     </form>
                 </div>
             </div>

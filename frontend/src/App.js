@@ -16,7 +16,7 @@ function App(props) {
 			var storedUserId = localStorage.getItem("userId")
 			if (storedUserId) {
 				//verify that the user id is in the database
-				const message = await fetch(`https://crowd-poll.herokuapp.com/api/users/${storedUserId}`)
+				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
 					.then((response) => {
 						if (response.status === 404)
 							return response.json();
@@ -40,7 +40,7 @@ function App(props) {
 				}
 	
 			} else {
-				const message = await fetch("https://crowd-poll.herokuapp.com/api/users/")
+				const message = await fetch("http://localhost:5001/api/users/")
 					.then((response) => response.json())
 
 				localStorage.setItem("userId", storedUserId)
@@ -71,7 +71,7 @@ function App(props) {
 			return;
 		}
 
-		const url = `https://crowd-poll.herokuapp.com/api/polls/${pollId}&${userId}`
+		const url = `http://localhost:5001/api/polls/${pollId}&${userId}`
 
 		const message = await fetch(url)
 			.then((response) => response.json())
@@ -93,21 +93,24 @@ function App(props) {
 
 
 		//subscribe to updates
-		const eventSource = new EventSource(`https://crowd-poll.herokuapp.com/api/polls/updates/${pollId}&${userId}`);
+		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
 			try {
-			const info = JSON.parse(e.data);
-				setPoll(<Poll id={info["id"]}
-								title={info["title"]}
-								options={info["options"]}
-								settings = {info["settings"]}
+				const info = JSON.parse(e.data);
+				setPoll(<Poll 								
+						options = {info["options"]}
+						settings = {info["settings"]}
 
-								//below won't change
-								//defaultVotedFor will not change. State updated in Poll.js
-								userId = {userId}
-								isOwner = {message["owner"]}
-								/>)
-
+						//below won't change
+						title={message["title"]}
+						id={message["id"]}
+						userId = {userId}
+						isOwner = {message["owner"]}
+						//defaultVotedFor will not change. State updated in Poll.js
+						defaultVotedFor = {message["votedFor"]}
+						/>)
+				
+				console.log(info["options"] )
 				console.log("Update received");
 			} catch (error) {
 				setAlert(<Alert title = {"Error"} message = {"Please try again"} setAlert = {setAlert}/>)
