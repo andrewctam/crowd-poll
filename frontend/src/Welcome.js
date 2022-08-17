@@ -1,9 +1,7 @@
 import "./index.css"
 import { useRef, useState } from "react";
-import Alert from "./Alert";
 function Welcome(props) {
     const titleInput = useRef(null);
-    const [alert, setAlert] = useState(null);
     const [showError, setShowError] = useState(false);
 
     const createPoll = async (e) => {
@@ -21,23 +19,19 @@ function Welcome(props) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({title: title, owner: props.userId })
-        }) .then(response => response.json());
+            body: JSON.stringify({title: title, ownerId: props.userId })
+        }).then(response => response.json());
 
 
-        props.setPollId(response["id"]); //calls getPoll after useEffect
-        window.history.replaceState(null, null, `?poll=${response["id"]}`);
+        props.setPollId(response["pollId"]); //calls getPoll after useEffect
+        window.history.replaceState(null, null, `?poll=${response["pollId"]}`);
     }
 
 
     return (
-
-        <>
-
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
 
             <div className="py-10" >
-                {alert}
                 <a href="."><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</h1></a>
                 <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Create a poll with a title <br /> Share the poll and crowd source options <br />Collectively vote on the best one</p>
             </div>
@@ -55,9 +49,6 @@ function Welcome(props) {
 
 
         </div>
-
-
-        </>
     );
 }
 

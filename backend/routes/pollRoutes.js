@@ -6,28 +6,32 @@ const router = express.Router();
 //hashmap where pollId -> res set. In the res set is all the res from SSE.
 var connected = new Map();
 
-
-
-router.get("/updates/:id&:userId", async (req, res) => {
+router.get("/updates/:pollId&:userId", async (req, res) => {
     console.log("User Connected")
     res.writeHead(200, {
         "Connection": "keep-alive",
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
       });
-      
-      const id = req.params.id
+    
+    const pollId = req.params.pollId
+    //const userId = req.params.userId
 
-      //see if the poll already has a set.
-      if (connected.get(id)) {
-          connected.get(id).add(res);
-        } else {
-            //create new set and add res.
-            const requests = new Set();
-            requests.add(res);
-            connected.set(id, requests);
-        } 
-        
+    if (!ObjectId.isValid(pollId)) {
+    res.status(400).json("Invalid ID")
+    return;
+    }
+
+    //see if the poll already has a set.
+    if (connected.get(pollId)) {
+        connected.get(pollId).add(res);
+    } else {
+        //create new set and add res.
+        const requests = new Set();
+        requests.add(res);
+        connected.set(pollId, requests);
+    } 
+            
         
         //send a ping every 40 seconds to avoid 55 second timeout 
     const ping = setTimeout(() => {
@@ -39,10 +43,10 @@ router.get("/updates/:id&:userId", async (req, res) => {
         console.log('User Disconnected');
         clearInterval(ping);
         
-        if (connected.get(id).size === 1)
-            connected.delete(id)
+        if (connected.get(pollId).size === 1)
+            connected.delete(pollId)
         else
-            connected.get(id).delete(res);
+            connected.get(pollId).delete(res);
 
         res.end();
     });
@@ -53,27 +57,22 @@ router.get("/updates/:id&:userId", async (req, res) => {
 const sendUpdates = async (pollId) => {
     const requests = connected.get(pollId);
     if (!requests) {
-        console.log("Error. Res not found");
+        console.log("Error. Response not found");
         return;
     }
 
-
-    try {
-        var poll = await Poll.find({_id: pollId})
+    if (ObjectId.isValid(pollId)) {
+        var poll = await Poll.findOne({_id: pollId})
         console.log("New Update for " + pollId)
-    } catch (error) {
-        console.log(error);
+    } else {
         return;
     }
 
     if (!poll)
         return;
 
-    poll = poll[0]
-
     var ownerOptions = [...poll["options"]]
     var options = [...poll["options"]]
-
 
     if (poll['approvalRequired']) {
         options = options.filter(element => element["approved"])
@@ -86,7 +85,6 @@ const sendUpdates = async (pollId) => {
         if (poll["hideVotesForOwner"])  {
             for (let i = 0; i < ownerOptions.length; i++) {
                 ownerOptions[i] = {...ownerOptions[i].toObject(), "votes" : -1}
-                console.log(ownerOptions[i])
             }
         }
     }
@@ -103,6 +101,7 @@ const sendUpdates = async (pollId) => {
             settings: {
                 limitOneVote: poll["limitOneVote"],
                 approvalRequired: poll["approvalRequired"],
+                autoApproveOwner: poll["autoApproveOwner"],
                 hideVotes: poll["hideVotes"],
                 disableVoting: poll["disableVoting"],
                 hideVotesForOwner: poll["hideVotesForOwner"],
@@ -118,15 +117,16 @@ router.get("/:id&:user", async (req, res) => {
 
 
     if (ObjectId.isValid(pollId)) {
-        try {
-            var poll = await Poll.find({_id: pollId})
-        } catch (error) {
-            console.log(error);
+        
+        if (ObjectId.isValid(pollId) && ObjectId.isValid(user)) {
+            var poll = await Poll.findOne({_id: pollId})
+        } else {
+            res.status(400).send("Invalid ID")
             return;
         }
         
+        
         if (poll) {
-            
             //add votes object
             if (!await Poll.exists({_id: pollId, "votes.userId":user})) {
                 await Poll.updateOne({_id: pollId}, {
@@ -139,11 +139,10 @@ router.get("/:id&:user", async (req, res) => {
                 });
                 var optionIds = []
             } else {
-                const ids = poll[0]["votes"]
+                const ids = poll["votes"]
                 optionIds = ids.find(option => option["userId"] === user)["optionIds"]
             }
-            poll = poll[0]
-            
+
 
             const isOwner = user === poll["owner"]
             var options = poll["options"]
@@ -162,13 +161,14 @@ router.get("/:id&:user", async (req, res) => {
             }
                 
             const msg = {
-                id: poll["_id"],
+                pollId: poll["_id"],
                 title: poll["title"],
                 options: options,
                 owner: isOwner,
                 settings: {
                     limitOneVote: poll["limitOneVote"],
                     approvalRequired: poll["approvalRequired"],
+                    autoApproveOwner: poll["autoApproveOwner"],
                     hideVotes: poll["hideVotes"],
                     disableVoting: poll["disableVoting"],
                     hideVotesForOwner: poll["hideVotesForOwner"],
@@ -188,31 +188,31 @@ router.get("/:id&:user", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
-    const {title, owner} = req.body;
+    const {title, ownerId} = req.body;
     
-    if (title) {
-        var poll = await Poll.create({title: title, owner: owner})
+    if (title && ObjectId.isValid(ownerId)) {
+        var poll = await Poll.create({title: title, owner: ownerId})
     } else {
-        console.log(title)
-        res.status(400).send("error enter title")
+        res.status(400).json("Error enter title")
         return;
     }
 
 
     if (poll) {
-        res.status(201).json({id: poll.id})
+        res.status(201).json({pollId: poll.id})
     } else {
         res.status(400).send("Error");
     }
+
 })
 
 
 
 router.post("/option", async (req, res) => {
-    const {id, optionTitle, userId} = req.body;
+    const {pollId, optionTitle, userId} = req.body;
 
-    if (optionTitle)
-        var poll = await Poll.find({_id: id})
+    if (optionTitle && ObjectId.isValid(pollId) && ObjectId.isValid(userId))
+        var poll = await Poll.findOne({_id: pollId})
     else {
         res.status(400).send("Error")  
         return;
@@ -220,16 +220,15 @@ router.post("/option", async (req, res) => {
     
 
     if (poll) {
-        poll = poll[0]
-        const result = await Poll.updateOne({_id: id}, {
+        const result = await Poll.updateOne({_id: pollId}, {
             $push: {
                options: {
                     optionTitle: optionTitle, 
                     votes: 0,
-                    approved: !poll["approvalRequired"] || userId === poll["owner"] },
+                    approved: !poll["approvalRequired"] || (poll["autoApproveOwner"] && userId === poll["owner"]) },
             },
         });
-        sendUpdates(id)
+        sendUpdates(pollId)
         res.status(201).json(result);
     } else {
         res.status(400).send("Error")
@@ -238,45 +237,56 @@ router.post("/option", async (req, res) => {
 })
 
 router.delete("/option", async (req, res) => {
-    const {id, optionId, userId} = req.body;
+    const {pollId, userId, options} = req.body;
 
-    const poll = await Poll.find({_id: id})
+    const optionsToDelete = options.split(".");
 
-    if (poll && poll[0]["owner"] === userId) {
-        const result = await Poll.updateOne({_id: id}, {
+    if (optionsToDelete && ObjectId.isValid(pollId)  && ObjectId.isValid(userId)) {
+        var poll = await Poll.findOne({_id: pollId})
+    } else {
+        res.status(401).json("Error");
+        return;
+    }
+
+    if (poll && poll["owner"] === userId) {
+        const result = await Poll.updateMany({_id: pollId}, {
             $pull: {
-               options: {_id: optionId},
+               options: {_id: {$in: optionsToDelete}},
             },
         });
-        sendUpdates(id);
+        sendUpdates(pollId);
         res.status(201).json(result);
     } else {
-        res.status(400).send("Error")
+        res.status(410).send("Error. Permission Denied.")
     }
 
 })
 
 
 router.put("/option", async (req, res) => {
-    const {id, optionId, approved, userId} = req.body;
+    const {pollId, optionId, approved, userId} = req.body;
 
-    const poll = await Poll.find({_id: id})
+    if (ObjectId.isValid(pollId) && ObjectId.isValid(optionId)) {
+        var poll = await Poll.findOne({_id: pollId})
+    } else {
+        res.status(401).json("Error");
+        return;
+    }
 
-    if (poll && poll[0]["owner"] === userId) {
-        console.log(approved)
+    if (poll && poll["owner"] === userId) {
         if (approved) {
-            await Poll.updateOne({_id: id, "options._id": optionId}, {
+            await Poll.updateOne({_id: pollId, "options._id": optionId}, {
                 "options.$.approved": true
             });
         } else {
-            await Poll.updateOne({_id: id}, {
+            await Poll.updateOne({_id: pollId}, {
                 $pull: {
                     options: {_id: optionId},
                 },
             });
         }
         
-        sendUpdates(id);
+        sendUpdates(pollId);
         res.status(201).json("Request Approved");
     } else {
         res.status(400).send("Error")
@@ -290,24 +300,34 @@ router.put("/option", async (req, res) => {
 
 
 router.put("/vote", async (req, res) => {
-    const {id, optionId, userId} = req.body;
+    const {pollId, optionId, userId} = req.body;
 
-    const poll = await Poll.find({_id: id})
+    if (ObjectId.isValid(pollId) && ObjectId.isValid(optionId) && ObjectId.isValid(userId)) {
+        var poll = await Poll.findOne({_id: pollId})
+    } else {
+        res.status(401).json("Error");
+        return;
+    }
     
-    if (poll && !poll[0]["disableVoting"]) {
-        const limitOneVote = poll[0]["limitOneVote"];
-        const ids = poll[0]["votes"]
+    if (poll && !poll["disableVoting"]) {
+        const limitOneVote = poll["limitOneVote"];
+        const ids = poll["votes"]
         
-        const optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+        try {
+            var optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+            var optionIdLocation = optionIds.findIndex(element => element === optionId)
+        } catch (error) {
+            res.status(401).json("ID not found")
+            return
+        }
         
-        const optionIdLocation = optionIds.findIndex(element => element === optionId)
         if (optionIdLocation === -1) { //vote
             if (limitOneVote && optionIds.length >= 1) {
                res.status(400).json("Limit 1 vote!")
                return;
             } else {
                 //    votes: [{userId: String, optionIds: [String]}],
-                await Poll.updateOne({_id: id, "votes.userId": userId}, {
+                await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
                     $push: {
                         "votes.$.optionIds": optionId
                     }
@@ -316,7 +336,7 @@ router.put("/vote", async (req, res) => {
                 optionIds.push(optionId)
             }
         } else {
-            await Poll.updateOne({_id: id, "votes.userId": userId}, {
+            await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
                 $pull: {
                     "votes.$.optionIds": optionId
                 }
@@ -326,17 +346,17 @@ router.put("/vote", async (req, res) => {
         }
 
         //    options: [{ optionTitle: String, votes: Number}],
-        await Poll.updateOne({_id: id, "options._id": optionId}, {
+        await Poll.updateOne({_id: pollId, "options._id": optionId}, {
             $inc: {
                 "options.$.votes": change
             },
         });
         
-        sendUpdates(id)
+        sendUpdates(pollId)
         res.status(201).json(optionIds);
         
     } else {
-        res.status(404).send("Error. Poll not found or voting disabled.")
+        res.status(401).json("Error. Poll not found or voting disabled.")
     }
 
     
@@ -346,12 +366,16 @@ router.put("/vote", async (req, res) => {
 
 router.put("/setting", async (req, res) => {
     const {pollId, userId, setting, newValue} = req.body;
+   
+    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId))  
+        var poll = await Poll.findOne({_id: pollId})
+    else {
+        res.status(400).json("Error");
+        return;
+    }
 
-    if (pollId && ObjectId.isValid(pollId))
-        var poll = await Poll.find({_id: pollId})
-
-    if (!poll || poll[0]["owner"] !== userId) {
-        res.status(400).send("Permission Denied");    
+    if (!poll || poll["owner"] !== userId) {
+        res.status(401).send("Permission Denied");    
         return;
     }
 
@@ -370,6 +394,9 @@ router.put("/setting", async (req, res) => {
             break;
         case "disableVoting":
             update = { disableVoting: newValue };
+            break;
+        case "autoApproveOwner":
+            update = {autoApproveOwner: newValue};
             break;
         default:
             res.status(400).send("Error");

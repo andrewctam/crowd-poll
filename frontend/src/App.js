@@ -82,7 +82,7 @@ function App(props) {
 			});
 
 		console.log(message)
-		setPoll(<Poll id={message["id"]}
+		setPoll(<Poll pollId={message["pollId"]}
 			title={message["title"]}
 			options={message["options"]}
 			settings = {message["settings"]}
@@ -96,21 +96,21 @@ function App(props) {
 		const eventSource = new EventSource(`http://localhost:5001/api/polls/updates/${pollId}&${userId}`);
 		eventSource.addEventListener('update', e => {
 			try {
-				const info = JSON.parse(e.data);
+				const update = JSON.parse(e.data);
 				setPoll(<Poll 								
-						options = {info["options"]}
-						settings = {info["settings"]}
+						options = {update["options"]}
+						settings = {update["settings"]}
 
 						//below won't change
 						title={message["title"]}
-						id={message["id"]}
+						pollId={message["pollId"]}
 						userId = {userId}
 						isOwner = {message["owner"]}
 						//defaultVotedFor will not change. State updated in Poll.js
 						defaultVotedFor = {message["votedFor"]}
 						/>)
 				
-				console.log(info["options"] )
+				console.log(update["options"] )
 				console.log("Update received");
 			} catch (error) {
 				setAlert(<Alert title = {"Error"} message = {"Please try again"} setAlert = {setAlert}/>)

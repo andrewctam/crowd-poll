@@ -1,7 +1,11 @@
 import { useState } from 'react'
 
 function Option(props) {
-    const castVote = async () => {
+    const [showBox, setShowBox] = useState(false);
+    const [selected, setSelected] = useState(false);
+    
+    const castVote = async (e) => {
+        
         console.log("voting")
         const url = "http://localhost:5001/api/polls/vote"
 
@@ -10,9 +14,12 @@ function Option(props) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: props.pollId, optionId: props.optionId, userId: props.userId })
-        }) .then( response => {
-            if (response.status != 400) {
+            body: JSON.stringify({ 
+                pollId: props.pollId,
+                optionId: props.optionId,
+                userId: props.userId })
+        }).then( response => {
+            if (response.status !== 400) {
                 return response.json();
             } else {
                 alert("Only 1 vote!")
@@ -26,16 +33,23 @@ function Option(props) {
     }
 
     const approveDenyOption = async (approved) => {
+        
         const url = "http://localhost:5001/api/polls/option"
 
-        const updatedVotes = await fetch(url, {
+         await fetch(url, {
             method: "put",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: props.pollId, optionId: props.optionId, approved: approved, userId: props.userId })
-        }) .then( response => {
-            if (response.status != 400) {
+            body: JSON.stringify({ 
+                pollId: props.pollId,
+                optionId: props.optionId,
+                approved: approved,
+                userId: props.userId 
+            })
+
+        }).then( response => {
+            if (response.status !== 400) {
                 return response.json();
             } else {
                 alert("Only 1 vote!")
@@ -43,30 +57,47 @@ function Option(props) {
             }
         })
       
+        return;
 
+    }
+
+    const toggleSelection = (e) => {
+        setSelected(!selected)   
+        props.toggleSelected(props.optionId)
     }
 
 
 
-    const voteCount = props.votes + (props.votes === 1 ? " vote" : " votes");
-
+    
+    
     if (!props.approved)
         var color = "bg-red-200"
+    else if (selected)
+        color = "bg-blue-200"
     else if (props.voted)
-        color = "bg-emerald-200"
+        color = "bg-green-200"
     else
         color = "bg-slate-200";
-
-
+    
+    
+    const voteCount = props.votes + (props.votes === 1 ? " vote" : " votes");
+    const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    
     return ((props.approved) ? 
-        <button onClick={castVote} className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
+        <button onMouseDown={castVote} onMouseEnter = {() => setShowBox(props.isOwner && true)} onMouseLeave = {() => setShowBox(false)} className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
             
-            <div className="text-lg p-5">
+            <div className="text-lg p-5 w-full relative">
                 {props.optionTitle}
 
+                {showBox || selected || (props.isOwner && touchscreen) ? 
+                <input type = "checkbox" checked = {selected} className = "absolute top-2 left-2 text-black text-sm p-2 border-black border bg-white w-4 h-4 rounded" 
+                    onChange = {toggleSelection} onMouseDown = {(e) => e.stopPropagation()}></input> 
+                : null}
+
             </div>
-            
-            <div className="inline border-t border-t-black w-full px-3 py-2 rounded">
+
+
+            <div className="grid-row border-t border-t-black w-full px-3 py-2 rounded">
                 {props.votes >= 0 ? voteCount : "Votes Hidden"}
             </div>
             
@@ -91,6 +122,7 @@ function Option(props) {
             </button>
         </div>
     
+      
         </div>
     )
 

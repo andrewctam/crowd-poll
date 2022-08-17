@@ -8,9 +8,11 @@ const pollSchema = mongoose.Schema({
 
     limitOneVote: { type: Boolean, default: false },
     approvalRequired: { type: Boolean, default: false },
+    autoApproveOwner: { type: Boolean, default: true },
     hideVotes: { type: Boolean, default: false },
-    hideVotesForOwner: { type: Boolean, default: true },
+    hideVotesForOwner: { type: Boolean, default: false },
     disableVoting: { type: Boolean, default: false },
+    
     
 })
     

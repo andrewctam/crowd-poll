@@ -4,11 +4,11 @@ const User = require("../models/userModel")
 const router = express.Router();
 
 
-router.get("/:id", async (req, res) => {
-    const id = req.params.id;
+router.get("/:userId", async (req, res) => {
+    const userId = req.params.userId;
 
-    if (id && ObjectId.isValid(id)) {
-        const idExists = await User.exists({ _id: id });
+    if (userId && ObjectId.isValid(userId)) {
+        const idExists = await User.exists({ _id: userId });
         if (idExists) {
             res.status(200).json("User Exists");
             return;
