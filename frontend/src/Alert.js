@@ -9,11 +9,12 @@ function Alert(props) {
 
         return () => clearTimeout(timer);
 
+    // eslint-disable-next-line
     }, []);
 
 
 
-    return <div className = "lg:absolute lg:top-0 m-5" >
+    return <div className = "w-4/5 m-auto" >
     <div className="bg-red-200 text-black font-bold rounded-t px-4 py-2">
       {props.title}
     </div>

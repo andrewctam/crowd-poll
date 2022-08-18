@@ -7,7 +7,7 @@ function Option(props) {
     const castVote = async (e) => {
         
         console.log("voting")
-        const url = "http://localhost:5001/api/polls/vote"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -34,7 +34,7 @@ function Option(props) {
 
     const approveDenyOption = async (approved) => {
         
-        const url = "http://localhost:5001/api/polls/option"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
 
          await fetch(url, {
             method: "put",
@@ -71,7 +71,7 @@ function Option(props) {
     
     
     if (!props.approved)
-        var color = "bg-red-200"
+        var color = "bg-red-100"
     else if (selected)
         color = "bg-blue-200"
     else if (props.voted)
@@ -84,14 +84,14 @@ function Option(props) {
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
     
     return ((props.approved) ? 
-        <button onMouseDown={castVote} onMouseEnter = {() => setShowBox(props.isOwner && true)} onMouseLeave = {() => setShowBox(false)} className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
+        <button onClick={castVote} onMouseEnter = {() => setShowBox(props.isOwner && true)} onMouseLeave = {() => setShowBox(false)} className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
             
             <div className="text-lg p-5 w-full relative">
                 {props.optionTitle}
 
                 {showBox || selected || (props.isOwner && touchscreen) ? 
                 <input type = "checkbox" checked = {selected} className = "absolute top-2 left-2 text-black text-sm p-2 border-black border bg-white w-4 h-4 rounded" 
-                    onChange = {toggleSelection} onMouseDown = {(e) => e.stopPropagation()}></input> 
+                    onChange = {toggleSelection} onClick = {(e) => e.stopPropagation()}></input> 
                 : null}
 
             </div>
@@ -105,22 +105,22 @@ function Option(props) {
         :
         <div className={"border w-full rounded-xl border-black mb-3 grid items-center " + color}>
             
-        <div className="text-lg p-5">
-            {props.optionTitle}
-        </div>
-        <div className = "mb-1">
-            {"Pending Approval (only you can see this option)"}
-        </div>
+            <div className="text-lg p-5">
+                {props.optionTitle}
+            </div>
+            <div className = "mb-1">
+                {"Pending Approval (only you can see this option)"}
+            </div>
 
-        <div>
-            <button onClick = {() => {approveDenyOption(true)}}className="inline border-t border-t-black border-r border-r-black bg-emerald-300  w-1/2 px-3 py-2 rounded-l-lg">
-                Approve
-            </button>   
+            <div>
+                <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black border-r border-r-black bg-emerald-300  w-1/2 px-3 py-2 rounded-l-lg">
+                    Approve
+                </button>   
 
-            <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black bg-red-300 w-1/2 px-3 py-2 rounded-r-lg">
-                Reject
-            </button>
-        </div>
+                <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black bg-red-300 w-1/2 px-3 py-2 rounded-r-lg">
+                    Reject
+                </button>
+            </div>
     
       
         </div>

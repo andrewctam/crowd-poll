@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Option from "./Option"
 
 function Poll(props) {
@@ -6,11 +6,20 @@ function Poll(props) {
     const [showError, setShowError] = useState(false);
     const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [sortingMethod, setSortingMethod] = useState("orderCreated");
+
+    
+    useEffect(() => {
+        if ((sortingMethod === "voteCount" && props.settings["hideVotes"]) && 
+            (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
+                setSortingMethod("orderCreated");
+        } 
+    // eslint-disable-next-line
+    }, [props.settings["hideVotes"], props.settings["hideVotesForOwner"], props.isOwner]);
 
     const addOption = async (e) => {
         e.preventDefault();
-
-        const url = "http://localhost:5001/api/polls/option"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
@@ -40,7 +49,7 @@ function Poll(props) {
         const setting = e.target.id;
         const newValue = e.target.checked;
 
-        const url = "http://localhost:5001/api/polls/setting"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/setting"
         
         await fetch(url, {
             method: "PUT",
@@ -56,6 +65,7 @@ function Poll(props) {
             })
         })
 
+     
     } 
     
     const toggleSelected = (optionId) => {
@@ -72,7 +82,7 @@ function Poll(props) {
     }
 
     const deleteSelected = async (e) => {
-        const url = "http://localhost:5001/api/polls/option"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
         await fetch(url, {
             method: "delete",
             headers: {
@@ -92,8 +102,30 @@ function Poll(props) {
 
     }
 
-    //var sorted = props.options//.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
-    const options = props.options.map(obj =>
+    
+   
+    var sorted = [...props.options];
+
+    switch(sortingMethod) {
+        case "alphabetically":
+            sorted = sorted.sort(  (a, b) => { 
+                if (b["optionTitle"] > a["optionTitle"])
+                    return -1;
+                else
+                    return 1;
+            } )
+            break;
+            
+        case "voteCount":
+            sorted = sorted.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
+            break;
+
+        case "orderCreated": //already sorted in order created
+        default:
+            break;
+    }
+    
+    const options = sorted.map(obj =>
         <Option
             key={obj["_id"]}
             pollId={props.pollId}
@@ -182,7 +214,7 @@ function Poll(props) {
                                 Delete Selected Options
                             </label>
                             
-                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black px-1 text-black text-xs">{selectedOptions.length}</button>
+                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border min-w-4 border-black px-1 text-black text-xs">{selectedOptions.length}</button>
                         </div> 
                         : null}
 
@@ -213,19 +245,45 @@ function Poll(props) {
 
             <div className="bg-slate-500 lg:h-screen p-10 overflow-y-auto">
                 
-                <div className="p-5 text-3xl bold text-white select-text">{props.title}</div>                
+                <div className="grid items-center p-4 text-3xl bold text-white select-text">{props.title}</div>                
 
-                <p className='text-lg bold mb-2 text-white'>
-                    {options.length !== 0 ? 
-                        "Click to vote. Click again to remove your vote."
-                        :
-                        "No answer options yet, add one using the input to the left!"
-                    }
-                </p> 
+                {options.length === 0 ? 
+                    <p className='text-lg bold mb-2 text-white'>
+                        {"No answer options yet, add one using the input to the left!"}
+                    </p> 
+                    :
+                    <div className = "inline my-2">
+                    
+                        <p className = "inline m-1 text-white bold text-wrap-">Sort Options By: </p>
+                        <SortAnchor 
+                            name = {"Order Created"}
+                            id = "orderCreated"
+                            setSortingMethod = {setSortingMethod}
+                            selected = {sortingMethod === "orderCreated"}
+                            disabled = {false}
 
+                        />
+                        <SortAnchor 
+                            name = {"Vote Count"}
+                            id = "voteCount"
+                            setSortingMethod = {setSortingMethod}
+                            selected = {sortingMethod === "voteCount"}
+                            disabled = {(props.settings["hideVotes"] && (!props.isOwner || (props.isOwner && (props.settings["hideVotesForOwner"]))))}
+
+                        />
+                        <SortAnchor 
+                            name = {"Alphabetically"}
+                            id = "alphabetically"
+                            setSortingMethod = {setSortingMethod}
+                            selected = {sortingMethod === "alphabetically"}
+                            disabled = {false}
+                        />
+
+                    </div>
+                }
+
+                <div className='mt-1'>{options}</div>
                 
-
-                <div>{options}</div>
             </div>
 
 
@@ -245,8 +303,28 @@ const SettingCheckBox = (props) => {
         {props.text}
     </label>
 
-    <input className = "w-4 h-4" id={props.name} type="checkbox" onChange = {props.setSetting} checked = {props.active}></input>
+    <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {props.setSetting} checked = {props.active}></input>
 </div>
 }
 
-export default Poll
+const SortAnchor = (props) => {
+
+    const setSorting = () => {
+        props.setSortingMethod(props.id);
+    }
+    if (props.disabled)
+    return (<div 
+            className = {"inline-block m-2 text-gray-400"}>
+            {props.name}
+        </div>)
+
+    return (<div 
+        onClick = {setSorting} 
+        className = {"cursor-pointer inline-block m-2 " + (props.selected ? "text-blue-300 underline" : "text-white")}>
+        {props.name}
+    </div>)
+
+}
+
+
+export default Poll;

@@ -5,6 +5,10 @@ module.exports = {
     extend: {
       height: {
         'half-screen': "50vh",
+      },
+      
+      minWidth: {
+        "4": "1rem",
       }
     },
   },

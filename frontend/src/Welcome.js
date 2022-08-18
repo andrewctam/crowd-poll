@@ -13,7 +13,7 @@ function Welcome(props) {
             return;
         }
         
-        const url = "http://localhost:5001/api/polls/create"
+        const url = "https://crowd-poll.herokuapp.com/api/polls/create"
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -34,6 +34,7 @@ function Welcome(props) {
             <div className="py-10" >
                 <a href="."><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</h1></a>
                 <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Create a poll with a title <br /> Share the poll and crowd source options <br />Collectively vote on the best one</p>
+
             </div>
 
 
