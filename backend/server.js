@@ -10,14 +10,6 @@ const app = express()
 connectMongoDB();
 
 app.use(cors());
-
-const headers = {
-    "Content-Type": "text/event-stream",
-    Connection: "keep-alive",
-    "Cache-Control": "no-cache",
-  };
-
-
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
 

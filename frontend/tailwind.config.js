@@ -6,6 +6,9 @@ module.exports = {
       height: {
         'half-screen': "50vh",
       },
+      maxWidth: {
+        "4/5": "80%",
+      },
       
       minWidth: {
         "4": "1rem",

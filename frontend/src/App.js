@@ -10,13 +10,14 @@ function App(props) {
 
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
+	const [loaded, setLoaded] = useState(false)
 
 	useEffect(() => {
 		const verifyId = async () => {
 			var storedUserId = localStorage.getItem("userId")
 			if (storedUserId) {
 				//verify that the user id is in the database
-				const message = await fetch(`https://crowd-poll.herokuapp.com/api/users/${storedUserId}`)
+				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
 					.then((response) => {
 						if (response.status === 404)
 							return response.json();
@@ -24,17 +25,18 @@ function App(props) {
 						else
 							return null; //null means found
 					}).catch( (error) => {
-						setAlert(<Alert timeout = {10000} title = {"Connection Error"} message = {"Failed to connect to server. Please try again in a moment"} setAlert = {setAlert}/>)
+						setAlert(<Alert timeout = {100000} title = {"Connection Error"} message = {"Failed to connect to server. Please try again in a moment"} setAlert = {setAlert}/>)
 						console.log(error)
 						return -1;
 					});
 					
 				if (message === -1) 
 					return;
-				else if (message) {
+				else if (message) { //new id generated
 					storedUserId = message["_id"]
 					localStorage.setItem("userId", storedUserId)
 					console.log("NF. N " + storedUserId)
+					localStorage.removeItem("created")
 				} else { //userFound
 					console.log("R " + storedUserId)
 				}
@@ -42,6 +44,7 @@ function App(props) {
 			} else {
 				const message = await fetch("https://crowd-poll.herokuapp.com/api/users/")
 					.then((response) => response.json())
+				localStorage.removeItem("created")
 
 				localStorage.setItem("userId", storedUserId)
 				storedUserId = message["_id"]
@@ -51,11 +54,15 @@ function App(props) {
 			setUserId(storedUserId);
 		}
 
+
 		verifyId();
 
 		const idParam = new URLSearchParams(window.location.search).get("poll")
-		if (idParam !== "") {
+
+		if (idParam) {
 			setPollId(idParam);
+		} else {
+			setLoaded(true);
 		}
 
 	}, [])
@@ -63,11 +70,13 @@ function App(props) {
 	useEffect(() => {
 		if (pollId && userId)
 			getPoll()
+		
 	// eslint-disable-next-line
 	}, [pollId, userId])
 
 	const getPoll = async () => {
 		if (!pollId) {
+			setLoaded(true)
 			return;
 		}
 
@@ -75,13 +84,12 @@ function App(props) {
 
 		const message = await fetch(url)
 			.then((response) => response.json())
-			.catch( (error) => {
+			.catch((error) => {
 				setAlert(<Alert timeout = {10000} title = {"Error Getting Poll"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
 				console.log(error)
 				return;
 			});
 
-		console.log(message)
 		setPoll(<Poll pollId={message["pollId"]}
 			title={message["title"]}
 			options={message["options"]}
@@ -109,24 +117,26 @@ function App(props) {
 						//defaultVotedFor will not change. State updated in Poll.js
 						defaultVotedFor = {message["votedFor"]}
 						/>)
-				
-				console.log(update["options"] )
-				console.log("Update received");
+				console.log("U");
 			} catch (error) {
 				setAlert(<Alert title = {"Error"} message = {"Please try again"} setAlert = {setAlert}/>)
-				console.log("reloading")
+				console.log("Error, Reloading")
 				window.location.reload();
 			}
 		});
+		
+		setLoaded(true)
 
 	}
 
 
 	return(
+	loaded ? 
 	<> 
 		{alert}
 		{poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>}
-	</>)
+	</>	
+	: null)
 
 }
 

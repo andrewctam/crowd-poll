@@ -13,25 +13,25 @@ router.get("/updates/:pollId&:userId", async (req, res) => {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
       });
-    
-    const pollId = req.params.pollId
-    //const userId = req.params.userId
+      
+      const pollId = req.params.pollId
+      //const userId = req.params.userId
 
-    if (!ObjectId.isValid(pollId)) {
-    res.status(400).json("Invalid ID")
-    return;
-    }
+      if (!ObjectId.isValid(pollId)) {
+        res.status(400).json("Invalid ID")
+        return;
+      }
 
-    //see if the poll already has a set.
-    if (connected.get(pollId)) {
-        connected.get(pollId).add(res);
-    } else {
-        //create new set and add res.
-        const requests = new Set();
-        requests.add(res);
-        connected.set(pollId, requests);
-    } 
-            
+      //see if the poll already has a set.
+      if (connected.get(pollId)) {
+          connected.get(pollId).add(res);
+        } else {
+            //create new set and add res.
+            const requests = new Set();
+            requests.add(res);
+            connected.set(pollId, requests);
+        } 
+        
         
         //send a ping every 40 seconds to avoid 55 second timeout 
     const ping = setTimeout(() => {
@@ -61,6 +61,7 @@ const sendUpdates = async (pollId) => {
         return;
     }
 
+
     if (ObjectId.isValid(pollId)) {
         var poll = await Poll.findOne({_id: pollId})
         console.log("New Update for " + pollId)
@@ -73,6 +74,7 @@ const sendUpdates = async (pollId) => {
 
     var ownerOptions = [...poll["options"]]
     var options = [...poll["options"]]
+
 
     if (poll['approvalRequired']) {
         options = options.filter(element => element["approved"])
@@ -205,6 +207,26 @@ router.post("/create", async (req, res) => {
     }
 
 })
+
+
+router.delete("/delete", async (req, res) => {
+    const {pollIds, userId} = req.body;
+
+    const pollsToDelete = pollIds.split(".");
+
+    if (pollsToDelete && ObjectId.isValid(userId)) {
+
+        pollsToDelete.forEach(async (pollId) => {
+            await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+        })
+    
+        res.status(201).json("Deleted");
+    } else {
+        res.status(410).send("Error. Permission Denied.")
+    }
+
+})
+
 
 
 

@@ -7,7 +7,6 @@ function Poll(props) {
     const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [sortingMethod, setSortingMethod] = useState("orderCreated");
-
     
     useEffect(() => {
         if ((sortingMethod === "voteCount" && props.settings["hideVotes"]) && 
@@ -141,12 +140,9 @@ function Poll(props) {
          />);
 
     
-    //console.log(props.settings)
     return (
-
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             
-
             <div className="lg:h-screen flex flex-col">
                 <div className="mt-2 py-10">
                     <a href="." className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</a>
@@ -231,14 +227,8 @@ function Poll(props) {
                         <br />
                         {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
-
-                        
                     </form>
-
-                    
-
-                  
-                </div>
+               </div>
             </div>
 
 
@@ -289,22 +279,16 @@ function Poll(props) {
 
         </div>)
 
-
-
-
-
-
-
 }
 
 const SettingCheckBox = (props) => {
-    return  <div className = "text-white text-right">
-    <label className = {"px-1 float-left mr-2 " + (props.indent ? "text-gray-300 ml-4" : "text-white")} htmlFor={props.name}>
-        {props.text}
-    </label>
+    return (<div className = "text-white text-right">
+        <label className = {"px-1 float-left mr-2 " + (props.indent ? "text-gray-300 ml-4" : "text-white")} htmlFor={props.name}>
+            {props.text}
+        </label>
 
-    <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {props.setSetting} checked = {props.active}></input>
-</div>
+        <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {props.setSetting} checked = {props.active}></input>
+    </div>)
 }
 
 const SortAnchor = (props) => {
@@ -312,11 +296,12 @@ const SortAnchor = (props) => {
     const setSorting = () => {
         props.setSortingMethod(props.id);
     }
+
     if (props.disabled)
-    return (<div 
-            className = {"inline-block m-2 text-gray-400"}>
-            {props.name}
-        </div>)
+        return (<div 
+                className = {"inline-block m-2 text-gray-400"}>
+                {props.name}
+            </div>)
 
     return (<div 
         onClick = {setSorting} 

@@ -5,8 +5,6 @@ function Option(props) {
     const [selected, setSelected] = useState(false);
     
     const castVote = async (e) => {
-        
-        console.log("voting")
         const url = "https://crowd-poll.herokuapp.com/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
@@ -108,17 +106,18 @@ function Option(props) {
             <div className="text-lg p-5">
                 {props.optionTitle}
             </div>
+            
             <div className = "mb-1">
                 {"Pending Approval (only you can see this option)"}
             </div>
 
             <div>
                 <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black border-r border-r-black bg-emerald-300  w-1/2 px-3 py-2 rounded-l-lg">
-                    Approve
+                    {"Approve"}
                 </button>   
 
                 <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black bg-red-300 w-1/2 px-3 py-2 rounded-r-lg">
-                    Reject
+                    {"Reject"}
                 </button>
             </div>
     
