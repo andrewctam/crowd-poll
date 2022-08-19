@@ -1,10 +1,9 @@
 import "./index.css"
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 function Welcome(props) {
     const titleInput = useRef(null);
     const [showError, setShowError] = useState(false);
-    const [showClear, setShowClear] = useState(false);
-    const [created, setCreated] = useState(null);
+    const [selectedDelete, setSelectedDelete] = useState([]);
 
     const createPoll = async (e) => {
         e.preventDefault();
@@ -29,7 +28,6 @@ function Welcome(props) {
         window.history.replaceState(null, null, `?poll=${response["pollId"]}`);
 
 
-
         const createdPolls = localStorage.getItem("created")
 
         if (createdPolls) {
@@ -44,29 +42,29 @@ function Welcome(props) {
 
     }
 
-    useEffect(() =>{ 
-        const createdPolls = JSON.parse(localStorage.getItem("created"))
-        if (createdPolls) {
-            var createdList = Object.keys(createdPolls).reverse().map((id) => {
-                return <li key={id}>
-                        <a className = "text-blue-200" href={`?poll=${id}`}>{createdPolls[id]}</a>
-                    </li>
-            })
-
-        } else
-            createdList = null;
+    const toggleSelected = (e) => {
+        const id = e.target.id
         
-        setCreated(createdList)
-    }, [showClear]);
+        for (let i = 0 ; i < selectedDelete.length; i++)
+            if (selectedDelete[i] === id) {
+                const temp = [...selectedDelete];
+                temp.splice(i, 1);
+                setSelectedDelete(temp);
+                return;
+            }
+            
+        setSelectedDelete([...selectedDelete, id]);
 
-    const deleteAll = async () => {
-        const polls = localStorage.getItem("created");
+    }
+    
+  
+    const deletePolls = async () => {
+        const pollIds = selectedDelete.join(".");
+    
+        if (pollIds) {
+            const url = "https://crowd-poll.herokuapp.com/api/polls/delete"
 
-        if (polls) {
-            const pollIds = Object.keys(JSON.parse(polls)).join(".");
-            const url = "http://localhost:5001/api/polls/delete"
-
-            const response = await fetch(url, {
+            await fetch(url, {
                 method: "DELETE",
                 headers: {
                     'Content-Type': 'application/json'
@@ -74,16 +72,36 @@ function Welcome(props) {
                 body: JSON.stringify({pollIds: pollIds, userId: props.userId })
             }).then(response => response.json());
 
+            const createdPolls = JSON.parse(localStorage.getItem("created"))
 
-            localStorage.removeItem("created"); 
-            setShowClear(true);
+            selectedDelete.forEach((id) => {
+                delete createdPolls[id]
+            })
 
-            setTimeout(() => {
-                setShowClear(false);
-            }, 3000)
+            if (Object.keys(createdPolls).length === 0)
+                localStorage.removeItem("created")
+            else
+                localStorage.setItem("created", JSON.stringify(createdPolls)); 
+
+
+            setSelectedDelete([])
+
         }
     }
 
+    const createdPolls = JSON.parse(localStorage.getItem("created"))
+    if (createdPolls) {
+        var created = Object.keys(createdPolls).reverse().map((id) =>
+                <CreatedBox 
+                    id = {id} 
+                    key = {id}
+                    title = {createdPolls[id]} 
+                    toggleSelected = {toggleSelected} 
+                    checked = {selectedDelete.includes(id)}/>
+        )
+
+    } else
+        created = null;    
     
     return (
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
@@ -96,22 +114,20 @@ function Welcome(props) {
 
                 <div className = "text-white mt-8 max-w-4/5 max-h-40 overflow-y-auto w-fit mx-auto border border-white rounded-lg p-3">
                     <p className = "text-lg bold mt-1">Your Created Polls</p>
-
                     {created ? 
                     <>
-                        <button className = "mb-2 text-red-300" onClick = {deleteAll}>
-                            Delete All
+                        {selectedDelete.length > 0 ? 
+                        <button className = "mb-2 text-sm text-red-300" onClick = {deletePolls}>
+                            {"Delete Selected Polls"}
                         </button>
+                        : null }
 
-                        <ul className = "w-full truncate text-left list-disc list-inside">{created}</ul>
+                        <ul className = "w-full truncate text-left">{created}</ul>
                     </>
                     :
-                        showClear ? 
-                        <p className = "text-red-200 text-sm">Deleted All</p>
-                        :
-                        <p className = "text-white text-sm">No created polls. Create one using the input!</p>
-
+                    <p className = "text-white text-sm">No created polls. Create one using the input!</p>
                     }
+                    
                 </div>
             </div>
 
@@ -130,5 +146,13 @@ function Welcome(props) {
         </div>
     );
 }
+
+
+const CreatedBox = (props) => {
+    return <li className = "align-middle">
+        <label className = "text-blue-200" href={`?poll=${props.id}`}>{props.title}</label>
+        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "w-4 h-4 border border-black float-right align-middle" type="checkbox"></input>
+    </li>
+} 
 
 export default Welcome;
