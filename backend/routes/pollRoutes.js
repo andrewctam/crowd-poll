@@ -229,7 +229,7 @@ router.delete("/delete", async (req, res) => {
             }
         
             requests.forEach(res => { 
-                res.write('event: update\n'); 
+                res.write('event: update\ndata:DELETE\n\n'); 
             })
 
         })
