@@ -113,6 +113,9 @@ const sendUpdates = async (pollId) => {
     })
 }
 
+
+
+
 router.get("/:id&:user", async (req, res) => {
     const pollId = req.params.id;
     const user = req.params.user;
@@ -180,11 +183,11 @@ router.get("/:id&:user", async (req, res) => {
 
             res.status(201).json(msg);
         }  else {
-            res.status(400).send("Poll expired or Invalid ID.")
+            res.status(400).json("Poll expired or Invalid ID.")
         }
     } else {
         console.log(pollId + " is not valid")
-        res.status(400).send("Poll expired or Invalid ID.")
+        res.status(400).json("Poll expired or Invalid ID.")
     }
 
 });
@@ -218,8 +221,19 @@ router.delete("/delete", async (req, res) => {
 
         pollsToDelete.forEach(async (pollId) => {
             await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+
+            const requests = connected.get(pollId);
+            if (!requests) {
+                console.log("Error. Response not found");
+                return;
+            }
+        
+            requests.forEach(res => { 
+                res.write('event: update\n'); 
+            })
+
         })
-    
+
         res.status(201).json("Deleted");
     } else {
         res.status(410).send("Error. Permission Denied.")

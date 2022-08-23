@@ -150,7 +150,7 @@ function Welcome(props) {
 
 const CreatedBox = (props) => {
     return <li className = "align-middle">
-        <label className = "text-blue-200" href={`?poll=${props.id}`}>{props.title}</label>
+        <a className = "text-blue-200" href={`?poll=${props.id}`}>{props.title}</a>
         <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "w-4 h-4 border border-black float-right align-middle" type="checkbox"></input>
     </li>
 } 

@@ -13,12 +13,12 @@ function Alert(props) {
     }, []);
 
 
-    return <div className = "w-fit m-auto" >
-            <div className="bg-red-200 text-black font-bold rounded-t px-4 py-2">
+    return <div>
+            <div className="bg-red-200 text-black font-bold px-4 py-2">
                 {props.title}
             </div>
 
-            <div className="rounded-b bg-red-100 px-4 py-3 text-red-800">
+            <div className="rounded-b-lg bg-red-100 px-4 py-3 text-red-800">
                 <p>{props.message}</p>
             </div>
         </div>

@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/CrowdPoll/static/css/main.1acd0b34.css",
-    "main.js": "/CrowdPoll/static/js/main.696f5945.js",
+    "main.css": "/CrowdPoll/static/css/main.b72a2aab.css",
+    "main.js": "/CrowdPoll/static/js/main.9e79f622.js",
     "index.html": "/CrowdPoll/index.html",
-    "main.1acd0b34.css.map": "/CrowdPoll/static/css/main.1acd0b34.css.map",
-    "main.696f5945.js.map": "/CrowdPoll/static/js/main.696f5945.js.map"
+    "main.b72a2aab.css.map": "/CrowdPoll/static/css/main.b72a2aab.css.map",
+    "main.9e79f622.js.map": "/CrowdPoll/static/js/main.9e79f622.js.map"
   },
   "entrypoints": [
-    "static/css/main.1acd0b34.css",
-    "static/js/main.696f5945.js"
+    "static/css/main.b72a2aab.css",
+    "static/js/main.9e79f622.js"
   ]
 }

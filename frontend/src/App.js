@@ -17,7 +17,7 @@ function App(props) {
 			var storedUserId = localStorage.getItem("userId")
 			if (storedUserId) {
 				//verify that the user id is in the database
-				const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
+				const message = await fetch(`https://crowd-poll.herokuapp.com/api/users/${storedUserId}`)
 					.then((response) => {
 						if (response.status === 404)
 							return response.json();
@@ -83,12 +83,23 @@ function App(props) {
 		const url = `https://crowd-poll.herokuapp.com/api/polls/${pollId}&${userId}`
 
 		const message = await fetch(url)
-			.then((response) => response.json())
+			.then((response) => {
+				if (response.status === 400)
+					return "Poll DNE"
+				else
+					return response.json()
+			})	
 			.catch((error) => {
 				setAlert(<Alert timeout = {10000} title = {"Error Getting Poll"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
 				console.log(error)
 				return;
 			});
+
+		if (message === "Poll DNE") {
+			setAlert(<Alert timeout = {10000} title = {"Error"} message = {"Poll Deleted or Does Not Exist"} setAlert = {setAlert}/>)
+			setLoaded(true);
+			return;
+		}
 
 		setPoll(<Poll pollId={message["pollId"]}
 			title={message["title"]}
@@ -105,6 +116,7 @@ function App(props) {
 		eventSource.addEventListener('update', e => {
 			try {
 				const update = JSON.parse(e.data);
+				
 				setPoll(<Poll 								
 						options = {update["options"]}
 						settings = {update["settings"]}
@@ -117,6 +129,7 @@ function App(props) {
 						//defaultVotedFor will not change. State updated in Poll.js
 						defaultVotedFor = {message["votedFor"]}
 						/>)
+
 				console.log("U");
 			} catch (error) {
 				setAlert(<Alert title = {"Error"} message = {"Please try again"} setAlert = {setAlert}/>)
