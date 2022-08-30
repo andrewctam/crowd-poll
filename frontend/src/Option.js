@@ -5,7 +5,7 @@ function Option(props) {
     const [selected, setSelected] = useState(false);
     
     const castVote = async (e) => {
-        const url = "https://crowd-poll.herokuapp.com/api/polls/vote"
+        const url = "https://crowdpoll.fly.dev/api/polls/vote"
 
         const updatedVotes = await fetch(url, {
             method: "put",
@@ -32,7 +32,7 @@ function Option(props) {
 
     const approveDenyOption = async (approved) => {
         
-        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
+        const url = "https://crowdpoll.fly.dev/api/polls/option"
 
          await fetch(url, {
             method: "put",

@@ -18,7 +18,7 @@ function Poll(props) {
 
     const addOption = async (e) => {
         e.preventDefault();
-        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
+        const url = "https://crowdpoll.fly.dev/api/polls/option"
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
@@ -48,7 +48,7 @@ function Poll(props) {
         const setting = e.target.id;
         const newValue = e.target.checked;
 
-        const url = "https://crowd-poll.herokuapp.com/api/polls/setting"
+        const url = "https://crowdpoll.fly.dev/api/polls/setting"
         
         await fetch(url, {
             method: "PUT",
@@ -81,7 +81,7 @@ function Poll(props) {
     }
 
     const deleteSelected = async (e) => {
-        const url = "https://crowd-poll.herokuapp.com/api/polls/option"
+        const url = "https://crowdpoll.fly.dev/api/polls/option"
         await fetch(url, {
             method: "delete",
             headers: {

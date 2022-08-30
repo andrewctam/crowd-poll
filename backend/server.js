@@ -1,4 +1,4 @@
-//comment out below when committing to heroku git
+//comment out below when uploading
 require('dotenv').config()
 
 const express = require('express');

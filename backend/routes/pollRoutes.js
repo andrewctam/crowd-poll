@@ -220,18 +220,21 @@ router.delete("/delete", async (req, res) => {
     if (pollsToDelete && ObjectId.isValid(userId)) {
 
         pollsToDelete.forEach(async (pollId) => {
-            await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+            if (ObjectId.isValid(pollId)) {
+                await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
 
-            const requests = connected.get(pollId);
-            if (!requests) {
-                console.log("Error. Response not found");
-                return;
+                const requests = connected.get(pollId);
+                if (!requests) {
+                    console.log("Error. Response not found");
+                    return;
+                }
+            
+                requests.forEach(res => { 
+                    res.write('event: update\ndata:DELETE\n\n'); 
+                })
+            } else {
+                console.log(pollId + " is not valid");
             }
-        
-            requests.forEach(res => { 
-                res.write('event: update\ndata:DELETE\n\n'); 
-            })
-
         })
 
         res.status(201).json("Deleted");

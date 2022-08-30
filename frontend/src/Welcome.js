@@ -14,7 +14,7 @@ function Welcome(props) {
             return;
         }
         
-        const url = "https://crowd-poll.herokuapp.com/api/polls/create"
+        const url = "https://crowdpoll.fly.dev/api/polls/create"
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -62,7 +62,7 @@ function Welcome(props) {
         const pollIds = selectedDelete.join(".");
     
         if (pollIds) {
-            const url = "https://crowd-poll.herokuapp.com/api/polls/delete"
+            const url = "https://crowdpoll.fly.dev/api/polls/delete"
 
             await fetch(url, {
                 method: "DELETE",
