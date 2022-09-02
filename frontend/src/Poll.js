@@ -217,16 +217,16 @@ function Poll(props) {
 
 
 
-            <div className="bg-slate-500 lg:h-screen p-10 overflow-y-auto">
-                
-                <div className="grid items-center p-4 text-3xl bold text-white select-text">{props.title}</div>                
+            <div className="bg-slate-500 lg:h-screen overflow-y-auto">
+            
+                <div className="grid items-center bg-slate-600 py-8 text-3xl mb-4 bold text-white select-text">{props.title}</div>                
 
                 {options.length === 0 ? 
-                    <p className='text-lg bold mb-2 text-white'>
+                    <p className='text-lg bold text-white'>
                         {"No answer options yet, add one using the input to the left!"}
                     </p> 
                     :
-                    <div className = "inline my-2">
+                    <div className = "inline border border-white rounded-lg p-2">
                     
                         <p className = "inline m-1 text-white bold text-wrap-">Sort Options By: </p>
                         <SortAnchor 
@@ -256,7 +256,7 @@ function Poll(props) {
                     </div>
                 }
 
-                <div className='mt-1'>{options}</div>
+                <div className='mx-10 my-3'>{options}</div>
                 
             </div>
 
