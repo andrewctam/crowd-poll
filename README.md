@@ -15,7 +15,7 @@ echo "MONGO_URI=yourURI" >> .env
 echo "PORT=yourPortNumber" >> .env
 ```
 
-To run your local servers, in each of the backend and frontend folders, install npm dependencies and run npm start
+To run your local servers, in each of the backend and frontend folders, install npm dependencies and run npm start. Make sure to change the urls of the fetch functions in the frontend to your localhost.
 
 ```
 cd backend
