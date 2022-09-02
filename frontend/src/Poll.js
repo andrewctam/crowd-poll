@@ -44,29 +44,6 @@ function Poll(props) {
         optionInput.current.value = "";
     }
 
-    const setSetting = async (e) => {
-        const setting = e.target.id;
-        const newValue = e.target.checked;
-
-        const url = "https://crowdpoll.fly.dev/api/polls/setting"
-        
-        await fetch(url, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                pollId: props.pollId,
-                userId: props.userId,
-                setting: setting,
-                newValue: newValue
-
-            })
-        })
-
-     
-    } 
-    
     const toggleSelected = (optionId) => {
         
         for (let i = 0 ; i < selectedOptions.length; i++)
@@ -137,6 +114,7 @@ function Poll(props) {
             approved = {!props.settings["approvalRequired"] || obj["approved"]}
             isOwner = {props.isOwner}
             toggleSelected = {toggleSelected}
+            disableVoting = {props.settings["disableVoting"]}
          />);
 
     
@@ -158,48 +136,54 @@ function Poll(props) {
                         </p>
 
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name = "disableVoting"
                             text ="Disable Voting"
                             indent = {false}
-                            setSetting = {setSetting} 
                             active= {props.settings["disableVoting"]} />
 
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name = "hideVotes"
                             text = "Hide Vote Count"
                             indent = {false}
-                            setSetting = {setSetting}
                             active = {props.settings["hideVotes"]} />
 
                         {props.isOwner && props.settings["hideVotes"] ?
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name = "hideVotesForOwner"
                             text = "Hide Vote Count For You" 
                             indent = {true}
-                            setSetting = {setSetting} 
                             active = {props.settings["hideVotesForOwner"]} />
                         : null}
 
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name = "limitOneVote"
                             text = "Limit Users To One Vote" 
-                            setSetting = {setSetting} 
                             indent = {false}
                             active = {props.settings["limitOneVote"]} />
 
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name ="approvalRequired"
                             text= "New Options Require Approval" 
                             indent = {false}
-                            setSetting = {setSetting}
                             active = {props.settings["approvalRequired"]} />
                         
                         {props.isOwner && props.settings["approvalRequired"] ?
                         <SettingCheckBox
+                            pollId = {props.pollId}
+                            userId = {props.userId}
                             name = "autoApproveOwner"
                             text = "Auto Approve Your Options" 
                             indent = {true}
-                            setSetting = {setSetting}
                             active = {props.settings["autoApproveOwner"]} />   
                         : null}
                         
@@ -282,14 +266,41 @@ function Poll(props) {
 }
 
 const SettingCheckBox = (props) => {
+    const [clientActive, setClientActive] = useState(props.active);
+
+    useEffect(() => {
+        setClientActive(props.active);
+    }, [props.active])
+
+    const handleChange = async (e) => {
+        console.log(e.target.checked)
+        const url = "https://crowdpoll.fly.dev/api/polls/setting"
+        setClientActive(!clientActive);
+
+        await fetch(url, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                pollId: props.pollId,
+                userId: props.userId,
+                setting: props.name,
+                newValue: e.target.checked
+            })
+        })
+
+    }
+
     return (<div className = "text-white text-right">
         <label className = {"px-1 float-left mr-2 " + (props.indent ? "text-gray-300 ml-4" : "text-white")} htmlFor={props.name}>
             {props.text}
         </label>
 
-        <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {props.setSetting} checked = {props.active}></input>
+        <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
     </div>)
 }
+
 
 const SortAnchor = (props) => {
 

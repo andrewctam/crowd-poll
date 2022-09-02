@@ -91,6 +91,7 @@ const sendUpdates = async (pollId) => {
         }
     }
     
+    
 
     requests.forEach(res => {
         //shortcuts to true if approval is unnecessary
@@ -335,9 +336,6 @@ router.put("/option", async (req, res) => {
 
 
 
-
-
-
 router.put("/vote", async (req, res) => {
     const {pollId, optionId, userId} = req.body;
 
@@ -360,7 +358,7 @@ router.put("/vote", async (req, res) => {
             return
         }
         
-        if (optionIdLocation === -1) { //vote
+        if (optionIdLocation === -1) { //vote not found, so cast one
             if (limitOneVote && optionIds.length >= 1) {
                res.status(400).json("Limit 1 vote!")
                return;
@@ -373,8 +371,9 @@ router.put("/vote", async (req, res) => {
                 });
                 var change = 1;
                 optionIds.push(optionId)
+                console.log("add")
             }
-        } else {
+        } else { //vote found, remove it
             await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
                 $pull: {
                     "votes.$.optionIds": optionId
@@ -382,6 +381,7 @@ router.put("/vote", async (req, res) => {
             });
             change = -1;
             optionIds.splice(optionIdLocation, 1)
+            console.log("delete")
         }
 
         //    options: [{ optionTitle: String, votes: Number}],

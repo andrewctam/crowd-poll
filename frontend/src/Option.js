@@ -3,30 +3,45 @@ import { useState } from 'react'
 function Option(props) {
     const [showBox, setShowBox] = useState(false);
     const [selected, setSelected] = useState(false);
-    
+    const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
+
+
     const castVote = async (e) => {
         const url = "https://crowdpoll.fly.dev/api/polls/vote"
 
-        const updatedVotes = await fetch(url, {
-            method: "put",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                pollId: props.pollId,
-                optionId: props.optionId,
-                userId: props.userId })
-        }).then( response => {
-            if (response.status !== 400) {
-                return response.json();
-            } else {
-                alert("Only 1 vote!")
-                return;
-            }
-        })
-        
-        if (updatedVotes)
-            props.setVotedFor(updatedVotes)
+        if (props.disableVoting)
+            return;
+
+        if (!voting) {
+            setVoting(true)
+
+            const updatedVotes = await fetch(url, {
+                method: "put",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    pollId: props.pollId,
+                    optionId: props.optionId,
+                    userId: props.userId
+                })
+            }).then( response => {
+                if (response.status !== 400) {
+                    return response.json();
+                } else {
+                    alert("Only 1 vote!")
+                    setVoting(false);
+                    return;
+                }
+            })
+            
+            if (updatedVotes)
+                props.setVotedFor(updatedVotes)
+
+            setVoting(false);
+        } else {
+            console.log("Wait for vote to finish")
+        }
 
     }
 
@@ -65,20 +80,24 @@ function Option(props) {
     }
 
 
-
-    
     
     if (!props.approved)
         var color = "bg-red-100"
     else if (selected)
         color = "bg-blue-200"
+    else if (voting)
+        color = "bg-emerald-100"
     else if (props.voted)
         color = "bg-green-200"
     else
         color = "bg-slate-200";
     
     
-    const voteCount = props.votes + (props.votes === 1 ? " vote" : " votes");
+    if (props.votes >= 0)
+        var voteCount = (props.votes) + (props.votes === 1 ? " vote" : " votes");
+    else
+        voteCount = "Votes Hidden";
+
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
     
     return ((props.approved) ? 
@@ -96,7 +115,7 @@ function Option(props) {
 
 
             <div className="grid-row border-t border-t-black w-full px-3 py-2 rounded">
-                {props.votes >= 0 ? voteCount : "Votes Hidden"}
+                {voteCount}
             </div>
             
         </button>
