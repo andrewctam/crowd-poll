@@ -109,26 +109,22 @@ function Welcome(props) {
             <div className="py-10" >
                 <a href="."><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</h1></a>
                 <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Create a poll with a title <br /> Share the poll and crowd source options <br />Collectively vote on the best one</p>
-                
-
-
-                <div className = "text-white mt-8 max-w-4/5 max-h-40 overflow-y-auto w-fit mx-auto border border-white rounded-lg p-3">
+            
+                {created ? 
+                <div className = "text-white mt-8 max-w-4/5 w-fit mx-auto">
                     <p className = "text-lg bold mt-1">Your Created Polls</p>
-                    {created ? 
-                    <>
-                        {selectedDelete.length > 0 ? 
-                        <button className = "mb-2 text-sm text-red-300" onClick = {deletePolls}>
-                            {"Delete Selected Polls"}
-                        </button>
-                        : null }
 
-                        <ul className = "w-full truncate text-left">{created}</ul>
-                    </>
-                    :
-                    <p className = "text-white text-sm">No created polls. Create one using the input!</p>
-                    }
-                    
+                    <div className = "w-full max-h-40 overflow-y-auto mx-auto border border-white rounded-lg p-3">
+                        <ul className = "w-full">{created}</ul>
+                    </div>
                 </div>
+                : null}
+                {selectedDelete.length > 0 ? 
+                    <button className = "border border-black rounded p-2 mt-2 bg-red-300 text-sm text-black" onClick = {deletePolls}>
+                        {"Delete Selected Polls"}
+                    </button>
+                : null }
+
             </div>
 
 
@@ -149,9 +145,9 @@ function Welcome(props) {
 
 
 const CreatedBox = (props) => {
-    return <li className = "align-middle">
-        <a className = "text-blue-200" href={`?poll=${props.id}`}>{props.title}</a>
-        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "w-4 h-4 border border-black float-right align-middle" type="checkbox"></input>
+    return <li className = "h-fit flex justify-between">
+        <a className = "text-blue-200 truncate" href={`?poll=${props.id}`}>{props.title}</a>
+        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "border border-black" type="checkbox"></input>
     </li>
 } 
 

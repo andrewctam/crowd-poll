@@ -124,6 +124,7 @@ function Poll(props) {
             <div className="lg:h-screen flex flex-col">
                 <div className="mt-2 py-10">
                     <a href="." className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</a>
+                    
                     <h1 className="text-xl pt-1 text-white select-none">Link to the poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
@@ -194,7 +195,7 @@ function Poll(props) {
                                 Delete Selected Options
                             </label>
                             
-                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border min-w-4 border-black px-1 text-black text-xs">{selectedOptions.length}</button>
+                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black px-2 text-black text-xs">{selectedOptions.length}</button>
                         </div> 
                         : null}
 
@@ -217,9 +218,9 @@ function Poll(props) {
 
 
 
-            <div className="bg-slate-500 lg:h-screen overflow-y-auto">
+            <div className="border-x border-x-black bg-stone-600 lg:h-screen overflow-y-auto">
             
-                <div className="grid items-center bg-slate-600 py-8 text-3xl mb-4 bold text-white select-text">{props.title}</div>                
+                <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white select-text">{props.title}</div>                
 
                 {options.length === 0 ? 
                     <p className='text-lg bold text-white'>
@@ -228,7 +229,7 @@ function Poll(props) {
                     :
                     <div className = "inline border border-white rounded-lg p-2">
                     
-                        <p className = "inline m-1 text-white bold text-wrap-">Sort Options By: </p>
+                        <p className = "inline m-1 text-white bold text-wrap-">Sort By: </p>
                         <SortAnchor 
                             name = {"Order Created"}
                             id = "orderCreated"
@@ -292,12 +293,12 @@ const SettingCheckBox = (props) => {
 
     }
 
-    return (<div className = "text-white text-right">
-        <label className = {"px-1 float-left mr-2 " + (props.indent ? "text-gray-300 ml-4" : "text-white")} htmlFor={props.name}>
+    return (<div className = "text-white flex justify-between">
+        <label className = {"px-1 mr-2 " + (props.indent ? "text-gray-300 ml-4" : "text-white")} htmlFor={props.name}>
             {props.text}
         </label>
 
-        <input className = "w-4 h-4 border border-black" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
+        <input className = "border border-black" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
     </div>)
 }
 
@@ -316,7 +317,7 @@ const SortAnchor = (props) => {
 
     return (<div 
         onClick = {setSorting} 
-        className = {"cursor-pointer inline-block m-2 " + (props.selected ? "text-blue-300 underline" : "text-white")}>
+        className = {"cursor-pointer inline-block m-2 " + (props.selected ? "text-sky-200 underline" : "text-white")}>
         {props.name}
     </div>)
 
