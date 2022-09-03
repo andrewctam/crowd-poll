@@ -122,14 +122,14 @@ function Poll(props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             
             <div className="lg:h-screen flex flex-col">
-                <div className="mt-2 py-10">
-                    <a href="." className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</a>
+                <div className="py-10 bg-slate-700">
+                    <a href="." className="mx-auto text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
                     
                     <h1 className="text-xl pt-1 text-white select-none">Link to the poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
                     <div className = "border border-white mt-4 p-3 w-fit mx-auto rounded-xl">
-                        <h1 className='text-white text-2xl mt-1 bold'>Settings</h1>
+                        <h1 className='text-white text-2xl mt-1 font-semibold'>Settings</h1>
                         
                         <p className='text-white mb-3'>
                             {props.isOwner ? "(only you can edit these)" 
@@ -139,6 +139,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name = "disableVoting"
                             text ="Disable Voting"
                             indent = {false}
@@ -147,6 +148,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name = "hideVotes"
                             text = "Hide Vote Count"
                             indent = {false}
@@ -156,6 +158,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name = "hideVotesForOwner"
                             text = "Hide Vote Count For You" 
                             indent = {true}
@@ -165,6 +168,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name = "limitOneVote"
                             text = "Limit Users To One Vote" 
                             indent = {false}
@@ -173,6 +177,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name ="approvalRequired"
                             text= "New Options Require Approval" 
                             indent = {false}
@@ -182,6 +187,7 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
+                            isOwner = {props.isOwner}
                             name = "autoApproveOwner"
                             text = "Auto Approve Your Options" 
                             indent = {true}
@@ -206,30 +212,29 @@ function Poll(props) {
 
                 </div>
 
-                <div className = "flex-grow bg-slate-600 p-10 mt-4 flex items-center justify-center">
+                <div className = "flex-grow bg-slate-600 p-10 flex items-center justify-center">
                     <form onSubmit={addOption} className = "w-full">
                         <input ref={optionInput}  className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..." />
-                        <br />
-                        {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
+                        {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
                     </form>
                </div>
             </div>
 
 
 
-            <div className="border-x border-x-black bg-stone-600 lg:h-screen overflow-y-auto">
+            <div className="bg-stone-600 lg:h-screen overflow-y-auto">
             
-                <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white select-text">{props.title}</div>                
+                <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white">{props.title}</div>                
 
                 {options.length === 0 ? 
-                    <p className='text-lg bold text-white'>
+                    <p className='text-lg font-semibold text-white'>
                         {"No answer options yet, add one using the input to the left!"}
                     </p> 
                     :
-                    <div className = "inline border border-white rounded-lg p-2">
+                    <div className = "inline-block border border-white rounded-lg px-2">
                     
-                        <p className = "inline m-1 text-white bold text-wrap-">Sort By: </p>
+                        <p className = "inline-block m-1 text-white font-semibold text-wrap-">Sort By: </p>
                         <SortAnchor 
                             name = {"Order Created"}
                             id = "orderCreated"
@@ -274,6 +279,8 @@ const SettingCheckBox = (props) => {
     }, [props.active])
 
     const handleChange = async (e) => {
+        if (!props.isOwner) 
+            return; 
         console.log(e.target.checked)
         const url = "https://crowdpoll.fly.dev/api/polls/setting"
         setClientActive(!clientActive);
@@ -298,7 +305,7 @@ const SettingCheckBox = (props) => {
             {props.text}
         </label>
 
-        <input className = "border border-black" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
+        <input className = "border border-black ml-1" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
     </div>)
 }
 

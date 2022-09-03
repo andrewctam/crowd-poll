@@ -1,9 +1,20 @@
 import "./index.css"
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 function Welcome(props) {
     const titleInput = useRef(null);
     const [showError, setShowError] = useState(false);
     const [selectedDelete, setSelectedDelete] = useState([]);
+    const [allSelected, setAllSelected] = useState(false);
+
+
+    useEffect(() => {
+        if (allSelected) {
+            const createdPolls = JSON.parse(localStorage.getItem("created"))
+            setSelectedDelete(Object.keys(createdPolls))
+        } else
+            setSelectedDelete([]);
+    }, [allSelected])
 
     const createPoll = async (e) => {
         e.preventDefault();
@@ -60,7 +71,7 @@ function Welcome(props) {
   
     const deletePolls = async () => {
         const pollIds = selectedDelete.join(".");
-    
+        setAllSelected(false);
         if (pollIds) {
             const url = "https://crowdpoll.fly.dev/api/polls/delete"
 
@@ -100,42 +111,53 @@ function Welcome(props) {
                     checked = {selectedDelete.includes(id)}/>
         )
 
+        created.unshift(
+            <li key = "selectAll" className = "h-fit flex justify-between">
+                <label htmlFor = "selectAll" className = "text-gray-300 select-none">{"Select All"}</label>
+                <input id = "selectAll" checked = {allSelected} onChange = {() => {setAllSelected(!allSelected)}} className = "border border-black ml-2" type="checkbox"></input>
+            </li>
+        )
+
     } else
         created = null;    
     
     return (
         <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
 
-            <div className="py-10" >
-                <a href="."><h1 className="mx-auto text-7xl font-bold text-gray-200 select-none">Crowd Poll</h1></a>
-                <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Create a poll with a title <br /> Share the poll and crowd source options <br />Collectively vote on the best one</p>
-            
-                {created ? 
-                <div className = "text-white mt-8 max-w-4/5 w-fit mx-auto">
-                    <p className = "text-lg bold mt-1">Your Created Polls</p>
-
-                    <div className = "w-full max-h-40 overflow-y-auto mx-auto border border-white rounded-lg p-3">
-                        <ul className = "w-full">{created}</ul>
-                    </div>
+            <div className="py-10 bg-slate-700 h-full grid items-center" >
+                <div>
+                    <a href="."><h1 className="mx-auto text-7xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
+                    <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Share a poll with a title <br /> Crowd source answer options <br />Collectively vote on the best one</p>
                 </div>
-                : null}
-                {selectedDelete.length > 0 ? 
-                    <button className = "border border-black rounded p-2 mt-2 bg-red-300 text-sm text-black" onClick = {deletePolls}>
-                        {"Delete Selected Polls"}
-                    </button>
-                : null }
-
             </div>
+         
 
 
-            <div className="bg-slate-600 grid items-center py-10 lg:h-screen">
+            <div className="bg-stone-600 grid lg:h-screen items-center">
                 <form className="py-10" onSubmit={createPoll}>
+                <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
                     <input ref={titleInput} className="h-10 mx-2 w-3/4 md:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
-                    <br />
+                    <button type="submit" className="bg-black text-gray-200 border border-black p-2 rounded" >Create Poll</button>
                     {showError ? <p className="m-1 text-red-200">Title can not be blank. Please enter a title.</p> : null}
-                    <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >Create Poll</button>
-
                 </form>
+
+
+                {created ? 
+                <div className = "text-white w-full h-full bg-stone-700 grid items-center p-6">
+                    <div>
+                        <p className = "text-2xl mb-1 select-none">Your Created Polls</p>
+                        <ul className = "w-2/5 max-h-72 overflow-y-auto mx-auto border border-white rounded-lg p-3">
+                            {created}
+                        </ul>
+
+                        <button onClick = {deletePolls} disabled = {selectedDelete.length === 0} className = {"border border-black rounded-xl px-3 py-2 mt-2 " + (selectedDelete.length === 0 ? "bg-red-100 text-gray-500" : "bg-rose-300 text-black")} >
+                            {"Delete Selected Polls"}
+                        </button>
+                    </div>
+                </div> : null}
+
+
+
             </div>
 
 
@@ -147,7 +169,7 @@ function Welcome(props) {
 const CreatedBox = (props) => {
     return <li className = "h-fit flex justify-between">
         <a className = "text-blue-200 truncate" href={`?poll=${props.id}`}>{props.title}</a>
-        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "border border-black" type="checkbox"></input>
+        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "border border-black ml-2" type="checkbox"></input>
     </li>
 } 
 

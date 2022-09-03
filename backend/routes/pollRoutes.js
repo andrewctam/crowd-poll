@@ -371,7 +371,6 @@ router.put("/vote", async (req, res) => {
                 });
                 var change = 1;
                 optionIds.push(optionId)
-                console.log("add")
             }
         } else { //vote found, remove it
             await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
@@ -381,7 +380,6 @@ router.put("/vote", async (req, res) => {
             });
             change = -1;
             optionIds.splice(optionIdLocation, 1)
-            console.log("delete")
         }
 
         //    options: [{ optionTitle: String, votes: Number}],
