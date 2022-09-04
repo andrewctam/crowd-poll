@@ -142,7 +142,7 @@ router.get("/:id&:user", async (req, res) => {
             }
 
 
-            const isOwner = user === poll["owner"]
+            const isOwner = userId === poll["owner"]
             var options = poll["options"]
 
             if (isOwner) {
