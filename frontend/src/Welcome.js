@@ -145,14 +145,20 @@ function Welcome(props) {
                 {created ? 
                 <div className = "text-white w-full h-full bg-stone-600 grid items-center p-6">
                     <div>
-                        <p className = "text-2xl mb-1 select-none px-4 mb-2">Your Created Polls</p>
+                        <p className = "text-2xl mb-1 select-none px-4">Your Created Polls</p>
                         <ul className = "w-2/5 max-h-72 overflow-y-auto mx-auto border border-white rounded-lg p-3">
                             {created}
+
+                            <div className = "mt-3 flex justify-between">
+                                <label className = "text-white" onClick = {deletePolls}>
+                                    {"Delete Selected Polls"}
+                                </label>
+                                
+                                <button onClick = {deletePolls} className = "bg-red-100 rounded border border-black px-2 text-black text-xs self-center">{selectedDelete.length}</button>
+                            </div>
+
                         </ul>
 
-                        <button onClick = {deletePolls} disabled = {selectedDelete.length === 0} className = {"border border-black rounded-xl px-3 py-2 mt-2 " + (selectedDelete.length === 0 ? "bg-red-100 text-gray-500" : "bg-rose-300 text-black")} >
-                            {"Delete Selected Polls"}
-                        </button>
                     </div>
                 </div> : null}
 
@@ -169,7 +175,7 @@ function Welcome(props) {
 const CreatedBox = (props) => {
     return <li className = "h-fit flex justify-between">
         <a className = "text-blue-200 truncate" href={`?poll=${props.id}`}>{props.title}</a>
-        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "border border-black ml-2" type="checkbox"></input>
+        <input id = {props.id} checked = {props.checked} onChange = {props.toggleSelected} className = "border border-black ml-2 self-center" type="checkbox"></input>
     </li>
 } 
 

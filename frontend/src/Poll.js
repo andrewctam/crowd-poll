@@ -193,12 +193,12 @@ function Poll(props) {
                         
 
                         
-                        <div className = "text-white text-right">
-                            <label className = "px-1 float-left mr-2 text-white" onClick = {deleteSelected}>
+                        <div className = "flex justify-between">
+                            <label className = "px-1 mr-2 text-white" onClick = {deleteSelected}>
                                 {"Delete Selected Options"}
                             </label>
                             
-                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black px-2 text-black text-xs">{selectedOptions.length}</button>
+                            <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black h-fit self-center px-2 text-black text-xs">{selectedOptions.length}</button>
                         </div> 
                         
 
@@ -338,7 +338,7 @@ const SettingCheckBox = (props) => {
             {props.text}
         </label>
 
-        <input className = "border border-black ml-1" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
+        <input className = "border border-black ml-1 self-center" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
     </div>)
 }
 
