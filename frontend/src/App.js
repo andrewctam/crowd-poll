@@ -148,8 +148,6 @@ function App(props) {
 	<> 
 		{alert}
 		{poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>}
-
-		
 	</>	
 	: null)
 

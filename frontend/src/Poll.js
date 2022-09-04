@@ -58,6 +58,9 @@ function Poll(props) {
     }
 
     const deleteSelected = async (e) => {
+        if (selectedOptions.length === 0)
+            return;
+            
         const url = "https://crowdpoll.fly.dev/api/polls/option"
         await fetch(url, {
             method: "delete",
@@ -128,18 +131,17 @@ function Poll(props) {
                     <h1 className="text-xl pt-1 text-white select-none">Link to the poll:</h1>
                     <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
+                    
+
+                    {props.isOwner ? 
                     <div className = "border border-white mt-4 p-3 w-fit mx-auto rounded-xl">
                         <h1 className='text-white text-2xl mt-1 font-semibold'>Settings</h1>
                         
-                        <p className='text-white mb-3'>
-                            {props.isOwner ? "(only you can edit these)" 
-                                           : "(only the owner can edit these)"}
-                        </p>
+                        <p className='text-white mb-3'> {"(only you can edit these)"} </p>
 
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name = "disableVoting"
                             text ="Disable Voting"
                             indent = {false}
@@ -148,7 +150,6 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name = "hideVotes"
                             text = "Hide Vote Count"
                             indent = {false}
@@ -158,7 +159,6 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name = "hideVotesForOwner"
                             text = "Hide Vote Count For You" 
                             indent = {true}
@@ -168,7 +168,6 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name = "limitOneVote"
                             text = "Limit Users To One Vote" 
                             indent = {false}
@@ -177,7 +176,6 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name ="approvalRequired"
                             text= "New Options Require Approval" 
                             indent = {false}
@@ -187,7 +185,6 @@ function Poll(props) {
                         <SettingCheckBox
                             pollId = {props.pollId}
                             userId = {props.userId}
-                            isOwner = {props.isOwner}
                             name = "autoApproveOwner"
                             text = "Auto Approve Your Options" 
                             indent = {true}
@@ -195,29 +192,67 @@ function Poll(props) {
                         : null}
                         
 
-                        {props.isOwner && selectedOptions.length > 0 ?
+                        
                         <div className = "text-white text-right">
                             <label className = "px-1 float-left mr-2 text-white" onClick = {deleteSelected}>
-                                Delete Selected Options
+                                {"Delete Selected Options"}
                             </label>
                             
                             <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black px-2 text-black text-xs">{selectedOptions.length}</button>
                         </div> 
-                        : null}
+                        
 
                         
-                    </div>
+                    </div> 
+                    :
+                    (props.settings["disableVoting"] || props.settings["hideVotes"] || props.settings["limitOneVote"] || props.settings["approvalRequired"]) ?
+                    <div className = "border border-white p-4 rounded-xl mx-auto w-fit mt-4">
+                        <h1 className="text-center text-2xl font-semibold pt-1 text-white select-none mb-3">Settings</h1>
 
-                
+                        <ul className = "text-left">
+                            <SettingListDisplay
+                                display = {props.settings["disableVoting"]}
+                                text = "Adding and removing votes is disabled" 
+                            />
+                            
+                            <SettingListDisplay
+                                display = {props.settings["hideVotes"]}
+                                text = "Vote counts are hidden" 
+                            />
+
+                            <SettingListDisplay
+                                display = {props.settings["limitOneVote"]}
+                                text = "You may only cast one vote at a time" 
+                            />
+
+                            <SettingListDisplay
+                                display = {props.settings["approvalRequired"]}
+                                text = "New options require approval from the owner" 
+                            />
+
+                        </ul>
+                    
+                    </div>
+                    : null}
+                    
+                    <div className='text-lg text-white mt-4'>
+                        {"Click on an option to add or remove your vote"}
+                    </div>
+                    <div className='text-lg text-white'>
+                        {"You can " + (props.settings["approvalRequired"] ? "request to " : "") + "add more options using the input below"}
+                    </div>
 
                 </div>
 
                 <div className = "flex-grow bg-slate-600 p-10 flex items-center justify-center">
                     <form onSubmit={addOption} className = "w-full">
+                        <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Add Answer Option</h1>
                         <input ref={optionInput}  className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..." />
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                         {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
                     </form>
+                    
+                    
                </div>
             </div>
 
@@ -228,11 +263,11 @@ function Poll(props) {
                 <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white">{props.title}</div>                
 
                 {options.length === 0 ? 
-                    <p className='text-lg font-semibold text-white'>
-                        {"No answer options yet, add one using the input to the left!"}
+                    <p className='text-lg text-white'>
+                        {"No answer options yet, add one using the input!"}
                     </p> 
                     :
-                    <div className = "inline-block border border-white rounded-lg px-2">
+                    <div className = "inline-block border border-white rounded-lg px-2 mx-2">
                     
                         <p className = "inline-block m-1 text-white font-semibold text-wrap-">Sort By: </p>
                         <SortAnchor 
@@ -259,13 +294,14 @@ function Poll(props) {
                             disabled = {false}
                         />
 
-                    </div>
-                }
+                    </div>}
+                
 
-                <div className='mx-10 my-3'>{options}</div>
+                <div className='mx-10 my-3'>
+                    {options}
+                </div>
                 
             </div>
-
 
         </div>)
 
@@ -279,9 +315,6 @@ const SettingCheckBox = (props) => {
     }, [props.active])
 
     const handleChange = async (e) => {
-        if (!props.isOwner) 
-            return; 
-        console.log(e.target.checked)
         const url = "https://crowdpoll.fly.dev/api/polls/setting"
         setClientActive(!clientActive);
 
@@ -309,6 +342,12 @@ const SettingCheckBox = (props) => {
     </div>)
 }
 
+const SettingListDisplay = (props) => {
+    if (props.display)
+        return <li className="text-white text-md">{props.text}</li>
+    else
+        return null;
+}
 
 const SortAnchor = (props) => {
 

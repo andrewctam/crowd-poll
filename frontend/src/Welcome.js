@@ -133,9 +133,9 @@ function Welcome(props) {
          
 
 
-            <div className="bg-stone-600 grid lg:h-screen items-center">
+            <div className="bg-stone-700 grid lg:h-screen items-center">
                 <form className="py-10" onSubmit={createPoll}>
-                <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
+                    <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
                     <input ref={titleInput} className="h-10 mx-2 w-3/4 md:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
                     <button type="submit" className="bg-black text-gray-200 border border-black p-2 rounded" >Create Poll</button>
                     {showError ? <p className="m-1 text-red-200">Title can not be blank. Please enter a title.</p> : null}
@@ -143,9 +143,9 @@ function Welcome(props) {
 
 
                 {created ? 
-                <div className = "text-white w-full h-full bg-stone-700 grid items-center p-6">
+                <div className = "text-white w-full h-full bg-stone-600 grid items-center p-6">
                     <div>
-                        <p className = "text-2xl mb-1 select-none">Your Created Polls</p>
+                        <p className = "text-2xl mb-1 select-none px-4 mb-2">Your Created Polls</p>
                         <ul className = "w-2/5 max-h-72 overflow-y-auto mx-auto border border-white rounded-lg p-3">
                             {created}
                         </ul>

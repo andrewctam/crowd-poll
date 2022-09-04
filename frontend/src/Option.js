@@ -9,8 +9,10 @@ function Option(props) {
     const castVote = async (e) => {
         const url = "https://crowdpoll.fly.dev/api/polls/vote"
 
-        if (props.disableVoting)
+        if (props.disableVoting) {
+            alert("Adding and removing votes is currently disabled.")
             return;
+        }
 
         if (!voting) {
             setVoting(true)
@@ -29,7 +31,7 @@ function Option(props) {
                 if (response.status !== 400) {
                     return response.json();
                 } else {
-                    alert("Only 1 vote!")
+                    alert("Only 1 vote is allowed! Remove your previous vote to vote again.")
                     setVoting(false);
                     return;
                 }

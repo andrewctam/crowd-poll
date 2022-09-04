@@ -15,7 +15,7 @@ router.get("/updates/:pollId&:userId", async (req, res) => {
       });
       
       const pollId = req.params.pollId
-      //const userId = req.params.userId
+      //const userId = req.params.userId => used in sendUpdates() for owner verification
 
       if (!ObjectId.isValid(pollId)) {
         res.status(400).json("Invalid ID")
@@ -119,26 +119,18 @@ const sendUpdates = async (pollId) => {
 
 router.get("/:id&:user", async (req, res) => {
     const pollId = req.params.id;
-    const user = req.params.user;
+    const userId = req.params.user;
 
-
-    if (ObjectId.isValid(pollId)) {
-        
-        if (ObjectId.isValid(pollId) && ObjectId.isValid(user)) {
-            var poll = await Poll.findOne({_id: pollId})
-        } else {
-            res.status(400).send("Invalid ID")
-            return;
-        }
-        
+    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId)) {        
+        var poll = await Poll.findOne({_id: pollId})
         
         if (poll) {
             //add votes object
-            if (!await Poll.exists({_id: pollId, "votes.userId":user})) {
+            if (!await Poll.exists({_id: pollId, "votes.userId": userId})) {
                 await Poll.updateOne({_id: pollId}, {
                     $push: {
                         "votes": {
-                            userId: user,
+                            userId: userId,
                             optionIds: []
                         }
                     }
@@ -146,7 +138,7 @@ router.get("/:id&:user", async (req, res) => {
                 var optionIds = []
             } else {
                 const ids = poll["votes"]
-                optionIds = ids.find(option => option["userId"] === user)["optionIds"]
+                optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
             }
 
 
@@ -155,7 +147,7 @@ router.get("/:id&:user", async (req, res) => {
 
             if (isOwner) {
                 if (poll["hideVotes"] && poll["hideVotesForOwner"])
-                    options.forEach(option => option["votes"] = - 1)
+                    options.forEach(option => option["votes"] = -1)
 
             } else {
                 if (poll['approvalRequired'])
@@ -185,10 +177,12 @@ router.get("/:id&:user", async (req, res) => {
             res.status(201).json(msg);
         }  else {
             res.status(400).json("Poll expired or Invalid ID.")
+            return;
         }
     } else {
         console.log(pollId + " is not valid")
         res.status(400).json("Poll expired or Invalid ID.")
+        return;
     }
 
 });
@@ -219,7 +213,6 @@ router.delete("/delete", async (req, res) => {
     const pollsToDelete = pollIds.split(".");
 
     if (pollsToDelete && ObjectId.isValid(userId)) {
-
         pollsToDelete.forEach(async (pollId) => {
             if (ObjectId.isValid(pollId)) {
                 await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
@@ -280,8 +273,15 @@ router.delete("/option", async (req, res) => {
     const {pollId, userId, options} = req.body;
 
     const optionsToDelete = options.split(".");
+    
+    for (let i = 0; i < optionsToDelete.length; i++) {
+        if (!ObjectId.isValid(optionsToDelete[i])) {
+            res.status(400).json("Invalid Option " + optionsToDelete[i]);
+            return;
+        }
+    }
 
-    if (optionsToDelete && ObjectId.isValid(pollId)  && ObjectId.isValid(userId)) {
+    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
         res.status(401).json("Error");
