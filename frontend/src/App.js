@@ -2,7 +2,7 @@ import "./index.css"
 import { useState, useEffect } from "react";
 import Poll from "./Poll"
 import Welcome from "./Welcome";
-import Alert from "./Alert";
+import Alert from "./misc/Alert";
 
 function App(props) {
 	const [poll, setPoll] = useState(null);

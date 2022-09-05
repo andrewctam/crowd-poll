@@ -79,9 +79,9 @@ function Option(props) {
         setSelected(!selected)   
         props.toggleSelected(props.optionId)
     }
-
-
     
+
+
     if (!props.approved)
         var color = "bg-red-200"
     else if (selected)
@@ -93,14 +93,14 @@ function Option(props) {
     else
         color = "bg-slate-300";
     
-    
     if (props.votes >= 0)
         var voteCount = (props.votes) + (props.votes === 1 ? " vote" : " votes");
     else
         voteCount = "Votes Hidden";
 
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
-    
+
+
     return ((props.approved) ? 
         <button onClick={castVote} onMouseEnter = {() => setShowBox(props.isOwner && true)} onMouseLeave = {() => setShowBox(false)} className={"w-5/6 mx-auto rounded-xl text-black border border-black mb-4 grid items-center " + color}>
             
@@ -122,18 +122,9 @@ function Option(props) {
         </button>
         :
         <div className={"border w-5/6 mx-auto rounded-xl border-black mb-3 grid items-center " + color}>
-            
-            <div className="text-lg p-3">
-                {props.optionTitle}
-            </div>
-            
-            <div className = "text-xl">
-                {"Pending Approval"}
-            </div>
-            
-            <div className = "text-sm mb-2">
-                {"(only you can see this option)"}
-            </div>
+            <div className="text-lg p-3"> {props.optionTitle} </div>
+            <div className = "text-xl"> {"Pending Approval"} </div>
+            <div className = "text-sm mb-2"> {"(only you can see this option)"} </div>
 
             <div>
                 <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black border-r border-r-black bg-emerald-200  w-1/2 px-3 py-2 rounded-l-lg">
@@ -144,8 +135,6 @@ function Option(props) {
                     {"Reject"}
                 </button>
             </div>
-    
-      
         </div>
     )
 
