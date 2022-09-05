@@ -1,20 +1,35 @@
 import { useRef, useState, useEffect } from 'react'
 import Option from "./Option"
+import Dropdown from "./Dropdown"
 
 function Poll(props) {
     const optionInput = useRef(null);
     const [showError, setShowError] = useState(false);
     const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
     const [selectedOptions, setSelectedOptions] = useState([]);
-    const [sortingMethod, setSortingMethod] = useState("orderCreated");
-    
+
+    const [sortingMethod, setSortingMethod] = useState("Order Created");
+    const [showSorting, setShowSorting] = useState(false);
+
+    const [filterMethod, setFilterMethod] = useState("All");
+    const [showFilter, setShowFilter] = useState(false);
+
     useEffect(() => {
-        if ((sortingMethod === "voteCount" && props.settings["hideVotes"]) && 
+        if ((sortingMethod === "Vote Count" && props.settings["hideVotes"]) && 
             (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
-                setSortingMethod("orderCreated");
+                setSortingMethod("Order Created");
         } 
     // eslint-disable-next-line
     }, [props.settings["hideVotes"], props.settings["hideVotesForOwner"], props.isOwner]);
+
+    useEffect(() => {
+        if (filterMethod === "Pending Approval" && !props.settings["approvalRequired"])
+            setFilterMethod("All")
+
+    // eslint-disable-next-line
+    }, [props.settings["approvalRequired"]]);
+
+
 
     const addOption = async (e) => {
         e.preventDefault();
@@ -83,11 +98,40 @@ function Poll(props) {
 
     
    
-    var sorted = [...props.options];
+    var displayedOptions = [...props.options];
+
+
+    switch(filterMethod) {
+        case "Voted For":
+            displayedOptions = displayedOptions.filter( (option) => { 
+                return votedFor.includes(option["_id"])
+            })
+            break;
+        case "Not Voted For":
+            displayedOptions = displayedOptions.filter( (option) => { 
+                return !votedFor.includes(option["_id"]) && option["approved"]
+            })
+            break;
+        case "Approved":
+            displayedOptions = displayedOptions.filter( (option) => { 
+                    return option["approved"]
+                })
+            break;
+        case "Pending Approval":
+            displayedOptions = displayedOptions.filter( (option) => { 
+                return !option["approved"]
+            })
+            break;
+        
+        case "All":
+        default:
+            break;   
+           
+    }
 
     switch(sortingMethod) {
-        case "alphabetically":
-            sorted = sorted.sort(  (a, b) => { 
+        case "Alphabetical Order":
+            displayedOptions = displayedOptions.sort(  (a, b) => { 
                 if (b["optionTitle"] > a["optionTitle"])
                     return -1;
                 else
@@ -95,16 +139,17 @@ function Poll(props) {
             } )
             break;
             
-        case "voteCount":
-            sorted = sorted.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
+        case "Vote Count":
+            displayedOptions = displayedOptions.sort(  (a, b) => { return b["votes"] - a["votes"]  } )
             break;
 
-        case "orderCreated": //already sorted in order created
+        case "Order Created": //already sorted in order created
         default:
             break;
     }
+
     
-    const options = sorted.map(obj =>
+    displayedOptions = displayedOptions.map(obj =>
         <Option
             key={obj["_id"]}
             pollId={props.pollId}
@@ -126,10 +171,10 @@ function Poll(props) {
             
             <div className="lg:h-screen flex flex-col">
                 <div className="py-10 bg-slate-700">
-                    <a href="." className="mx-auto text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
+                    <a href="." className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
                     
-                    <h1 className="text-xl pt-1 text-white select-none">Link to the poll:</h1>
-                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
+                    <h1 className="lg:text-xl pt-1 text-white select-none">Link to the poll:</h1>
+                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 md:w-1/2 w-3/4 rounded text-black lg:text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
 
                     
 
@@ -139,52 +184,40 @@ function Poll(props) {
                         
                         <p className='text-white mb-3'> {"(only you can edit these)"} </p>
 
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name = "disableVoting"
                             text ="Disable Voting"
                             indent = {false}
                             active= {props.settings["disableVoting"]} />
 
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name = "hideVotes"
                             text = "Hide Vote Count"
                             indent = {false}
                             active = {props.settings["hideVotes"]} />
 
                         {props.isOwner && props.settings["hideVotes"] ?
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name = "hideVotesForOwner"
                             text = "Hide Vote Count For You" 
                             indent = {true}
                             active = {props.settings["hideVotesForOwner"]} />
                         : null}
 
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name = "limitOneVote"
                             text = "Limit Users To One Vote" 
                             indent = {false}
                             active = {props.settings["limitOneVote"]} />
 
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name ="approvalRequired"
                             text= "New Options Require Approval" 
                             indent = {false}
                             active = {props.settings["approvalRequired"]} />
                         
                         {props.isOwner && props.settings["approvalRequired"] ?
-                        <SettingCheckBox
-                            pollId = {props.pollId}
-                            userId = {props.userId}
+                        <SettingCheckBox pollId = {props.pollId} userId = {props.userId}
                             name = "autoApproveOwner"
                             text = "Auto Approve Your Options" 
                             indent = {true}
@@ -192,7 +225,6 @@ function Poll(props) {
                         : null}
                         
 
-                        
                         <div className = "flex justify-between">
                             <label className = "px-1 mr-2 text-white" onClick = {deleteSelected}>
                                 {"Delete Selected Options"}
@@ -200,8 +232,6 @@ function Poll(props) {
                             
                             <button onClick = {deleteSelected} className = "bg-red-100 rounded border border-black h-fit self-center px-2 text-black text-xs">{selectedOptions.length}</button>
                         </div> 
-                        
-
                         
                     </div> 
                     :
@@ -235,10 +265,10 @@ function Poll(props) {
                     </div>
                     : null}
                     
-                    <div className='text-lg text-white mt-4'>
+                    <div className='text-sm lg:text-lg text-white mt-4'>
                         {"Click on an option to add or remove your vote"}
                     </div>
-                    <div className='text-lg text-white'>
+                    <div className='text-sm lg:text-lg text-white'>
                         {"You can " + (props.settings["approvalRequired"] ? "request to " : "") + "add more options using the input below"}
                     </div>
 
@@ -246,8 +276,8 @@ function Poll(props) {
 
                 <div className = "flex-grow bg-slate-600 p-10 flex items-center justify-center">
                     <form onSubmit={addOption} className = "w-full">
-                        <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Add Answer Option</h1>
-                        <input ref={optionInput}  className="h-10 md:w-1/2 w-3/4 rounded text-black text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..." />
+                        <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Add Answer Option</h1>
+                        <input ref={optionInput}  className="h-10 w-3/4 lg:w-1/2 rounded text-black lg:text-lg placeholder:text-black bg-slate-200 p-2 border border-black" placeholder="Enter an option..." />
                         <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                         {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
                     </form>
@@ -262,43 +292,95 @@ function Poll(props) {
             
                 <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white">{props.title}</div>                
 
-                {options.length === 0 ? 
-                    <p className='text-lg text-white'>
+                {props.options.length === 0 ? 
+                    <p className='text-md lg:text-lg text-white'>
                         {"No answer options yet, add one using the input!"}
                     </p> 
                     :
-                    <div className = "inline-block border border-white rounded-lg px-2 mx-2">
-                    
-                        <p className = "inline-block m-1 text-white font-semibold text-wrap-">Sort By: </p>
-                        <SortAnchor 
-                            name = {"Order Created"}
-                            id = "orderCreated"
-                            setSortingMethod = {setSortingMethod}
-                            selected = {sortingMethod === "orderCreated"}
-                            disabled = {false}
+                    <div>
+                        <Dropdown 
+                            name = "Sort By"
+                            show = {showSorting}
+                            setShow = {setShowSorting}
+                            selected = {sortingMethod}
 
+                            children = {[
+                                <SortFilterOption 
+                                name = {"Order Created"}
+                                setSortingMethod = {setSortingMethod}
+                                selected = {sortingMethod === "Order Created"}
+                                disabled = {false}
+                            />,
+
+                            <SortFilterOption 
+                                name = {"Vote Count"}
+                                setSortingMethod = {setSortingMethod}
+                                selected = {sortingMethod === "Vote Count"}
+                                disabled = {(props.settings["hideVotes"] && (!props.isOwner || (props.isOwner && (props.settings["hideVotesForOwner"]))))}
+
+                            />,
+
+                            <SortFilterOption 
+                                name = {"Alphabetical Order"} 
+                                setSortingMethod = {setSortingMethod}
+                                selected = {sortingMethod === "Alphabetical Order"}
+                                disabled = {false}
+                            />
+                            ]} 
                         />
-                        <SortAnchor 
-                            name = {"Vote Count"}
-                            id = "voteCount"
-                            setSortingMethod = {setSortingMethod}
-                            selected = {sortingMethod === "voteCount"}
-                            disabled = {(props.settings["hideVotes"] && (!props.isOwner || (props.isOwner && (props.settings["hideVotesForOwner"]))))}
+                               
+                        <Dropdown 
+                            name = "Filter By"
+                            show = {showFilter}
+                            setShow = {setShowFilter}
+                            selected = {filterMethod}
+                            children = {[
+                                <SortFilterOption
+                                    key = {"All"}
+                                    name = {"All"}
+                                    setSortingMethod = {setFilterMethod}
+                                    selected = {filterMethod === "All"}
+                                    disabled = {false}
+                                />,
 
+                                <SortFilterOption
+                                    key = {"Voted For"}
+                                    name = {"Voted For"}
+                                    setSortingMethod = {setFilterMethod}
+                                    selected = {filterMethod === "Voted For"}
+                                    disabled = {false}
+                                />,
+
+                                <SortFilterOption
+                                    key = {"Not Voted For"}
+                                    name = {"Not Voted For"}
+                                    setSortingMethod = {setFilterMethod}
+                                    selected = {filterMethod === "Not Voted For"}
+                                    disabled = {false}
+                                />,
+
+                                props.isOwner ? 
+                                <SortFilterOption
+                                    key = {"Approved"}
+                                    name = {"Approved"}
+                                    setSortingMethod = {setFilterMethod}
+                                    selected = {filterMethod === "Approved"}
+                                    disabled = {false}
+                                /> : null,
+
+                                props.isOwner ? 
+                                <SortFilterOption
+                                    key = {"Pending Approval"}
+                                    name = {"Pending Approval"}
+                                    setSortingMethod = {setFilterMethod}
+                                    selected = {filterMethod === "Pending Approval"}
+                                    disabled = {!props.settings["approvalRequired"]}
+                                /> : null]}
                         />
-                        <SortAnchor 
-                            name = {"Alphabetically"}
-                            id = "alphabetically"
-                            setSortingMethod = {setSortingMethod}
-                            selected = {sortingMethod === "alphabetically"}
-                            disabled = {false}
-                        />
+                    </div>}                
 
-                    </div>}
-                
-
-                <div className='mx-10 my-3'>
-                    {options}
+                <div className='mx-10 my-3 lg:h-fit h-screen'>
+                    {displayedOptions}
                 </div>
                 
             </div>
@@ -349,22 +431,24 @@ const SettingListDisplay = (props) => {
         return null;
 }
 
-const SortAnchor = (props) => {
+const SortFilterOption = (props) => {
 
-    const setSorting = () => {
-        props.setSortingMethod(props.id);
+    const setSorting = (e) => {
+        e.stopPropagation();
+        props.setSortingMethod(props.name);
     }
 
     if (props.disabled)
         return (<div 
-                className = {"inline-block m-2 text-gray-400"}>
+                className = {"block text-center w-full text-gray-400"}>
                 {props.name}
             </div>)
 
     return (<div 
         onClick = {setSorting} 
-        className = {"cursor-pointer inline-block m-2 " + (props.selected ? "text-sky-200 underline" : "text-white")}>
+        className = {"cursor-pointer block w-full text-center " + (props.selected ? "text-sky-400" : "text-white")}>
         {props.name}
+        
     </div>)
 
 }

@@ -34,8 +34,9 @@ function App(props) {
 					return;
 				else if (message) { //new id generated
 					storedUserId = message["_id"]
-					localStorage.setItem("userId", storedUserId)
+
 					console.log("NF. N " + storedUserId)
+					localStorage.setItem("userId", storedUserId)
 					localStorage.removeItem("created")
 				} else { //userFound
 					console.log("R " + storedUserId)
@@ -44,10 +45,10 @@ function App(props) {
 			} else {
 				const message = await fetch("https://crowdpoll.fly.dev/api/users/")
 					.then((response) => response.json())
-				localStorage.removeItem("created")
-
-				localStorage.setItem("userId", storedUserId)
 				storedUserId = message["_id"]
+					
+				localStorage.removeItem("created")
+				localStorage.setItem("userId", storedUserId)
 				console.log("N " + storedUserId)	
 			}
 

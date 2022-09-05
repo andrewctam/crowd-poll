@@ -122,12 +122,12 @@ function Welcome(props) {
         created = null;    
     
     return (
-        <div className="grid md:grid-cols-1 lg:grid-cols-2 items-center text-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center text-center">
 
             <div className="py-10 bg-slate-700 h-full grid items-center" >
                 <div>
-                    <a href="."><h1 className="mx-auto text-7xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
-                    <p className="text-xl pt-1 mt-2 text-gray-300 select-none">Share a poll with a title <br /> Crowd source answer options <br />Collectively vote on the best one</p>
+                    <a href="."><h1 className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
+                    <p className="text-sm lg:text-xl pt-1 mt-2 text-gray-300 select-none">Share a poll with a title <br /> Crowd source answer options <br />Collectively vote on the best one</p>
                 </div>
             </div>
          
@@ -135,9 +135,9 @@ function Welcome(props) {
 
             <div className="bg-stone-700 grid lg:h-screen items-center">
                 <form className="py-10" onSubmit={createPoll}>
-                    <h1 className="mx-auto text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
-                    <input ref={titleInput} className="h-10 mx-2 w-3/4 md:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
-                    <button type="submit" className="bg-black text-gray-200 border border-black p-2 rounded" >Create Poll</button>
+                    <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
+                    <input ref={titleInput} className="h-10 mx-2 w-3/4 lg:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
+                    <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
                     {showError ? <p className="m-1 text-red-200">Title can not be blank. Please enter a title.</p> : null}
                 </form>
 
@@ -145,28 +145,23 @@ function Welcome(props) {
                 {created ? 
                 <div className = "text-white w-full h-full bg-stone-600 grid items-center p-6">
                     <div>
-                        <p className = "text-2xl mb-1 select-none px-4">Your Created Polls</p>
-                        <ul className = "w-2/5 max-h-72 overflow-y-auto mx-auto border border-white rounded-lg p-3">
+                        <p className = "text-xl lg:text-2xl mb-1 select-none px-4">Your Created Polls</p>
+                        <ul className = "w-fit max-h-72 overflow-y-auto mx-auto border border-white rounded-lg p-3">
                             {created}
 
-                            <div className = "mt-3 flex justify-between">
+                            <div className = "mt-3 mb-1 w-full border-b border-b-white"></div>
+                            <div className = "flex justify-between">
                                 <label className = "text-white" onClick = {deletePolls}>
                                     {"Delete Selected Polls"}
                                 </label>
                                 
-                                <button onClick = {deletePolls} className = "bg-red-100 rounded border border-black px-2 text-black text-xs self-center">{selectedDelete.length}</button>
+                                <button onClick = {deletePolls} className = "bg-red-100 rounded border border-black ml-2 px-2 text-black text-xs self-center">{selectedDelete.length}</button>
                             </div>
-
                         </ul>
-
                     </div>
-                </div> : null}
-
-
-
+                </div> 
+                : null}
             </div>
-
-
         </div>
     );
 }
