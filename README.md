@@ -3,6 +3,8 @@
 ## Description
 [Crowd Poll](https://crowdpolls.web.app) is a full stack web app that allows users to generate a poll and crowd source answer options.
 
+![Owner View](ownerdemo.png)
+![User View](userdemo.png)
 
 ## Installation
 Clone this repository. In the backend folder, create a .env file with 2 variables, MONGO_URI and PORT. Assign them values, with MONGO_URI allowing you to connect to your MongoDB database and PORT being the default port.
