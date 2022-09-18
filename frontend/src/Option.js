@@ -83,7 +83,7 @@ function Option(props) {
 
 
     if (!props.approved)
-        var color = "bg-red-200"
+        var color = "bg-red-100"
     else if (selected)
         color = "bg-blue-200"
     else if (voting)
@@ -127,13 +127,13 @@ function Option(props) {
             <div className = "text-sm mb-2"> {"(only you can see this option)"} </div>
 
             <div>
-                <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black border-r border-r-black bg-emerald-200  w-1/2 px-3 py-2 rounded-l-lg">
-                    {"Approve"}
-                </button>   
-
-                <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black bg-red-300 w-1/2 px-3 py-2 rounded-r-lg">
+                <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black border-r border-r-black bg-red-300 w-1/2 px-3 py-2 rounded-l-lg">
                     {"Reject"}
                 </button>
+
+                <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black  bg-emerald-300  w-1/2 px-3 py-2 rounded-r-lg">
+                    {"Approve"}
+                </button>   
             </div>
         </div>
     )
