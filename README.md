@@ -7,6 +7,13 @@ Owner View                   |  User View
 :---------------------------:|:-------------------------:
 ![Owner View](ownerdemo.png) | ![User View](userdemo.png)
 
+## Technologies
+- [MongoDB](https://www.mongodb.com/try/download/community)
+- [Express](https://expressjs.com/en/starter/installing.html)
+- [Node.js](https://nodejs.org/en/download/)
+- [React](https://reactjs.org/docs/getting-started.html)
+- [Tailwind CSS](https://tailwindcss.com/docs/guides/create-react-app)
+
 ## Installation
 Clone this repository. In the backend folder, create a .env file with 2 variables, MONGO_URI and PORT. Assign them values, with MONGO_URI allowing you to connect to your MongoDB database and PORT being the default port.
 
