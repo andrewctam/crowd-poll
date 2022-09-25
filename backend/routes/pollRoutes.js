@@ -3,189 +3,6 @@ var ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("../models/pollModel")
 const router = express.Router();
 
-//hashmap where pollId -> res set. In the res set is all the res from SSE.
-var connected = new Map();
-
-router.get("/updates/:pollId&:userId", async (req, res) => {
-    console.log("User Connected")
-    res.writeHead(200, {
-        "Connection": "keep-alive",
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-      });
-      
-      const pollId = req.params.pollId
-      //const userId = req.params.userId => used in sendUpdates() for owner verification
-
-      if (!ObjectId.isValid(pollId)) {
-        res.status(400).json("Invalid ID")
-        return;
-      }
-
-      //see if the poll already has a set.
-      if (connected.get(pollId)) {
-          connected.get(pollId).add(res);
-        } else {
-            //create new set and add res.
-            const requests = new Set();
-            requests.add(res);
-            connected.set(pollId, requests);
-        } 
-        
-        
-        //send a ping every 40 seconds to avoid 55 second timeout 
-    const ping = setTimeout(() => {
-        res.write('event: update'); 
-        res.write("\n\n");   
-    }, 4000)
-
-    res.on('close', () => {
-        console.log('User Disconnected');
-        clearInterval(ping);
-        
-        if (connected.get(pollId).size === 1)
-            connected.delete(pollId)
-        else
-            connected.get(pollId).delete(res);
-
-        res.end();
-    });
-
-})
-
-
-const sendUpdates = async (pollId) => {
-    const requests = connected.get(pollId);
-    if (!requests) {
-        console.log("Error. Response not found");
-        return;
-    }
-
-
-    if (ObjectId.isValid(pollId)) {
-        var poll = await Poll.findOne({_id: pollId})
-        console.log("New Update for " + pollId)
-    } else {
-        return;
-    }
-
-    if (!poll)
-        return;
-
-    var ownerOptions = [...poll["options"]]
-    var options = [...poll["options"]]
-
-
-    if (poll['approvalRequired']) {
-        options = options.filter(element => element["approved"])
-    }
-
-    if (poll['hideVotes']) {
-        for (let i = 0; i < options.length; i++) 
-            options[i] =  {...options[i].toObject(), "votes" : -1}
-
-        if (poll["hideVotesForOwner"])  {
-            for (let i = 0; i < ownerOptions.length; i++) {
-                ownerOptions[i] = {...ownerOptions[i].toObject(), "votes" : -1}
-            }
-        }
-    }
-    
-    
-
-    requests.forEach(res => {
-        //shortcuts to true if approval is unnecessary
-        const isOwner = res.req.originalUrl.split("&")[1] === poll["owner"];
-        
-        res.write('event: update\n'); 
-        res.write(`data:${JSON.stringify({
-            options: isOwner ? ownerOptions : options,
-
-            settings: {
-                limitOneVote: poll["limitOneVote"],
-                approvalRequired: poll["approvalRequired"],
-                autoApproveOwner: poll["autoApproveOwner"],
-                hideVotes: poll["hideVotes"],
-                disableVoting: poll["disableVoting"],
-                hideVotesForOwner: poll["hideVotesForOwner"],
-            },
-        })}`)
-        res.write("\n\n");   
-    })
-}
-
-
-
-
-router.get("/:id&:user", async (req, res) => {
-    const pollId = req.params.id;
-    const userId = req.params.user;
-
-    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId)) {        
-        var poll = await Poll.findOne({_id: pollId})
-        
-        if (poll) {
-            //add votes object
-            if (!await Poll.exists({_id: pollId, "votes.userId": userId})) {
-                await Poll.updateOne({_id: pollId}, {
-                    $push: {
-                        "votes": {
-                            userId: userId,
-                            optionIds: []
-                        }
-                    }
-                });
-                var optionIds = []
-            } else {
-                const ids = poll["votes"]
-                optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
-            }
-
-
-            const isOwner = userId === poll["owner"]
-            var options = poll["options"]
-
-            if (isOwner) {
-                if (poll["hideVotes"] && poll["hideVotesForOwner"])
-                    options.forEach(option => option["votes"] = -1)
-
-            } else {
-                if (poll['approvalRequired'])
-                    options = options.filter(element => element["approved"])
-            
-                if (poll['hideVotes']) {
-                    options.forEach(option => option["votes"] = - 1)
-                }
-            }
-                
-            const msg = {
-                pollId: poll["_id"],
-                title: poll["title"],
-                options: options,
-                owner: isOwner,
-                settings: {
-                    limitOneVote: poll["limitOneVote"],
-                    approvalRequired: poll["approvalRequired"],
-                    autoApproveOwner: poll["autoApproveOwner"],
-                    hideVotes: poll["hideVotes"],
-                    disableVoting: poll["disableVoting"],
-                    hideVotesForOwner: poll["hideVotesForOwner"],
-                },
-                votedFor: optionIds
-            }
-
-            res.status(201).json(msg);
-        }  else {
-            res.status(400).json("Poll expired or Invalid ID.")
-            return;
-        }
-    } else {
-        console.log(pollId + " is not valid")
-        res.status(400).json("Poll expired or Invalid ID.")
-        return;
-    }
-
-});
 
 router.post("/create", async (req, res) => {
     const {title, ownerId} = req.body;
@@ -205,7 +22,6 @@ router.post("/create", async (req, res) => {
     }
 
 })
-
 
 router.delete("/delete", async (req, res) => {
     const {pollIds, userId} = req.body;
@@ -237,8 +53,6 @@ router.delete("/delete", async (req, res) => {
     }
 
 })
-
-
 
 
 router.post("/option", async (req, res) => {
@@ -302,7 +116,6 @@ router.delete("/option", async (req, res) => {
 
 })
 
-
 router.put("/option", async (req, res) => {
     const {pollId, optionId, approved, userId} = req.body;
 
@@ -333,8 +146,6 @@ router.put("/option", async (req, res) => {
     }
 
 })
-
-
 
 router.put("/vote", async (req, res) => {
     const {pollId, optionId, userId} = req.body;
@@ -399,7 +210,6 @@ router.put("/vote", async (req, res) => {
     
 
 })
-
 
 router.put("/setting", async (req, res) => {
     const {pollId, userId, setting, newValue} = req.body;
