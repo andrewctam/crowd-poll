@@ -8,7 +8,7 @@ const SettingCheckBox = (props) => {
     }, [props.active])
 
     const handleChange = async (e) => {
-        const url = "https://crowdpoll.fly.dev/api/polls/setting"
+        const url = "http://localhost:5001/api/polls/setting"
         setClientActive(!clientActive);
 
         await fetch(url, {

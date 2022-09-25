@@ -17,7 +17,7 @@ function App(props) {
 		var storedUserId = localStorage.getItem("userId")
 		if (storedUserId) {
 			//verify that the user id is in the database
-			const message = await fetch(`https://crowdpoll.fly.dev/api/users/${storedUserId}`)
+			const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
 				.then((response) => {
 					if (response.status === 404)
 						return response.json();
@@ -43,7 +43,7 @@ function App(props) {
 			}
 
 		} else {
-			const message = await fetch("https://crowdpoll.fly.dev/api/users/")
+			const message = await fetch("http://localhost:5001/api/users/")
 				.then((response) => response.json())
 			storedUserId = message["_id"]
 				
@@ -80,6 +80,7 @@ function App(props) {
 		}
 
 		const client = new W3CWebSocket(`ws://localhost:5001?poll=${pollId}&user=${userId}`);
+
 		client.onopen = () => {
 			console.log("Successfully Connected")
 		}
@@ -106,24 +107,35 @@ function App(props) {
 						verifyId();
 						break;
 
-					default: break;
+					default: 
+						console.log(data["error"])
+						break;
 				}
-
 				return;
 			}
-	
-			setPoll(<Poll pollId={data["pollId"]}
-				title={data["title"]}
-				options={data["options"]}
-				settings = {data["settings"]}
-				isOwner = {data["owner"]}
-				defaultVotedFor = {data["votedFor"]}
-				userId = {userId}
-			/>)
+
+			if (data["update"]) {
+				//update poll with data from server
+				setPoll(<Poll pollId={data["pollId"]}
+								title={data["title"]}
+								options={data["options"]}
+								settings = {data["settings"]}
+								isOwner = {data["owner"]}
+								votedFor = {data["votedFor"]}
+								userId = {userId}
+								ws = {client}
+							/>)
+			} 
 			
 		}
 		
+		document.addEventListener("beforeunload", () => {
+			client.send(JSON.stringify({"type" : "Disconnect"}))
+		})
 
+		setInterval(() => {
+			client.send(JSON.stringify({"type" : "ping"}))
+		}, 5000)
 
 		setLoaded(true)
 	}

@@ -8,7 +8,6 @@ import DropdownOption from './misc/DropdownOption';
 function Poll(props) {
     const optionInput = useRef(null);
     const [showError, setShowError] = useState(false);
-    const [votedFor, setVotedFor] = useState(props.defaultVotedFor);
     const [selectedOptions, setSelectedOptions] = useState([]);
 
     const [sortingMethod, setSortingMethod] = useState("Order Created");
@@ -36,7 +35,7 @@ function Poll(props) {
 
     const addOption = async (e) => {
         e.preventDefault();
-        const url = "https://crowdpoll.fly.dev/api/polls/option"
+       
         const optionTitle = optionInput.current.value
 
         if (optionTitle === "") {
@@ -46,18 +45,13 @@ function Poll(props) {
             setShowError(false);
         }
         
+        props.ws.send(JSON.stringify({
+            "type": "addOption",
+            "pollId": props.pollId,
+            "userId": props.userId,
+            "optionTitle": optionTitle
+        }));
 
-        await fetch(url, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                optionTitle: optionTitle, 
-                pollId: props.pollId, 
-                userId: props.userId
-            })
-        })
 
         optionInput.current.value = "";
     }
@@ -78,40 +72,29 @@ function Poll(props) {
     const deleteSelected = async (e) => {
         if (selectedOptions.length === 0)
             return;
-            
-        const url = "https://crowdpoll.fly.dev/api/polls/option"
-        await fetch(url, {
-            method: "delete",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                pollId: props.pollId, 
-                userId: props.userId, 
-                options: selectedOptions.join(".")
-            })
-        }).then( response => { 
-            if (response.status === 401)
-                alert("Error. Permission Denied!")
-        })
+
+        props.ws.send(JSON.stringify({
+            "type": "deleteOptions",
+            "userId": props.userId,
+            "pollId": props.pollId,
+            "options": selectedOptions
+        }));
 
         setSelectedOptions([]);
-
     }
 
     
-   
     var displayedOptions = [...props.options];
 
     switch(filterMethod) {
         case "Voted For":
             displayedOptions = displayedOptions.filter( (option) => { 
-                return votedFor.includes(option["_id"])
+                return props.votedFor.includes(option["_id"])
             })
             break;
         case "Not Voted For":
             displayedOptions = displayedOptions.filter( (option) => { 
-                return !votedFor.includes(option["_id"]) && option["approved"]
+                return !props.votedFor.includes(option["_id"]) && option["approved"]
             })
             break;
         case "Approved":
@@ -150,27 +133,7 @@ function Poll(props) {
             break;
     }
 
-    
-    displayedOptions = displayedOptions.map(obj =>
-        <Option
-            userId={props.userId}
-            pollId={props.pollId}
-            isOwner = {props.isOwner}
-
-            votes={obj["votes"]}
-            optionTitle={obj["optionTitle"]}
-            optionId={obj["_id"]}
-            key={obj["_id"]}
-            
-            voted = {votedFor.includes(obj["_id"])}
-            setVotedFor = {setVotedFor}
-
-            approved = {!props.settings["approvalRequired"] || obj["approved"]}
-            toggleSelected = {toggleSelected}
-            disableVoting = {props.settings["disableVoting"]}
-         />);
-
-    
+        
 
     //what to display for settings. Owner sees box to change settings. Other users see which settings, null if none, a box if at least 1 setting
     if (props.isOwner) {
@@ -270,11 +233,11 @@ function Poll(props) {
                             selected = {sortingMethod}
 
                             children = {[
-                                <DropdownOption name = {"Order Created"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Order Created"} disabled = {false} />,
-                                <DropdownOption name = {"Vote Count"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Vote Count"} 
+                                <DropdownOption key = {"Order Created"} name = {"Order Created"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Order Created"} disabled = {false} />,
+                                <DropdownOption key = {"Vote Count"} name = {"Vote Count"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Vote Count"} 
                                     disabled = {(props.settings["hideVotes"] && (!props.isOwner || (props.isOwner && (props.settings["hideVotesForOwner"]))))}/>,
                                     
-                                <DropdownOption name = {"Alphabetical Order"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Alphabetical Order"} disabled = {false}/>
+                                <DropdownOption key = {"Alphabetical Order"} name = {"Alphabetical Order"} setSortingMethod = {setSortingMethod} selected = {sortingMethod === "Alphabetical Order"} disabled = {false}/>
                             ]} 
                         />
                                
@@ -301,7 +264,28 @@ function Poll(props) {
                     </div>}                
 
                 <div className='mx-10 my-3 lg:h-fit h-screen'>
-                    {displayedOptions}
+                    {displayedOptions.map(obj =>
+                    <Option
+                            userId={props.userId}
+                            pollId={props.pollId}
+                            isOwner = {props.isOwner}
+
+                            ws = {props.ws}
+
+                            votes={obj["votes"]}
+                            optionTitle={obj["optionTitle"]}
+                            optionId={obj["_id"]}
+                            key={obj["_id"]}
+                            
+                            voted = {props.votedFor.includes(obj["_id"])}
+                            votedFor = {props.votedFor}
+                            
+
+                            approved = {!props.settings["approvalRequired"] || obj["approved"]}
+                            toggleSelected = {toggleSelected}
+                            disableVoting = {props.settings["disableVoting"]}
+                        />)
+                    }
                 </div>
                 
             </div>
