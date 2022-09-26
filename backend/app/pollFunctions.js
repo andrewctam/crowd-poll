@@ -35,11 +35,15 @@ const getPoll = async (userId, pollId) => {
         return JSON.stringify({"error": "Poll expired or Invalid ID."})
     }
 
-    //get the options that the user has voted for
-    if (await Poll.exists({_id: pollId, "votes.userId": userId})) {
+    //check if the user voted before
+    //votes = [ {userId: [optionIds] } ]
+
+    if (await Poll.exists({_id: pollId, "votes.userId": userId})) { //check if the poll has an array of votedFor for the user
         const ids = poll["votes"]
-        optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
-    } else { //user has no votes yet
+
+        //find the user's ids and get the options they voted for
+        var optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+    } else { //user has never voted before, create new array
         await Poll.updateOne({_id: pollId}, {
             $push: {
                 "votes": {
@@ -48,7 +52,7 @@ const getPoll = async (userId, pollId) => {
                 }
             }
         });
-        var optionIds = []
+        optionIds = []
     }
 
 
@@ -68,7 +72,7 @@ const getPoll = async (userId, pollId) => {
         }
     }
         
-    const msg = {
+    return JSON.stringify({
         update: "true",
         pollId: poll["_id"],
         title: poll["title"],
@@ -83,16 +87,14 @@ const getPoll = async (userId, pollId) => {
             hideVotesForOwner: poll["hideVotesForOwner"],
         },
         votedFor: optionIds
-    }
+    })
 
-    return JSON.stringify(msg)
 }
 
 const addOption = async (userId, pollId, optionTitle) => {
     if (optionTitle && await checkPollId(pollId) && await checkUserId(userId)) 
         var poll = await Poll.findOne({_id: pollId})
     else {
-        console.log(optionTitle + " " + pollId + " " + userId)
         return JSON.stringify({"error" : "Invalid Inputs"})
     }
     
@@ -105,7 +107,8 @@ const addOption = async (userId, pollId, optionTitle) => {
             options: {
                 optionTitle: optionTitle, 
                 votes: 0,
-                approved: !poll["approvalRequired"] || (poll["autoApproveOwner"] && userId === poll["owner"]) },
+                approved: !poll["approvalRequired"] || (poll["autoApproveOwner"] && userId === poll["owner"]) 
+            },
         },
     });
     
@@ -127,7 +130,7 @@ const deleteOptions = async (userId, pollId, optionsToDelete) => {
 
 
     if (poll && poll["owner"] === userId) {
-        const result = await Poll.updateMany({_id: pollId}, {
+        await Poll.updateMany({_id: pollId}, {
             $pull: {
                options: {_id: {$in: optionsToDelete}},
             },
@@ -182,8 +185,7 @@ const vote = async (userId, pollId, optionId) => {
     const ids = poll["votes"]
     
     try {
-        var optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
-        var optionIdLocation = optionIds.findIndex(element => element === optionId)
+        var optionIds = ids.find(option => option["userId"] === userId)["optionIds"] //get array of optionIds user has voted for
     } catch (error) {
         return JSON.stringify({"error": "Invalid ID"})
     }
@@ -194,28 +196,26 @@ const vote = async (userId, pollId, optionId) => {
         } else {
             //    votes: [{userId: String, optionIds: [String]}],
             await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
-                $push: {
+                $push: { //add vote
                     "votes.$.optionIds": optionId
                 }
             });
-            var change = 1;
-            optionIds.push(optionId)
+            var change = 1; //num to change vote count by
         }
     } else { //vote found, remove it
         await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
-            $pull: {
+            $pull: { //remove vote
                 "votes.$.optionIds": optionId
             }
         });
         change = -1;
-        optionIds.splice(optionIdLocation, 1)
     }
 
 
     //    options: [{ optionTitle: String, votes: Number}],
     await Poll.updateOne({_id: pollId, "options._id": optionId}, {
         $inc: {
-            "options.$.votes": change
+            "options.$.votes": change //update vote count
         },
     });
     
@@ -255,12 +255,12 @@ const updateSetting = async (userId, pollId, setting, newValue) => {
             update = {autoApproveOwner: newValue};
             break;
         default:
-            return JSON.stringify({"error" : "Invalid Setting:" + setting})
+            return JSON.stringify({"error" : "Invalid Setting: " + setting})
     }
 
-    const result = await Poll.updateOne({_id: pollId}, update);
-    sendUpdatedPoll(pollId)
+    await Poll.updateOne({_id: pollId}, update);
 
+    sendUpdatedPoll(pollId)
     return JSON.stringify({"success": setting + " Updated"})
 }
 
