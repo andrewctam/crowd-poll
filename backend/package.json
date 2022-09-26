@@ -2,7 +2,7 @@
   "name": "crowdpoll",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app/server.js",
   "scripts": {
     "server": "nodemon server.js",
     "start": "nodemon server.js"

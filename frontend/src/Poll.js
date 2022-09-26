@@ -57,7 +57,6 @@ function Poll(props) {
     }
 
     const toggleSelected = (optionId) => {
-        
         for (let i = 0 ; i < selectedOptions.length; i++)
             if (selectedOptions[i] === optionId) {
                 const temp = [...selectedOptions];
@@ -77,7 +76,7 @@ function Poll(props) {
             "type": "deleteOptions",
             "userId": props.userId,
             "pollId": props.pollId,
-            "options": selectedOptions
+            "optionsToDelete": selectedOptions.join(".")
         }));
 
         setSelectedOptions([]);
@@ -142,20 +141,20 @@ function Poll(props) {
                 <h1 className='text-white text-2xl mt-1 font-semibold'>Settings</h1>
                 <p className='text-white mb-3'> {"(only you can edit these)"} </p>
 
-                <SettingCheckBox text = "Disable Voting" name = "disableVoting" indent = {false} pollId = {props.pollId} userId = {props.userId} active= {props.settings["disableVoting"]} />
+                <SettingCheckBox ws = {props.ws} text = "Disable Voting" name = "disableVoting" indent = {false} pollId = {props.pollId} userId = {props.userId} active= {props.settings["disableVoting"]} />
 
-                <SettingCheckBox text = "Hide Vote Count" name = "hideVotes" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["hideVotes"]} />
+                <SettingCheckBox ws = {props.ws} text = "Hide Vote Count" name = "hideVotes" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["hideVotes"]} />
 
                 {props.isOwner && props.settings["hideVotes"] ?
-                <SettingCheckBox text = "Hide Vote Count For You" name = "hideVotesForOwner" indent = {true} pollId = {props.pollId} userId = {props.userId} active = {props.settings["hideVotesForOwner"]} />
+                <SettingCheckBox ws = {props.ws} text = "Hide Vote Count For You" name = "hideVotesForOwner" indent = {true} pollId = {props.pollId} userId = {props.userId} active = {props.settings["hideVotesForOwner"]} />
                 : null}
 
-                <SettingCheckBox text = "Limit Users To One Vote" name = "limitOneVote" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["limitOneVote"]} />
-
-                <SettingCheckBox text= "New Options Require Approval" name = "approvalRequired" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["approvalRequired"]} />
+                <SettingCheckBox ws = {props.ws} text = "Limit Users To One Vote" name = "limitOneVote" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["limitOneVote"]} />
+ 
+                <SettingCheckBox  ws = {props.ws}text= "New Options Require Approval" name = "approvalRequired" indent = {false} pollId = {props.pollId} userId = {props.userId} active = {props.settings["approvalRequired"]} />
                 
                 {props.isOwner && props.settings["approvalRequired"] ?
-                <SettingCheckBox text = "Auto Approve Your Options" name = "autoApproveOwner" indent = {true} pollId = {props.pollId} userId = {props.userId} active = {props.settings["autoApproveOwner"]} />   
+                <SettingCheckBox ws = {props.ws} text = "Auto Approve Your Options" name = "autoApproveOwner" indent = {true} pollId = {props.pollId} userId = {props.userId} active = {props.settings["autoApproveOwner"]} />   
                 : null}
                 
 

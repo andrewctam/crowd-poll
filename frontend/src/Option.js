@@ -18,7 +18,7 @@ function Option(props) {
             return;
         }
 
-        if (!voting) {
+        if (!voting) { //if not waiting for the result of this vote
             setVoting(true);
 
             await props.ws.send(JSON.stringify({
@@ -28,7 +28,7 @@ function Option(props) {
                 userId: props.userId
             }));
 
-        } else {
+        } else { //currently waiting for the result of this vote
             console.log("Wait for vote to finish")
         }
 
@@ -40,7 +40,7 @@ function Option(props) {
             pollId: props.pollId,
             optionId: props.optionId,
             userId: props.userId,
-            approve: approved
+            approved: approved
         }));
     }
 
@@ -81,7 +81,6 @@ function Option(props) {
                 : null}
 
             </div>
-
 
             <div className="grid-row bg-slate-300/75 border-t border-t-black w-full px-3 py-2 rounded-xl">
                 {voteCount}

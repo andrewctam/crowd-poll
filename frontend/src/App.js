@@ -11,26 +11,24 @@ function App(props) {
 
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
-	const [loaded, setLoaded] = useState(false)
 
 	const verifyId = async () => {
 		var storedUserId = localStorage.getItem("userId")
 		if (storedUserId) {
 			//verify that the user id is in the database
-			const message = await fetch(`http://localhost:5001/api/users/${storedUserId}`)
+			const message = await fetch(`https://crowdpoll.fly.dev/api/users/${storedUserId}`)
 				.then((response) => {
 					if (response.status === 404)
 						return response.json();
-
 					else
 						return null; //null means found
-				}).catch( (error) => {
-					setAlert(<Alert timeout = {100000} title = {"Connection Error"} message = {"Failed to connect to server. Please try again in a moment"} setAlert = {setAlert}/>)
+				}).catch((error) => {
+					setAlert(<Alert timeout={10000} title={"Connection Error"} message={"Failed to connect to server. Please try again in a moment"} setAlert={setAlert} />)
 					console.log(error)
 					return -1;
 				});
-				
-			if (message === -1) 
+
+			if (message === -1)
 				return;
 			else if (message) { //new id generated
 				storedUserId = message["_id"]
@@ -43,13 +41,13 @@ function App(props) {
 			}
 
 		} else {
-			const message = await fetch("http://localhost:5001/api/users/")
+			const message = await fetch("https://crowdpoll.fly.dev/api/users/")
 				.then((response) => response.json())
 			storedUserId = message["_id"]
-				
+
 			localStorage.removeItem("created")
 			localStorage.setItem("userId", storedUserId)
-			console.log("N " + storedUserId)	
+			console.log("N " + storedUserId)
 		}
 
 		setUserId(storedUserId);
@@ -61,32 +59,29 @@ function App(props) {
 		const idParam = new URLSearchParams(window.location.search).get("poll")
 		if (idParam)
 			setPollId(idParam);
-		else
-			setLoaded(true);
 
 	}, [])
 
 	useEffect(() => {
 		if (pollId && userId)
 			getPoll()
-		
-	// eslint-disable-next-line
+
+		// eslint-disable-next-line
 	}, [pollId, userId])
 
 	const getPoll = async () => {
 		if (!pollId) {
-			setLoaded(true)
 			return;
 		}
 
-		const client = new W3CWebSocket(`ws://localhost:5001?poll=${pollId}&user=${userId}`);
+		const client = new W3CWebSocket(`wss://crowdpoll.fly.dev?poll=${pollId}&user=${userId}`);
 
 		client.onopen = () => {
 			console.log("Successfully Connected")
 		}
 
 		client.onerror = (error) => {
-			setAlert(<Alert timeout = {10000} title = {"Error connecting to server"} message = {"Please try again in a moment"} setAlert = {setAlert}/>)
+			setAlert(<Alert timeout={10000} title={"Error connecting to server"} message={"Please try again in a moment"} setAlert={setAlert} />)
 			console.log(error)
 		}
 
@@ -95,19 +90,21 @@ function App(props) {
 			console.log(data)
 
 			if (data["error"]) {
-				switch(data["error"]) {
+				switch (data["error"]) {
 					case "Invalid Poll ID":
-						setAlert(<Alert timeout = {10000} title = {"Error"} message = {"Poll Deleted or Does Not Exist"} setAlert = {setAlert}/>)
+						setAlert(<Alert timeout={10000} title={"Error"} message={"Poll Deleted or Does Not Exist"} setAlert={setAlert} />)
 						setPollId(null)
-						setLoaded(true);
 						break;
 
 					case "Invalid User ID":
-						setAlert(<Alert timeout = {10000} title = {"Error"} message = {"UserID Invalid"} setAlert = {setAlert}/>)
+						setAlert(<Alert timeout={10000} title={"Error"} message={"User ID Invalid"} setAlert={setAlert} />)
 						verifyId();
 						break;
+					case "Permission Denied":
+						setAlert(<Alert timeout={10000} title={"Not Owner"} message={"Permission Denied"} setAlert={setAlert} />)
+						break;
 
-					default: 
+					default:
 						console.log(data["error"])
 						break;
 				}
@@ -116,38 +113,40 @@ function App(props) {
 
 			if (data["update"]) {
 				//update poll with data from server
-				setPoll(<Poll pollId={data["pollId"]}
-								title={data["title"]}
-								options={data["options"]}
-								settings = {data["settings"]}
-								isOwner = {data["owner"]}
-								votedFor = {data["votedFor"]}
-								userId = {userId}
-								ws = {client}
-							/>)
-			} 
-			
-		}
-		
-		document.addEventListener("beforeunload", () => {
-			client.send(JSON.stringify({"type" : "Disconnect"}))
-		})
+				setPoll(
+					<Poll pollId={data["pollId"]}
+						title={data["title"]}
+						options={data["options"]}
+						settings={data["settings"]}
+						isOwner={data["owner"]}
+						votedFor={data["votedFor"]}
+						userId={userId}
+						ws={client}
+					/>)
+			}
 
-		setInterval(() => {
-			client.send(JSON.stringify({"type" : "ping"}))
+		}
+
+		//ping server every 5 seconds to avoid being removed from ws connections
+		const ping = setInterval(() => {
+			client.send(JSON.stringify({ "type": "ping" }))
+
+			if (client.readyState === client.CLOSED) {
+				clearInterval(ping)
+				setAlert(<Alert timeout={5000} title={"Error"} message={"Connection to server lost"} setAlert={setAlert} />)
+				setPoll(null)
+			}
+
 		}, 5000)
 
-		setLoaded(true)
 	}
 
 
-	return(
-	loaded ? 
-	<> 
-		{alert}
-		{poll ? poll : <Welcome setPollId={setPollId} userId = {userId}/>}
-	</>	
-	: null)
+	return (
+		<>
+			{alert}
+			{poll ? poll : <Welcome setPollId={setPollId} userId={userId} />}
+		</>)
 
 }
 

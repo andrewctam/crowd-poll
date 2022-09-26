@@ -1,7 +1,8 @@
 var ObjectId = require('mongoose').Types.ObjectId;
-const Poll = require("../models/pollModel")
+const Poll = require("./models/pollModel")
+const User = require("./models/userModel")
 
-const wsConnections = require("../server")
+const wsConnections = require("./server")
 
 const sendUpdatedPoll = async (pollId) => {
     console.log(wsConnections)
@@ -12,22 +13,33 @@ const sendUpdatedPoll = async (pollId) => {
     });
 }
 
+const checkIds = async (userId, pollId) => {
+    return ObjectId.isValid(userId) && 
+            ObjectId.isValid(pollId) &&
+            await Poll.exists({_id: pollId}) &&
+            await User.exists({_id: userId})
+
+}
+
 const getPoll = async (userId, pollId) => {
     if (!ObjectId.isValid(pollId)) {
-        return JSON.stringify({error: "Invalid Poll ID"})
+        return JSON.stringify({"error": "Invalid Poll ID"})
     }
 
     if (!ObjectId.isValid(userId)) {
-        return JSON.stringify({error: "Invalid User ID"})
+        return JSON.stringify({"error": "Invalid User ID"})
     }
 
     var poll = await Poll.findOne({_id: pollId})    
     if (!poll) {
-        return JSON.stringify({error: "Poll expired or Invalid ID."})
+        return JSON.stringify({"error": "Poll expired or Invalid ID."})
     }
 
-    //add votes object
-    if (!await Poll.exists({_id: pollId, "votes.userId": userId})) {
+    //get the options that the user has voted for
+    if (await Poll.exists({_id: pollId, "votes.userId": userId})) {
+        const ids = poll["votes"]
+        optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+    } else { //user has no votes yet
         await Poll.updateOne({_id: pollId}, {
             $push: {
                 "votes": {
@@ -37,9 +49,6 @@ const getPoll = async (userId, pollId) => {
             }
         });
         var optionIds = []
-    } else {
-        const ids = poll["votes"]
-        optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
     }
 
 
@@ -91,7 +100,7 @@ const addOption = async (userId, pollId, optionTitle) => {
         return JSON.stringify({"error" : "Poll Invalid"})
     }
 
-    const result = await Poll.updateOne({_id: pollId}, {
+    await Poll.updateOne({_id: pollId}, {
         $push: {
             options: {
                 optionTitle: optionTitle, 
@@ -101,10 +110,10 @@ const addOption = async (userId, pollId, optionTitle) => {
     });
     
     sendUpdatedPoll(pollId);
-    return JSON.stringify(result)
+    return JSON.stringify({"success": "Option Added"})
 }
 
-const deleteOption = async (userId, pollId, optionsToDelete) => {
+const deleteOptions = async (userId, pollId, optionsToDelete) => {
     for (let i = 0; i < optionsToDelete.length; i++) {
         if (!ObjectId.isValid(optionsToDelete[i]))
             return JSON.stringify({"error" : "Invalid: " + optionsToDelete[i]})
@@ -124,7 +133,7 @@ const deleteOption = async (userId, pollId, optionsToDelete) => {
             },
         });
         sendUpdatedPoll(pollId);
-        return JSON.stringify(result)
+        return JSON.stringify({"success": "Options Deleted"})
     } else {
         return JSON.stringify({"error": "Permission Denied"})
     }
@@ -152,7 +161,7 @@ const approveDenyOption = async (userId, pollId, optionId, approved) => {
         }
         
         sendUpdatedPoll(pollId);
-        return JSON.stringify({"success": "Request Processed"})
+        return JSON.stringify({"success": "Option has been " + (approved ? "approved" : "denied")})
     } else {
         return JSON.stringify({"error": "Permission Denied"})
     }
@@ -204,16 +213,14 @@ const vote = async (userId, pollId, optionId) => {
 
 
     //    options: [{ optionTitle: String, votes: Number}],
-    await Poll.updateOne({_id: pollId, "options._id": optionId}, {
+    const result = await Poll.updateOne({_id: pollId, "options._id": optionId}, {
         $inc: {
             "options.$.votes": change
         },
     });
     
     sendUpdatedPoll(pollId)
-    return JSON.stringify({
-        "votedFor" : optionIds
-    });
+    return JSON.stringify({"success": "Vote Acknowledged"})
     
 }
 
@@ -248,15 +255,13 @@ const updateSetting = async (userId, pollId, setting, newValue) => {
             update = {autoApproveOwner: newValue};
             break;
         default:
-            return JSON.stringify({"error" : "Invalid Setting"})
+            return JSON.stringify({"error" : "Invalid Setting:" + setting})
     }
 
     const result = await Poll.updateOne({_id: pollId}, update);
     sendUpdatedPoll(pollId)
 
-    return JSON.stringify(result)
+    return JSON.stringify({"success": setting + " Updated"})
 }
 
-
-
-module.exports = {getPoll, addOption, sendUpdatedPoll, deleteOption, approveDenyOption, vote, updateSetting}
+module.exports = {getPoll, addOption, sendUpdatedPoll, deleteOptions, approveDenyOption, vote, updateSetting}

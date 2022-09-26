@@ -27,7 +27,7 @@ function Welcome(props) {
             return;
         }
         
-        const url = "http://localhost:5001/api/polls/create"
+        const url = "https://crowdpoll.fly.dev/api/polls/create"
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -75,7 +75,7 @@ function Welcome(props) {
         const pollIds = selectedDelete.join(".");
         setAllSelected(false);
         if (pollIds) {
-            const url = "http://localhost:5001/api/polls/delete"
+            const url = "https://crowdpoll.fly.dev/api/polls/delete"
 
             await fetch(url, {
                 method: "DELETE",

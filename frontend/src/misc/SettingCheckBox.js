@@ -1,28 +1,23 @@
 import {useState, useEffect} from 'react';
 
 const SettingCheckBox = (props) => {
-    const [clientActive, setClientActive] = useState(props.active);
+    const [clientActive, setClientActive] = useState(props.active); //allows settings to be responsive even if there is server delay
 
     useEffect(() => {
         setClientActive(props.active);
     }, [props.active])
 
-    const handleChange = async (e) => {
-        const url = "http://localhost:5001/api/polls/setting"
+    const handleChange = async (e) => {        
         setClientActive(!clientActive);
 
-        await fetch(url, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                pollId: props.pollId,
-                userId: props.userId,
-                setting: props.name,
-                newValue: e.target.checked
-            })
-        })
+        props.ws.send(JSON.stringify({
+            type: "updateSetting",
+            pollId: props.pollId,
+            userId: props.userId,
+            setting: props.name,
+            newValue: e.target.checked
+        }));
+
 
     }
 
