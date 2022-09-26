@@ -26,8 +26,7 @@ function Welcome(props) {
             setShowError(true);
             return;
         }
-        
-        const url = "https://crowdpoll.fly.dev/api/polls/create"
+        const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/polls/create`
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -75,8 +74,7 @@ function Welcome(props) {
         const pollIds = selectedDelete.join(".");
         setAllSelected(false);
         if (pollIds) {
-            const url = "https://crowdpoll.fly.dev/api/polls/delete"
-
+            const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/polls/delete`
             await fetch(url, {
                 method: "DELETE",
                 headers: {

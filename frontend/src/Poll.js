@@ -265,25 +265,26 @@ function Poll(props) {
                 <div className='mx-10 my-3 lg:h-fit h-screen'>
                     {displayedOptions.map(obj =>
                     <Option
-                            userId={props.userId}
-                            pollId={props.pollId}
-                            isOwner = {props.isOwner}
+                        userId={props.userId}
+                        pollId={props.pollId}
+                        isOwner = {props.isOwner}
 
-                            ws = {props.ws}
+                        ws = {props.ws}
 
-                            votes={obj["votes"]}
-                            optionTitle={obj["optionTitle"]}
-                            optionId={obj["_id"]}
-                            key={obj["_id"]}
-                            
-                            voted = {props.votedFor.includes(obj["_id"])}
-                            votedFor = {props.votedFor}
-                            
+                        votes={obj["votes"]}
+                        optionTitle={obj["optionTitle"]}
+                        optionId={obj["_id"]}
+                        key={obj["_id"]}
+                        
+                        voted = {props.votedFor.includes(obj["_id"])}
+                        votedFor = {props.votedFor}
+                        
 
-                            approved = {!props.settings["approvalRequired"] || obj["approved"]}
-                            toggleSelected = {toggleSelected}
-                            disableVoting = {props.settings["disableVoting"]}
-                        />)
+                        approved = {!props.settings["approvalRequired"] || obj["approved"]}
+                        toggleSelected = {toggleSelected}
+                        disableVoting = {props.settings["disableVoting"]}
+                        limitOneVote = {props.settings["limitOneVote"]}
+                    />)
                     }
                 </div>
                 

@@ -33,17 +33,18 @@ router.delete("/delete", async (req, res) => {
         pollsToDelete.forEach(async (pollId) => {
             if (ObjectId.isValid(pollId)) {
                 await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+                
+                const connectedUsers = wsConnections.get(pollId)
+                if (connectedUsers) {
+                    connectedUsers.forEach((user) => {
+                        user.ws.send(JSON.stringify({"error": "Poll Deleted"}))
+                        user.ws.close()
+                    })
 
-                /*
-                const requests = connected.get(pollId);
-                if (!requests) {
-                    console.log("Error. Response not found");
-                    return;
+                    wsConnections.delete(pollId)
                 }
-            
-                requests.forEach(res => { 
-                    res.write('event: update\ndata:DELETE\n\n'); 
-                })*/
+
+             
             } else {
                 console.log(pollId + " is not valid");
             }

@@ -10,19 +10,16 @@ Owner View                   |  User View
 ## Technologies
 - [MongoDB](https://www.mongodb.com/try/download/community)
 - [Express](https://expressjs.com/en/starter/installing.html)
+- [WebSockets](https://www.npmjs.com/package/ws
 - [Node.js](https://nodejs.org/en/download/)
 - [React](https://reactjs.org/docs/getting-started.html)
 - [Tailwind CSS](https://tailwindcss.com/docs/guides/create-react-app)
 
 ## Installation
-Clone this repository. In the backend folder, create a .env file with 2 variables, MONGO_URI and PORT. Assign them values, with MONGO_URI allowing you to connect to your MongoDB database and PORT being the default port.
+Clone this repository. In the backend and frontend folders, update the environmental variables in .env.template and rename them to .env.
 
 ```
 git clone https://github.com/tamandrew/CrowdPoll.git
-cd CrowdPoll/backend
-touch .env
-echo "MONGO_URI=yourURI" >> .env
-echo "PORT=yourPortNumber" >> .env
 ```
 
 To run your local servers, in each of the backend and frontend folders, install npm dependencies and run npm start. Make sure to change the urls of the fetch functions in the frontend to your localhost.

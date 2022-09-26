@@ -4,7 +4,6 @@ function Option(props) {
     const [showBox, setShowBox] = useState(false);
     const [selected, setSelected] = useState(false);
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
-
     useEffect(() => {
         setVoting(false);
         //once an update is received, voting is finished
@@ -13,10 +12,17 @@ function Option(props) {
     const castVote = async (e) => {
         e.preventDefault();
 
+        //check for settings to avoid sending unnecessary requests that would be rejected
         if (props.disableVoting) {
             alert("Adding and removing votes is currently disabled.")
             return;
         }
+
+        if (props.limitOneVote && !props.voted && props.votedFor.length > 0) {
+            alert("You can only vote for one option.")
+            return;
+        }
+
 
         if (!voting) { //if not waiting for the result of this vote
             setVoting(true);

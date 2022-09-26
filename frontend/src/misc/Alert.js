@@ -14,7 +14,7 @@ function Alert(props) {
 
 
     return <div>
-            <div className="bg-red-200 text-black font-semibold px-4 py-2">
+            <div className="bg-red-200 rounded-t-lg text-black font-semibold px-4 py-2">
                 {props.title}
             </div>
 

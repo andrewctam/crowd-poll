@@ -13,20 +13,20 @@ const sendUpdatedPoll = async (pollId) => {
     });
 }
 
-const checkIds = async (userId, pollId) => {
-    return ObjectId.isValid(userId) && 
-            ObjectId.isValid(pollId) &&
-            await Poll.exists({_id: pollId}) &&
-            await User.exists({_id: userId})
+const checkPollId = async (pollId) => {
+    return ObjectId.isValid(pollId) && await Poll.exists({_id: pollId})
+}
 
+const checkUserId = async (userId) => {
+    return ObjectId.isValid(userId) && await User.exists({_id: userId})
 }
 
 const getPoll = async (userId, pollId) => {
-    if (!ObjectId.isValid(pollId)) {
+    if (!await checkPollId(pollId)) {
         return JSON.stringify({"error": "Invalid Poll ID"})
     }
 
-    if (!ObjectId.isValid(userId)) {
+    if (!await checkUserId(userId)) {
         return JSON.stringify({"error": "Invalid User ID"})
     }
 
@@ -89,7 +89,7 @@ const getPoll = async (userId, pollId) => {
 }
 
 const addOption = async (userId, pollId, optionTitle) => {
-    if (optionTitle && ObjectId.isValid(pollId) && ObjectId.isValid(userId))
+    if (optionTitle && await checkPollId(pollId) && await checkUserId(userId)) 
         var poll = await Poll.findOne({_id: pollId})
     else {
         console.log(optionTitle + " " + pollId + " " + userId)
@@ -119,7 +119,7 @@ const deleteOptions = async (userId, pollId, optionsToDelete) => {
             return JSON.stringify({"error" : "Invalid: " + optionsToDelete[i]})
     }
 
-    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId)) {
+    if (await checkPollId(pollId) && await checkUserId(userId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
         return JSON.stringify({"error": "ID invalid"})
@@ -141,7 +141,7 @@ const deleteOptions = async (userId, pollId, optionsToDelete) => {
 
 const approveDenyOption = async (userId, pollId, optionId, approved) => {
 
-    if (ObjectId.isValid(pollId) && ObjectId.isValid(optionId)) {
+    if (await checkPollId(pollId) && await checkUserId(userId) && ObjectId.isValid(optionId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
         return JSON.stringify({"error": "ID invalid"})
@@ -168,7 +168,7 @@ const approveDenyOption = async (userId, pollId, optionId, approved) => {
 }
 
 const vote = async (userId, pollId, optionId) => {
-    if (ObjectId.isValid(pollId) && ObjectId.isValid(optionId) && ObjectId.isValid(userId)) {
+    if (await checkPollId(pollId) && await checkUserId(userId) && ObjectId.isValid(optionId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
         return JSON.stringify({"error": "ID invalid"})
@@ -213,7 +213,7 @@ const vote = async (userId, pollId, optionId) => {
 
 
     //    options: [{ optionTitle: String, votes: Number}],
-    const result = await Poll.updateOne({_id: pollId, "options._id": optionId}, {
+    await Poll.updateOne({_id: pollId, "options._id": optionId}, {
         $inc: {
             "options.$.votes": change
         },
@@ -225,7 +225,7 @@ const vote = async (userId, pollId, optionId) => {
 }
 
 const updateSetting = async (userId, pollId, setting, newValue) => {   
-    if (ObjectId.isValid(pollId) && ObjectId.isValid(userId))  
+    if (await checkPollId(pollId) && await checkUserId(userId))  
         var poll = await Poll.findOne({_id: pollId})
     else {
         return JSON.stringify({"error" : "Invalid Inputs"})
