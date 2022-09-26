@@ -58,7 +58,8 @@ function App(props) {
 		const idParam = new URLSearchParams(window.location.search).get("poll")
 		if (idParam)
 			setPollId(idParam);
-
+			
+		// eslint-disable-next-line
 	}, [])
 
 	useEffect(() => {

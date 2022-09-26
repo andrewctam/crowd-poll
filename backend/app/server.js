@@ -126,7 +126,7 @@ wss.on("connection", async (ws, req) => {
     }
 
     pings.set(ws, {
-        "timeout": setTimeout(deleteUser, 11000), //delete user if no ping in 11 seconds. They should ping every 5 seconds
+        "timeout": setTimeout(deleteUser, 11000), //delete user if no ping in 11 seconds. They should send a ping every 5 seconds
         "deleteUser": deleteUser //function to delete user. used for resetting timeout after ping
     })
     

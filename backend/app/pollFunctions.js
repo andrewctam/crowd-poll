@@ -8,7 +8,7 @@ const sendUpdatedPoll = async (pollId) => {
     console.log(wsConnections)
     const connectedUsers = wsConnections.get(pollId);
 
-    connectedUsers.forEach( async (user) => {
+    connectedUsers.forEach( async (user) => { //send updated poll to all connected users
         user["ws"].send(await getPoll(user["userId"], pollId))
     });
 }
@@ -37,7 +37,6 @@ const getPoll = async (userId, pollId) => {
 
     //check if the user voted before
     //votes = [ {userId: [optionIds] } ]
-
     if (await Poll.exists({_id: pollId, "votes.userId": userId})) { //check if the poll has an array of votedFor for the user
         const ids = poll["votes"]
 
@@ -61,14 +60,14 @@ const getPoll = async (userId, pollId) => {
 
     if (isOwner) {
         if (poll["hideVotes"] && poll["hideVotesForOwner"])
-            options.forEach(option => option["votes"] = -1)
+            options.forEach(option => option["votes"] = -1) //set -1 to indicate votes hidden
 
     } else {
         if (poll['approvalRequired'])
-            options = options.filter(element => element["approved"])
+            options = options.filter(element => element["approved"]) //filter out to only show approved options. show all if approval is not required
     
         if (poll['hideVotes']) {
-            options.forEach(option => option["votes"] = - 1)
+            options.forEach(option => option["votes"] = - 1) //set -1 to indicate votes hidden
         }
     }
         
@@ -143,7 +142,6 @@ const deleteOptions = async (userId, pollId, optionsToDelete) => {
 }    
 
 const approveDenyOption = async (userId, pollId, optionId, approved) => {
-
     if (await checkPollId(pollId) && await checkUserId(userId) && ObjectId.isValid(optionId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
@@ -153,11 +151,11 @@ const approveDenyOption = async (userId, pollId, optionId, approved) => {
     if (poll && poll["owner"] === userId) {
         if (approved) {
             await Poll.updateOne({_id: pollId, "options._id": optionId}, {
-                "options.$.approved": true
+                "options.$.approved": true //update to approved
             });
         } else {
             await Poll.updateOne({_id: pollId}, {
-                $pull: {
+                $pull: { //delete the unapproved option
                     options: {_id: optionId},
                 },
             });
@@ -190,7 +188,14 @@ const vote = async (userId, pollId, optionId) => {
         return JSON.stringify({"error": "Invalid ID"})
     }
     
-    if (optionIdLocation === -1) { //vote not found, so cast one
+    if (optionIds.includes(optionId)) { //vote found, remove it
+        await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
+            $pull: { //remove vote
+                "votes.$.optionIds": optionId
+            }
+        });
+        change = -1;
+    } else { //vote not found, add it
         if (limitOneVote && optionIds.length >= 1) {
             return JSON.stringify({"error": "Limit One Vote"})
         } else {
@@ -202,13 +207,6 @@ const vote = async (userId, pollId, optionId) => {
             });
             var change = 1; //num to change vote count by
         }
-    } else { //vote found, remove it
-        await Poll.updateOne({_id: pollId, "votes.userId": userId}, {
-            $pull: { //remove vote
-                "votes.$.optionIds": optionId
-            }
-        });
-        change = -1;
     }
 
 
