@@ -1,5 +1,5 @@
 import "./index.css"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Poll from "./Poll"
 import Welcome from "./Welcome";
 import Alert from "./misc/Alert";
@@ -12,49 +12,44 @@ function App(props) {
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
 
+	const pingRef = useRef(null);
+
 	const verifyId = async () => {
-		var storedUserId = localStorage.getItem("userId")
-		if (storedUserId) {
-			//verify that the user id is in the database
-			const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/users/${storedUserId}`
-			const message = await fetch(url)
-				.then((response) => {
-					if (response.status === 404)
-						return response.json();
-					else
-						return null; //null means found
-				}).catch((error) => {
-					setAlert(<Alert timeout={10000} title={"Connection Error"} message={"Failed to connect to server. Please try again in a moment"} setAlert={setAlert} />)
-					console.log(error)
-					return -1;
-				});
-
-			if (message === -1) //error
-				return;
-			else if (message) { //new id generated
-				storedUserId = message["_id"]
-
-				console.log("NF. N " + storedUserId)
-				localStorage.setItem("userId", storedUserId)
-				localStorage.removeItem("created")
-			} else { //message is null, user found
-				console.log("R " + storedUserId)
-			}
-
+		if (userId !== "") {
+			var storedUserId = userId
 		} else {
-			//get a new user id
-			const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/users/`
-
-			const message = await fetch(url)
-				.then((response) => response.json())
-			storedUserId = message["_id"]
-
-			localStorage.removeItem("created")
-			localStorage.setItem("userId", storedUserId)
-			console.log("N " + storedUserId)
+			storedUserId = localStorage.getItem("userId")
+			if (!storedUserId) {
+				storedUserId = "null";
+			}
 		}
 
-		setUserId(storedUserId);
+		//verify that the user id is in the database
+		const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/users/${storedUserId}`
+		const message = await fetch(url)
+			.then(response => response.json())	
+			.catch((error) => {
+				console.log(error);
+				return null;
+			});
+
+		if (!message) { //error
+			setAlert(<Alert timeout={10000} title={"Connection Error"} message={"Failed to connect to server. Please try again in a moment"} setAlert={setAlert} />)
+			return;
+		}
+
+		localStorage.setItem("userId", message)
+		setUserId(message);
+	
+		if (storedUserId === message) //user id found in db, no change
+			console.log("R " + storedUserId)
+		else { //new user id created, either none provided or invalid one provided
+			console.log("N " + message)
+			localStorage.removeItem("created") //remove created matrices since userId changed
+		}
+		
+
+
 	}
 
 	useEffect(() => {
@@ -67,6 +62,8 @@ function App(props) {
 	}, [])
 
 	useEffect(() => {
+		clearInterval(pingRef.current)
+
 		if (pollId && userId)
 			getPoll()
 		else
@@ -78,26 +75,27 @@ function App(props) {
 	const getPoll = async () => {
 		if (!pollId) {
 			return false;
-		}
+		}  
 		
 		//open a websocket connection to communicate with the server
 		const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_WS_URL : process.env.REACT_APP_PROD_WS_URL}?poll=${pollId}&user=${userId}`
-		const client = new W3CWebSocket(url);
+		const ws = new W3CWebSocket(url);
 
-		client.onopen = () => {
-			console.log("Successfully Connected")
+		ws.onopen = () => {
+			console.log("Successfully Connected to Server")
+			console.log(ws)
 		}
 
-		client.onerror = (error) => {
-			setAlert(<Alert timeout={5000} title={"Error connecting to server"} message={"Please try again in a moment"} setAlert={setAlert} />)
+		ws.onerror = (error) => {
+			setAlert(<Alert timeout={5000} title={"Error connecting to server"} message={"Please refresh and try again in a moment"} setAlert={setAlert} />)
 			console.log(error)
-			return false;
+			ws.close();
 		}
 
-		client.onmessage = (message) => {
+		ws.onmessage = (message) => {
 			const data = JSON.parse(message.data)
 			console.log(data)
-
+			
 			//catch any errors. server will only send an "error" in data if there is an error
 			if (data["error"]) {
 				switch (data["error"]) {
@@ -136,7 +134,7 @@ function App(props) {
 						isOwner={data["owner"]}
 						votedFor={data["votedFor"]}
 						userId={userId}
-						ws={client}
+						ws={ws}
 					/>)
 			}
 
@@ -144,16 +142,15 @@ function App(props) {
 
 		//ping server every 5 seconds to avoid being removed from ws connections
 		const ping = setInterval(() => {
-			client.send(JSON.stringify({ "type": "ping" }))
-
-			if (client.readyState === client.CLOSED) {
+			if (ws.readyState === ws.CLOSED) {
 				clearInterval(ping)
-				setAlert(<Alert timeout={5000} title={"Error"} message={"Connection to server lost. Please try to refresh the page"} setAlert={setAlert} />)
-				setPoll(null)
+				setAlert(<Alert timeout={5000} title={"Error"} message={"Connection to server lost. Trying to reconnect..."} setAlert={setAlert} />)
+				getPoll(); //retry to connect
+			} else {
+				ws.send(JSON.stringify({"type": "ping"}))
 			}
 		}, 5000)
-
-		return true
+		pingRef.current = ping;
 
 	}
 
@@ -162,7 +159,7 @@ function App(props) {
 		(!pollId || (pollId && poll)) ? //either no poll id, or wait for poll to load
 		<>
 			{alert}
-			{poll ? poll : <Welcome setPollId={setPollId} userId={userId} />}
+			{poll ? poll : <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} />}
 		</>
 		: null)
 

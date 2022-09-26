@@ -1,30 +1,20 @@
 const express = require('express')
-var ObjectId = require('mongoose').Types.ObjectId;
 const User = require("../models/userModel")
 const router = express.Router();
-
+var ObjectId = require('mongoose').Types.ObjectId;
 
 router.get("/:userId", async (req, res) => {
     const userId = req.params.userId;
 
-    if (userId && ObjectId.isValid(userId)) {
-        const idExists = await User.exists({ _id: userId });
-        if (idExists) {
-            res.status(200).json("User Exists");
-            return;
-        }
+    if (userId && ObjectId.isValid(userId) && await User.exists({ _id: userId })) { //verify userId
+        res.status(200).json(userId);
+        return;
+
+    } else { //no userId provided or invalid one provided or not in db, create new one
+        const newUser = await User.create({});
+        res.status(201).json(newUser["_id"]);
     }
-
-    const newId = await User.create({});
-    res.status(404).json(newId);
 });
-
-
-router.get("/", async (req, res) => {
-    const newId = await User.create({});
-    res.status(200).json(newId);
-});
-
 
 
 module.exports = router

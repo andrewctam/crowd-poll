@@ -32,9 +32,25 @@ function Welcome(props) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({title: title, ownerId: props.userId })
-        }).then(response => response.json());
+            body: JSON.stringify({title: title, userId: props.userId })
+        }).then((response) => {
 
+            if (response.status === 404)
+                return 404;
+            else
+                return response.json()
+        
+        });
+        
+        if (response === 404) {
+            props.verifyId();
+            return;
+        }
+
+        if (!response["pollId"]) {
+            console.log("Error creating poll");
+            return;
+        }
 
         props.setPollId(response["pollId"]); //calls getPoll after useEffect
         window.history.replaceState(null, null, `?poll=${response["pollId"]}`);
@@ -50,7 +66,7 @@ function Welcome(props) {
         } else {
             localStorage.setItem("created", JSON.stringify({[response["pollId"]]: title}));
         }
-
+       
 
     }
 

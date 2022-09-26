@@ -1,14 +1,10 @@
 if (process.env.NODE_ENV !== 'production')
     require('dotenv').config()
 
-const express = require('express');
-const cors = require('cors');
 const port = process.env.PORT || 6000
 
-const ObjectId = require('mongoose').Types.ObjectId;
 const connectMongoDB = require("./database");
 connectMongoDB();
-
 
 //maps poll ids to a set containing ws user info
 //Map(1) {{POLLID} => Set(1) { { ws: [WebSocket], userId: {USERID} } }}
@@ -19,12 +15,15 @@ module.exports = wsConnections
 const pings = new Map();
 
 //express server
+const express = require('express');
+const cors = require('cors');
 const app = express()
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
-
 app.use("/api/users", require("./routes/userRoutes"))
+
+app.use("/api/polls", require("./middleware/pollMiddleware"))
 app.use("/api/polls", require("./routes/pollRoutes"))
 const expressServer = app.listen(port, () => {console.log(`Server started on port ${port}`)})
 
@@ -53,7 +52,10 @@ wss.on("connection", async (ws, req) => {
                         "deleteUser": infoForReset["deleteUser"]
                     })
                     
-                    ws.send(JSON.stringify({type: "pong"}))
+                    ws.send(JSON.stringify({"pong": "pong"}))
+                } else {
+                    ws.send(JSON.stringify({"error": "No ping info. What happened?"}))
+                    ws.close();
                 }
 
                 break;
@@ -124,7 +126,7 @@ wss.on("connection", async (ws, req) => {
     }
 
     pings.set(ws, {
-        "timeout": setTimeout(deleteUser, 10000), //delete user if no ping in 10 seconds
+        "timeout": setTimeout(deleteUser, 11000), //delete user if no ping in 11 seconds. They should ping every 5 seconds
         "deleteUser": deleteUser //function to delete user. used for resetting timeout after ping
     })
     
