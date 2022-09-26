@@ -12,7 +12,20 @@ module.exports = {
       
       minWidth: {
         "4": "1rem",
-      }
+      },
+
+      // that is animation class
+      animation: {
+        fade: 'fadeOut 5s ease-in-out',
+      },
+
+      // that is actual animation
+      keyframes: theme => ({
+        fadeOut: {
+          '0%': { color: theme('colors.transparent') },
+          '100%': { color: theme('colors.gray.100') },
+        },
+      }),
     },
   },
   plugins: [],

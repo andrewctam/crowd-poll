@@ -127,7 +127,7 @@ function App(props) {
 			//server will only send update if there is an "update" in data
 			if (data["update"]) {
 				//update poll with data from server
-				setPoll(
+				setPoll( 
 					<Poll pollId={data["pollId"]}
 						title={data["title"]}
 						options={data["options"]}
@@ -152,17 +152,29 @@ function App(props) {
 			}
 		}, 5000)
 		pingRef.current = ping;
-
 	}
 
 
-	return (
-		(!pollId || (pollId && poll)) ? //either no poll id, or wait for poll to load
-		<>
-			{alert}
-			{poll ? poll : <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} />}
-		</>
-		: null)
+	if (pollId) {
+		if (poll) 
+			var display = poll
+		else
+			display = (<div className = "m-4 text-gray-100 animate-fade">
+							{"If the poll does not load, click "}
+							<button className="animate-fade underline" onClick={() => getPoll()}>here</button>
+							{" to retry the connection. Otherwise, there may be a problem with the server. Click "}
+							<a className="animate-fade underline" href = "./">here</a>
+							{" to go back to the home page."}
+						</div>)
+	} else {
+		display = <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} />
+	}
+
+
+	return (<div>
+		{alert}
+		{display}
+	</div>)
 
 }
 

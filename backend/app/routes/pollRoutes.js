@@ -27,33 +27,34 @@ router.post("/create", async (req, res) => {
 router.delete("/delete", async (req, res) => {
     const {pollIds, userId} = req.body;
 
+    if (!pollIds)
+        res.status(400).json("Error. No pollIds provided")
+
     const pollsToDelete = pollIds.split(".");
+    if (!pollsToDelete) 
+        res.status(410).send("Error")
+    
 
-    if (pollsToDelete) {
-        pollsToDelete.forEach(async (pollId) => {
-            if (ObjectId.isValid(pollId)) {
-                await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
-                
-                const connectedUsers = wsConnections.get(pollId)
-                if (connectedUsers) {
-                    connectedUsers.forEach((user) => {
-                        user.ws.send(JSON.stringify({"error": "Poll Deleted"}))
-                        user.ws.close()
-                    })
+    pollsToDelete.forEach(async (pollId) => {
+        if (ObjectId.isValid(pollId)) {
+            await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+            
+            const connectedUsers = wsConnections.get(pollId)
+            if (connectedUsers) {
+                connectedUsers.forEach((user) => {
+                    user.ws.send(JSON.stringify({"error": "Poll Deleted"}))
+                    user.ws.close()
+                })
 
-                    wsConnections.delete(pollId)
-                }
-             
-            } else {
-                console.log(pollId + " is not valid");
+                wsConnections.delete(pollId)
             }
-        })
+            
+        } else {
+            console.log(pollId + " is not valid");
+        }
+    })
 
-        res.status(201).json("Deleted");
-    } else {
-        res.status(410).send("Error. Permission Denied.")
-    }
-
+    res.status(201).json("Deleted");
 })
 
 module.exports = router

@@ -8,9 +8,11 @@ const sendUpdatedPoll = async (pollId) => {
     console.log(wsConnections)
     const connectedUsers = wsConnections.get(pollId);
 
-    connectedUsers.forEach( async (user) => { //send updated poll to all connected users
-        user["ws"].send(await getPoll(user["userId"], pollId))
-    });
+    if (connectedUsers) {
+        connectedUsers.forEach( async (user) => { //send updated poll to all connected users
+            user["ws"].send(await getPoll(user["userId"], pollId))
+        });
+    }
 }
 
 const checkPollId = async (pollId) => {
