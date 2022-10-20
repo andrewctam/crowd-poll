@@ -81,14 +81,14 @@ function Option(props) {
             onMouseEnter={() => setShowBox(props.isOwner && true)}
             onMouseLeave={() => setShowBox(false)}
             className={`w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3`}
-            style={{ borderColor: color }}
+            style={{ borderColor: color, backgroundImage: props.voted ? "linear-gradient(to right, rgb(89 110 90), rgb(92 92 90))" : "" }}
         >
 
-            <div className="text-xl px-10 w-full relative text-left">
+            <div className="text-xl px-10 relative text-left text-ellipsis overflow-hidden">
                 {props.optionTitle}
 
                 {showBox || selected || (props.isOwner && touchscreen) ?
-                    <input type="checkbox" checked={selected} className="absolute top-2 left-2 text-sm w-4 h-4 rounded-xl"
+                    <input type="checkbox" checked={selected} className="absolute -top-1 left-2 text-sm w-4 h-4 rounded-xl"
                         onChange={toggleSelection} onClick={(e) => e.stopPropagation()}></input>
                     : null}
 
@@ -112,7 +112,7 @@ function Option(props) {
                 </div>
 
                 <div className="grid-row px-10 rounded-xl text-left text-black text-sm">
-                    <button onClick={() => { approveDenyOption(true) }} className="inline border-t border-t-black  bg-emerald-100  w-1/2 px-3 py-2 rounded-l-lg">
+                    <button onClick={() => { approveDenyOption(true) }} className="inline border-t border-t-black bg-emerald-100  w-1/2 px-3 py-2 rounded-l-lg">
                         {"Approve"}
                     </button>
 
