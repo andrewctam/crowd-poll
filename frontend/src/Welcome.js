@@ -150,7 +150,7 @@ function Welcome(props) {
 
 
             <div className="bg-stone-700 grid lg:h-screen items-center">
-                <form className="py-10" onSubmit={createPoll}>
+                <form className="mx-2 py-10" onSubmit={createPoll}>
                     <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
                     <input ref={titleInput} className="h-10 mx-2 w-3/4 lg:w-1/2 rounded text-black text-lg placeholder:text-black bg-slate-200 px-2 border border-black" placeholder="Enter a title..." />
                     <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>

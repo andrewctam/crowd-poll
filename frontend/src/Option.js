@@ -28,9 +28,9 @@ function Option(props) {
             setVoting(true);
 
             await props.ws.send(JSON.stringify({
-                type: "vote", 
+                type: "vote",
                 pollId: props.pollId,
-                optionId: props.optionId, 
+                optionId: props.optionId,
                 userId: props.userId
             }));
 
@@ -51,22 +51,22 @@ function Option(props) {
     }
 
     const toggleSelection = (e) => {
-        setSelected(!selected)   
+        setSelected(!selected)
         props.toggleSelected(props.optionId)
     }
 
 
     if (!props.approved)
-        var color = "bg-red-100"
+        var color = "rgb(255, 0, 0)"
     else if (selected)
-        color = "bg-blue-200"
-    else if (voting) 
-        color = "bg-emerald-100"
+        color = "rgb(255 127 127)"
+    else if (voting)
+        color = "rgb(200 236 180)"
     else if (props.voted)
-        color = "bg-green-200"
+        color = "rgb(154 236 180)"
     else
-        color = "bg-slate-300";
-    
+        color = "rgb(255, 255, 255)";
+
     if (props.votes >= 0)
         var voteCount = (props.votes) + (props.votes === 1 ? " vote" : " votes");
     else
@@ -75,43 +75,59 @@ function Option(props) {
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
 
-    return ((props.approved) ? 
-        <button onClick={castVote} onMouseEnter = {() => setShowBox(props.isOwner && true)} onMouseLeave = {() => setShowBox(false)} className={"w-5/6 mx-auto rounded-xl text-black border border-black mb-4 grid items-center " + color}>
-            
-            <div className="text-lg p-5 w-full relative">
+    if (props.approved)
+        return (<button
+            onClick={castVote}
+            onMouseEnter={() => setShowBox(props.isOwner && true)}
+            onMouseLeave={() => setShowBox(false)}
+            className={`w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3`}
+            style={{ borderColor: color }}
+        >
+
+            <div className="text-xl px-10 w-full relative text-left">
                 {props.optionTitle}
 
-                {showBox || selected || (props.isOwner && touchscreen) ? 
-                <input type = "checkbox" checked = {selected} className = "absolute top-2 left-2 text-sm p-2 border-black border bg-white w-4 h-4 rounded-xl" 
-                    onChange = {toggleSelection} onClick = {(e) => e.stopPropagation()}></input> 
-                : null}
+                {showBox || selected || (props.isOwner && touchscreen) ?
+                    <input type="checkbox" checked={selected} className="absolute top-2 left-2 text-sm w-4 h-4 rounded-xl"
+                        onChange={toggleSelection} onClick={(e) => e.stopPropagation()}></input>
+                    : null}
 
             </div>
 
-            <div className="grid-row bg-slate-300/75 border-t border-t-black w-full px-3 py-2 rounded-xl">
+            <div className="grid-row w-full px-10 rounded-xl text-left">
                 {voteCount}
             </div>
-            
-        </button>
-        :
-        <div className={"border w-5/6 mx-auto rounded-xl border-black mb-3 grid items-center " + color}>
-            <div className="text-lg p-3"> {props.optionTitle} </div>
-            <div className = "text-xl"> {"Pending Approval"} </div>
-            <div className = "text-sm mb-2"> {"(only you can see this option)"} </div>
 
-            <div>
-                <button onClick = {() => {approveDenyOption(false)}} className="inline border-t border-t-black border-r border-r-black bg-red-300 w-1/2 px-3 py-2 rounded-l-lg">
-                    {"Reject"}
-                </button>
+        </button>)
+    else
+        return (
 
-                <button onClick = {() => {approveDenyOption(true)}} className="inline border-t border-t-black  bg-emerald-300  w-1/2 px-3 py-2 rounded-r-lg">
-                    {"Approve"}
-                </button>   
+            <div className={`w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 grid items-center bg-slate-400/10 py-3`}>
+
+                <div className="text-xl px-10 w-full relative text-left">
+                    {props.optionTitle}
+                </div>
+                <div className="px-10 w-full relative text-left text-sm">
+                    {"Pending Approval. Only you can see this option."}
+                </div>
+
+                <div className="grid-row px-10 rounded-xl text-left text-black text-sm">
+                    <button onClick={() => { approveDenyOption(true) }} className="inline border-t border-t-black  bg-emerald-100  w-1/2 px-3 py-2 rounded-l-lg">
+                        {"Approve"}
+                    </button>
+
+                    <button onClick={() => { approveDenyOption(false) }} className="inline border-t border-t-black border-l border-l-black bg-rose-100 w-1/2 px-3 py-2 rounded-r-lg">
+                        {"Reject"}
+                    </button>
+
+
+                </div>
+
             </div>
-        </div>
-    )
 
-    
+        )
+
+
 
 }
 
