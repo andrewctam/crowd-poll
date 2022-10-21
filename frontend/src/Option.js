@@ -109,7 +109,7 @@ function Option(props) {
     else
         return (
 
-            <div className={`w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 py-3 grid items-center bg-gradient-to-r from-rose-400/10 via-rose-400/20 to-slate-400/10`}>
+            <div className={`w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 py-3 grid items-center bg-gradient-to-r from-rose-400/20 via-rose-400/10 to-slate-400/10`}>
 
                 <div className="text-xl px-10 w-full relative text-left">
                     {props.optionTitle}

@@ -185,8 +185,7 @@ function Poll(props) {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
-
-            <div className="lg:h-screen overflow-y-auto py-10 bg-slate-700 grid items-center">
+            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center">
                 <div>
                     <a href="." className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
