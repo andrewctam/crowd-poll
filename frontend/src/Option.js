@@ -88,7 +88,7 @@ function Option(props) {
                 {props.optionTitle}
 
                 {showBox || selected || (props.isOwner && touchscreen) ?
-                    <input type="checkbox" checked={selected} className="absolute -top-1 left-2 text-sm w-4 h-4 rounded-xl"
+                    <input type="checkbox" checked={selected} className="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
                         onChange={toggleSelection} onClick={(e) => e.stopPropagation()}></input>
                     : null}
 

@@ -12,7 +12,7 @@ const DropdownOption = (props) => {
             </div>)
     else
         return (
-            <div onClick={setSorting} className={"cursor-pointer block w-full text-center " + (props.selected ? "text-sky-400" : "text-white")}>
+            <div onClick={setSorting} className={"cursor-pointer block w-full text-center " + (props.selected ? "text-sky-300" : "text-white")}>
                 {props.name}
             </div>)
 
