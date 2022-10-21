@@ -17,6 +17,7 @@ function Poll(props) {
     const [filterMethod, setFilterMethod] = useState("All");
     const [showFilter, setShowFilter] = useState(false);
 
+    const [pieSelected, setPieSelected] = useState(null);
     useEffect(() => {
         if ((sortingMethod === "Vote Count" && props.settings["hideVotes"]) &&
             (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
@@ -196,6 +197,7 @@ function Poll(props) {
 
                     <Statistics
                         options={props.options}
+                        setPieSelected={setPieSelected}
                     />
                 </div>
 
@@ -266,6 +268,8 @@ function Poll(props) {
 
                             voted={props.votedFor.includes(obj["_id"])}
                             votedFor={props.votedFor}
+
+                            pieSelected = {pieSelected === obj["_id"]}
 
 
                             approved={!props.settings["approvalRequired"] || obj["approved"]}

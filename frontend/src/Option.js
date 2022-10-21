@@ -55,25 +55,27 @@ function Option(props) {
         props.toggleSelected(props.optionId)
     }
 
+    let style = {
+        borderColor: "rgb(255, 255, 255)"
+    };
 
     if (!props.approved)
-        var color = "rgb(255, 0, 0)"
+        style["borderColor"] = "rgb(255, 0, 0)"
     else if (selected)
-        color = "rgb(255 127 127)"
+        style["borderColor"] = "rgb(255 127 127)"
     else if (voting)
-        color = "rgb(200 236 180)"
+        style["borderColor"] = "rgb(200 236 180)"
     else if (props.voted)
-        color = "rgb(154 236 180)"
-    else
-        color = "rgb(255, 255, 255)";
+        style["borderColor"] = "rgb(154 236 180)"
 
-    if (props.votes >= 0)
-        var voteCount = (props.votes) + (props.votes === 1 ? " vote" : " votes");
-    else
-        voteCount = "Votes Hidden";
+    if (props.pieSelected)
+        style["transform"] = "scale(1.1)"
+
+    if (props.voted)
+        style["backgroundImage"] = "linear-gradient(to right, rgb(89 100 90), rgb(92 92 90))"
+
 
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
-
 
     if (props.approved)
         return (<button
@@ -81,7 +83,7 @@ function Option(props) {
             onMouseEnter={() => setShowBox(props.isOwner && true)}
             onMouseLeave={() => setShowBox(false)}
             className={`w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3`}
-            style={{ borderColor: color, backgroundImage: props.voted ? "linear-gradient(to right, rgb(89 110 90), rgb(92 92 90))" : "" }}
+            style={style}
         >
 
             <div className="text-xl px-10 relative text-left text-ellipsis overflow-hidden">
@@ -95,7 +97,12 @@ function Option(props) {
             </div>
 
             <div className="grid-row w-full px-10 rounded-xl text-left">
-                {voteCount}
+                {props.votes >= 0 ?
+                    `${props.votes} ${props.votes === 1 ? "vote" : "votes"}`
+                    :
+                    "Votes Hidden"
+                }
+
             </div>
 
         </button>)
