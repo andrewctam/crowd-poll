@@ -109,7 +109,7 @@ function Option(props) {
     else
         return (
 
-            <div className={`w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 grid items-center bg-slate-400/10 py-3`}>
+            <div className={`w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 py-3 grid items-center bg-gradient-to-r from-rose-400/10 via-rose-400/20 to-slate-400/10`}>
 
                 <div className="text-xl px-10 w-full relative text-left">
                     {props.optionTitle}
@@ -118,13 +118,13 @@ function Option(props) {
                     {"Pending Approval. Only you can see this option."}
                 </div>
 
-                <div className="grid-row px-10 rounded-xl text-left text-black text-sm">
-                    <button onClick={() => { approveDenyOption(true) }} className="inline border-t border-t-black bg-emerald-100  w-1/2 px-3 py-2 rounded-l-lg">
-                        {"Approve"}
+                <div className="grid-row px-10 rounded-xl text-left text-sm mt-2">
+                    <button onClick={() => { approveDenyOption(false) }} className="inline bg-rose-300/25 text-white w-1/2 px-3 py-2 rounded-l-lg">
+                        {"Reject"}
                     </button>
 
-                    <button onClick={() => { approveDenyOption(false) }} className="inline border-t border-t-black border-l border-l-black bg-rose-100 w-1/2 px-3 py-2 rounded-r-lg">
-                        {"Reject"}
+                    <button onClick={() => { approveDenyOption(true) }} className="inline bg-emerald-400/25 text-white w-1/2 px-3 py-2 rounded-r-lg">
+                        {"Approve"}
                     </button>
 
 

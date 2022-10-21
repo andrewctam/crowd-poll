@@ -23,7 +23,7 @@ const Statistics = (props) => {
         return null;
 
     return (<div className="w-full p-5 h-fit mx-auto">
-            <svg className="w-3/5 h-fit mx-auto" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+            <svg className="w-1/2 h-full mx-auto" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
                 <g transform="translate(200,200)">
                     <PieChart data={data} voteSum = {voteSum} setPieSelected = {props.setPieSelected} />
                 </g>
@@ -64,9 +64,9 @@ const PieChart = (props) => {
     return (
         <g>
             {arcs.map((d, i) => (
-                <g key={i} onMouseEnter = {() => {props.setPieSelected(d.data["_id"])}} onMouseLeave = {() => {props.setPieSelected(null)}}>
+                <g key={i} onMouseEnter = {() => {props.setPieSelected(d.data["_id"])}} onMouseLeave = {() => {props.setPieSelected(null)}} className = "cursor-crosshair">
                     <path d={arc(d)} fill={i === arcs.length - 1 && colors(i) === colors(0) ? colors(i + 1) : colors(i)} />
-                    <text transform={`translate(${labelArc.centroid(d)})`} textAnchor="middle" fill="black" fontSize="12px">{`${d.data.title} (${Math.round((d.data.votes / props.voteSum) * 100)}%)`}</text>
+                    <text transform={`translate(${labelArc.centroid(d)})`} textAnchor="middle" fill="black" fontSize="14px">{`${d.data.title} (${Math.round((d.data.votes / props.voteSum) * 100)}%)`}</text>
                 </g>
             ))}
 
