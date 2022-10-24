@@ -110,7 +110,7 @@ function Welcome(props) {
             else
                 localStorage.setItem("created", JSON.stringify(createdPolls)); 
 
-
+            props.addAlert("Polls Deleted", 2000);
             setSelectedDelete([])
 
         }

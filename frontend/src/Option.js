@@ -14,12 +14,12 @@ function Option(props) {
 
         //check for settings to avoid sending unnecessary requests that would be rejected
         if (props.disableVoting) {
-            alert("Adding and removing votes is currently disabled.")
+            props.addAlert("Adding and removing votes is currently disabled.", 2000, "error");
             return;
         }
 
         if (props.limitOneVote && !props.voted && props.votedFor.length > 0) {
-            alert("You can only vote for one option.")
+            props.addAlert("You can only vote for one option.", 2000, "error");
             return;
         }
 
@@ -48,6 +48,8 @@ function Option(props) {
             userId: props.userId,
             approved: approved
         }));
+
+        props.addAlert(`Option ${approved ? "approved." : "rejected."}`, 2000);
     }
 
     const toggleSelection = (e) => {

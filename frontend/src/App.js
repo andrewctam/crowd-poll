@@ -2,17 +2,19 @@ import "./index.css"
 import { useState, useEffect, useRef } from "react";
 import Poll from "./Poll"
 import Welcome from "./Welcome";
-import Alert from "./misc/Alert";
+
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+import useAlert from "./useAlert";
 
 function App(props) {
 	const [poll, setPoll] = useState(null);
-	const [alert, setAlert] = useState(null);
 
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
 
 	const pingRef = useRef(null);
+
+	const [alerts, addAlert] = useAlert();
 
 	const verifyId = async () => {
 		if (userId !== "") {
@@ -34,7 +36,7 @@ function App(props) {
 			});
 
 		if (!message) { //error
-			setAlert(<Alert timeout={10000} title={"Connection Error"} message={"Failed to connect to server. Please try again in a moment"} setAlert={setAlert} />)
+			addAlert("Failed to connect to server. Please try again in a moment", 10000, "error");
 			return;
 		}
 
@@ -47,8 +49,6 @@ function App(props) {
 			console.log("N " + message)
 			localStorage.removeItem("created") //remove created matrices since userId changed
 		}
-		
-
 
 	}
 
@@ -88,7 +88,7 @@ function App(props) {
 		}
 
 		ws.onerror = (error) => {
-			setAlert(<Alert timeout={5000} title={"Error connecting to server"} message={"Please refresh and try again in a moment"} setAlert={setAlert} />)
+			addAlert("Failed to connect to server. Please refresh and try again", 10000, "error");
 			console.log(error)
 			ws.close();
 		}
@@ -101,19 +101,19 @@ function App(props) {
 			if (data["error"]) {
 				switch (data["error"]) {
 					case "Invalid Poll ID":
-						setAlert(<Alert timeout={10000} title={"Error"} message={"Poll Deleted or Does Not Exist"} setAlert={setAlert} />)
+						addAlert("Poll Deleted or Does Not Exist", 10000, "error");
 						setPollId(null)
 						break;
 
 					case "Invalid User ID":
-						setAlert(<Alert timeout={10000} title={"Error"} message={"User ID Invalid"} setAlert={setAlert} />)
+						addAlert("User ID Invalid", 10000, "error");
 						verifyId();
 						break;
 					case "Permission Denied":
-						setAlert(<Alert timeout={10000} title={"Not Owner"} message={"Permission Denied"} setAlert={setAlert} />)
+						addAlert("Permission Denied, Not Owner.", 10000, "error");
 						break;
 					case "Poll Deleted":
-						setAlert(<Alert timeout={10000} title={"Poll Deleted"} message={"Poll Deleted"} setAlert={setAlert} />)
+						addAlert("Poll Was Deleted", 10000, "error");
 						setPollId(null)
 						break;
 					default: //other kind of error, no need to handle
@@ -145,7 +145,7 @@ function App(props) {
 		const ping = setInterval(() => {
 			if (ws.readyState === ws.CLOSED) {
 				clearInterval(ping)
-				setAlert(<Alert timeout={5000} title={"Error"} message={"Connection to server lost. Trying to reconnect..."} setAlert={setAlert} />)
+				addAlert("Connection to server lost. Trying to reconnect...", 5000, "error");
 				getPoll(); //retry to connect
 			} else {
 				ws.send(JSON.stringify({"type": "ping"}))
@@ -167,14 +167,14 @@ function App(props) {
 							{" to go back to the home page."}
 						</div>)
 	} else {
-		display = <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} />
+		display = <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} addAlert = {addAlert} />
 	}
 
 
-	return (<div>
-		{alert}
+	return (<>
+		{alerts}
 		{display}
-	</div>)
+	</>)
 
 }
 

@@ -5,7 +5,7 @@ import SettingCheckBox from './misc/SettingCheckBox';
 import SettingListDisplay from './misc/SettingListDisplay';
 import DropdownOption from './misc/DropdownOption';
 import Statistics from './misc/Statistics';
-
+import useAlert from './useAlert';
 function Poll(props) {
     const optionInput = useRef(null);
     const [showError, setShowError] = useState(false);
@@ -34,6 +34,7 @@ function Poll(props) {
     }, [props.settings["approvalRequired"]]);
 
 
+    const [alerts, addAlert] = useAlert();
 
     const addOption = async (e) => {
         e.preventDefault();
@@ -54,7 +55,12 @@ function Poll(props) {
             "optionTitle": optionTitle
         }));
 
-
+        if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"])) {
+            addAlert("Request to add option sent!", 2000);
+        } else {
+            addAlert("Option added!", 2000);
+        }
+        
         optionInput.current.value = "";
     }
 
@@ -71,7 +77,7 @@ function Poll(props) {
     }
 
     const deleteSelected = async (e) => {
-        if (selectedOptions.length === 0)
+        if (selectedOptions.length === 0 || !props.isOwner)
             return;
 
         props.ws.send(JSON.stringify({
@@ -81,6 +87,8 @@ function Poll(props) {
             "optionsToDelete": selectedOptions.join(".")
         }));
 
+        addAlert("Options deleted!", 2000);
+        
         setSelectedOptions([]);
     }
 
@@ -183,7 +191,9 @@ function Poll(props) {
         settingsDisplay = null;
 
 
-    return (
+    return ( 
+        <>
+        {alerts}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center">
                 <div>
@@ -258,6 +268,7 @@ function Poll(props) {
                             pollId={props.pollId}
                             isOwner={props.isOwner}
 
+                            addAlert={addAlert}
                             ws={props.ws}
 
                             votes={obj["votes"]}
@@ -287,7 +298,8 @@ function Poll(props) {
 
             </div>
 
-        </div>)
+        </div>
+        </>)
 
 }
 
