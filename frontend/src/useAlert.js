@@ -4,17 +4,22 @@ import { useReducer, useEffect } from "react";
 
 const useAlert = () => {
     const createAlert = ((msg, id, time, type = "success") => {
-        const alert = (
-
-                <div className={`rounded border border-black px-4 py-3 w-fit h-fit p-5 m-2 text-black ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}>
-                    <p>{msg}</p>
-                </div>
-            )
-
-
         const timeout = setTimeout(() => {
-            dispatch({ type: "REMOVE_ALERT", payload: {"id": id} })
+            dispatch({ type: "REMOVE_ALERT", payload: { "id": id } })
         }, time)
+
+        const alert = (
+            <div
+                key = {`alert${id}`}
+                className={`rounded border border-black px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}
+                onClick={() => {
+                    dispatch({ type: "REMOVE_ALERT", payload: { "id": id } })
+                }}>
+                    
+                <p>{msg}</p>
+            </div>
+        )
+
 
         return {
             index: id,
@@ -46,7 +51,7 @@ const useAlert = () => {
     const [alerts, dispatch] = useReducer(reducer, []);
 
     const alertContainer = (
-        <div className="fixed top-0 left-0 m-1">
+        <div className="fixed top-0 left-0 m-1 z-20">
             {alerts.map(alert => alert.alert)}
         </div>
     )
