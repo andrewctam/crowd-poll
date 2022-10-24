@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback, useReducer } from 'react'
 import Option from "./Option"
 import Dropdown from "./misc/Dropdown"
 import SettingCheckBox from './misc/SettingCheckBox';
@@ -9,7 +9,25 @@ import useAlert from './useAlert';
 function Poll(props) {
     const optionInput = useRef(null);
     const [showError, setShowError] = useState(false);
-    const [selectedOptions, setSelectedOptions] = useState([]);
+
+    const [selectedOptions, dispatch] = useReducer((state, action) => {
+        switch (action.type) {
+            case "TOGGLE":
+                if (state.includes(action.payload.optionId)) {
+                    return state.filter(oId => oId !== action.payload.optionId);
+                } else {
+                    return [...state, action.payload.optionId];
+                }
+            case "CLEAR":
+                return [];
+            default:
+                return state;
+        }
+    }, []);
+
+    const toggleSelection = useCallback((optionId) => {
+        dispatch({ type: "TOGGLE", payload: {"optionId": optionId} });
+    }, []);
 
     const [sortingMethod, setSortingMethod] = useState("Order Created");
     const [showSorting, setShowSorting] = useState(false);
@@ -64,18 +82,7 @@ function Poll(props) {
         optionInput.current.value = "";
     }
 
-    const toggleSelected = (optionId) => {
-        for (let i = 0; i < selectedOptions.length; i++)
-            if (selectedOptions[i] === optionId) {
-                const temp = [...selectedOptions];
-                temp.splice(i, 1);
-                setSelectedOptions(temp);
-                return;
-            }
-
-        setSelectedOptions([...selectedOptions, optionId]);
-    }
-
+  
     const deleteSelected = async (e) => {
         if (selectedOptions.length === 0 || !props.isOwner)
             return;
@@ -89,7 +96,7 @@ function Poll(props) {
 
         addAlert("Options deleted!", 2000);
         
-        setSelectedOptions([]);
+        dispatch({ type: "CLEAR" });
     }
 
 
@@ -277,15 +284,12 @@ function Poll(props) {
                             key={obj["_id"]}
 
                             voted={props.votedFor.includes(obj["_id"])}
-                            votedFor={props.votedFor}
-
                             pieSelected = {pieSelected === obj["_id"]}
 
-
+                            toggleSelection={toggleSelection}
                             approved={!props.settings["approvalRequired"] || obj["approved"]}
-                            toggleSelected={toggleSelected}
                             disableVoting={props.settings["disableVoting"]}
-                            limitOneVote={props.settings["limitOneVote"]}
+                            alreadyVoted = {props.settings["limitOneVote"] && props.votedFor.length > 0}
                         />)
                     }
                     <form onSubmit={addOption} className="w-full">

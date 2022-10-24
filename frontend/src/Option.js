@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 
 function Option(props) {
     const [showBox, setShowBox] = useState(false);
     const [selected, setSelected] = useState(false);
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
+    
     useEffect(() => {
         setVoting(false);
         //once an update is received, voting is finished
-    }, [props.votedFor])
+    }, [props.voted])
 
     const castVote = async (e) => {
         e.preventDefault();
@@ -18,7 +19,7 @@ function Option(props) {
             return;
         }
 
-        if (props.limitOneVote && !props.voted && props.votedFor.length > 0) {
+        if (!props.voted && props.alreadyVoted) {
             props.addAlert("You can only vote for one option.", 2000, "error");
             return;
         }
@@ -52,9 +53,9 @@ function Option(props) {
         props.addAlert(`Option ${approved ? "approved." : "rejected."}`, 2000);
     }
 
-    const toggleSelection = (e) => {
+    const toggleSelection = () => {
         setSelected(!selected)
-        props.toggleSelected(props.optionId)
+        props.toggleSelection(props.optionId)
     }
 
     let style = {
@@ -79,6 +80,7 @@ function Option(props) {
 
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 
+    console.log(props.optionTitle)
     if (props.approved)
         return (<button
             onClick={castVote}
@@ -140,4 +142,4 @@ function Option(props) {
 
 }
 
-export default Option
+export default memo(Option)

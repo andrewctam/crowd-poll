@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 
 
 
@@ -10,12 +10,12 @@ const useAlert = () => {
 
         const alert = (
             <div
-                key = {`alert${id}`}
+                key={`alert${id}`}
                 className={`rounded border border-black px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}
                 onClick={() => {
                     dispatch({ type: "REMOVE_ALERT", payload: { "id": id } })
                 }}>
-                    
+
                 <p>{msg}</p>
             </div>
         )
@@ -50,15 +50,15 @@ const useAlert = () => {
 
     const [alerts, dispatch] = useReducer(reducer, []);
 
-    const alertContainer = (
-        <div className="fixed top-0 left-0 m-1 z-20">
+    const alertContainer = useMemo(() => {
+        return <div className="fixed top-0 left-0 m-1 z-20">
             {alerts.map(alert => alert.alert)}
         </div>
-    )
+    }, [alerts]);
 
-    const addAlert = (msg, time, type) => {
+    const addAlert = useCallback((msg, time, type) => {
         dispatch({ type: "ADD_ALERT", payload: { msg: msg, time: time, type: type } })
-    }
+    }, [dispatch]);
 
     return [alertContainer, addAlert];
 
