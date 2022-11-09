@@ -209,7 +209,7 @@ function Poll(props) {
                 <div>
                     <a href="." className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
-                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 rounded mt-4 text-black lg:text-lg placeholder:text-black shadow-md bg-slate-200 px-2" value={window.location} />
+                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 rounded mt-4 text-black lg:text-lg placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location} />
 
                     {settingsDisplay}
 
@@ -229,7 +229,7 @@ function Poll(props) {
                 </div>
 
                 {props.options.length === 0 ?
-                    <p className='text-md lg:text-lg text-white'>
+                    <p className='text-md lg:text-lg mb-10 text-white'>
                         {"No answer options yet, add one below!"}
                     </p>
                     :
@@ -295,11 +295,13 @@ function Poll(props) {
                             alreadyVoted = {props.settings["limitOneVote"] && props.votedFor.length > 0}
                         />)
                     }
-                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10">
-                        <input ref={optionInput} className="h-10 w-3/4 lg:w-1/2 rounded text-white placeholder:text-white/70 lg:text-lg bg-stone-600/75 p-2 focus:outline-none shadow-md" placeholder="Add an answer option..." />
-                        <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
-                        {showError ? <p className="text-red-300">Option can not be blank. Please enter some text.</p> : null}
+                    
+                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-stone-600/90 rounded-xl shadow-md">
+                        <input ref={optionInput}  onChange = {() => setShowError(false)} className={`h-10 w-4/5 lg:w-3/4 text-white lg:text-lg p-1 bg-stone-600 focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
+                            placeholder={showError ? "Answer option can not be blank" : "Add an answer option..."}/>
+                        <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                     </form>
+
                 </div>
 
 
