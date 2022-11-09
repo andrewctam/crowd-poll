@@ -13,7 +13,7 @@ const useAlert = () => {
         const alert = (
             <div
                 key={`alert${count}`}
-                className={`rounded border border-black px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}
+                className={`rounded px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 shadow-md ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}
                 onClick={() => {
                     dispatch({ type: "REMOVE_ALERT", payload: { "id": count } })
                 }}>

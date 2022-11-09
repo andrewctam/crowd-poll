@@ -154,8 +154,8 @@ function Poll(props) {
     //what to display for settings. Owner sees box to change settings. Other users see which settings, null if none, a box if at least 1 setting
     if (props.isOwner) {
         var settingsDisplay = (
-            <div className="border border-white mt-4 p-3 w-fit mx-auto rounded-xl">
-                <h1 className='text-white text-2xl mt-1 font-semibold'>Settings</h1>
+            <div className="bg-slate-600 mt-4 p-3 w-fit mx-auto rounded-xl shadow-md">
+                <h1 className='text-white text-2xl mb-2 font-semibold'>Settings</h1>
                 <SettingCheckBox ws={props.ws} text="Disable Voting" name="disableVoting" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["disableVoting"]} />
 
                 <SettingCheckBox ws={props.ws} text="Hide Vote Count" name="hideVotes" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["hideVotes"]} />
@@ -183,7 +183,7 @@ function Poll(props) {
             </div>)
     } else if (props.settings["disableVoting"] || props.settings["hideVotes"] || props.settings["limitOneVote"] || props.settings["approvalRequired"]) {
         settingsDisplay = (
-            <div className="border border-white p-4 rounded-xl mx-auto w-fit mt-4">
+            <div className="p-4 rounded-xl mx-auto w-fit mt-4 bg-slate-600 shadow-md">
                 <h1 className="text-center text-2xl font-semibold pt-1 text-white select-none mb-3">Settings</h1>
 
                 <ul className="text-left">
@@ -202,12 +202,14 @@ function Poll(props) {
         <>
         {alerts}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
-            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center">
+            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
+                "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
+                "zIndex": "1"
+            }}>
                 <div>
                     <a href="." className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
-                    <h1 className="lg:text-xl pt-1 text-white select-none">Link to the poll:</h1>
-                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 rounded text-black lg:text-lg placeholder:text-black bg-slate-200 px-2 border border-black" value={window.location} />
+                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 rounded mt-4 text-black lg:text-lg placeholder:text-black shadow-md bg-slate-200 px-2" value={window.location} />
 
                     {settingsDisplay}
 
@@ -220,8 +222,9 @@ function Poll(props) {
             </div>
 
 
-            <div className="bg-stone-600 lg:h-screen overflow-y-auto">
-                <div className="grid items-center bg-stone-700 py-8 text-3xl mb-4 bold text-white">
+            <div className="bg-stone-700 lg:h-screen overflow-y-auto">
+
+                <div className="grid items-center m-5 rounded-xl bg-stone-600/75 py-3 text-3xl bold text-white shadow-lg sticky top-5 z-10">
                     {props.title}
                 </div>
 
@@ -292,10 +295,10 @@ function Poll(props) {
                             alreadyVoted = {props.settings["limitOneVote"] && props.votedFor.length > 0}
                         />)
                     }
-                    <form onSubmit={addOption} className="w-full">
-                        <input ref={optionInput} className="h-10 w-3/4 lg:w-1/2 rounded text-white placeholder:text-white/50 lg:text-lg bg-slate-200/25 p-2 focus:outline-none" placeholder="Add an answer option..." />
-                        <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded" >{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
-                        {showError ? <p className="m-1 text-red-300">Option can not be blank. Please enter some text.</p> : null}
+                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10">
+                        <input ref={optionInput} className="h-10 w-3/4 lg:w-1/2 rounded text-white placeholder:text-white/70 lg:text-lg bg-stone-600/75 p-2 focus:outline-none shadow-md" placeholder="Add an answer option..." />
+                        <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
+                        {showError ? <p className="text-red-300">Option can not be blank. Please enter some text.</p> : null}
                     </form>
                 </div>
 
