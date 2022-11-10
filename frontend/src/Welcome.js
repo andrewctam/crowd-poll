@@ -139,7 +139,7 @@ function Welcome(props) {
         created = null;    
     
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center text-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-center text-center">
 
             <div className="py-10 bg-slate-700 h-full grid items-center" style = {{
                 "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
@@ -153,8 +153,8 @@ function Welcome(props) {
          
 
 
-            <div className="bg-stone-700 grid lg:h-screen items-center">
-                <form className="py-10 bg-stone-600 shadow-xl rounded-xl mx-10 mt-5" onSubmit={createPoll}>
+            <div className="bg-stone-700 grid lg:h-screen items-center w-full">
+                <form className="p-10 bg-stone-600 shadow-xl rounded-xl mx-10 mt-5" onSubmit={createPoll}>
                     <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
                     <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/4 lg:w-1/2 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
                     placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
@@ -165,10 +165,11 @@ function Welcome(props) {
 
 
                 {created ? 
-                <div className = "text-white w-full h-full grid items-center p-2">
-                    <div className = "bg-stone-600 w-fit mx-auto p-6 mt-4 rounded-xl shadow-xl">
+                <div className = "text-white h-full grid items-center p-2">
+                    <div className = "bg-stone-600 mx-auto p-6 mt-4 rounded-xl shadow-xl">
                         <p className = "text-xl lg:text-2xl mb-4 select-none px-4">Your Created Polls</p>
-                        <ul className = "w-full max-h-72 overflow-y-auto mx-auto px-6 list-disc list-inside">
+
+                        <ul className = "max-h-72 overflow-y-auto mx-auto px-6 max-w-[50vh]">
                             {created}
                         </ul>
 

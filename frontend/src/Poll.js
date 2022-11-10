@@ -202,14 +202,15 @@ function Poll(props) {
         <>
         {alerts}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
+
             <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
                 "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
                 "zIndex": "1"
             }}>
                 <div>
-                    <a href="." className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
+                    <a href="." className="mx-auto text-5xl block lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
-                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 rounded mt-4 text-black lg:text-lg placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location} />
+                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location} />
 
                     {settingsDisplay}
 
@@ -224,7 +225,7 @@ function Poll(props) {
 
             <div className="bg-stone-700 lg:h-screen overflow-y-auto">
 
-                <div className="grid items-center m-5 rounded-xl bg-stone-600/75 py-3 text-3xl bold text-white shadow-lg sticky top-5 z-10">
+                <div className="grid items-center m-5 rounded-xl bg-stone-600/75 py-3 text-3xl bold text-white shadow-lg sticky top-5 z-10 overflow-hidden text-ellipsis">
                     {props.title}
                 </div>
 
@@ -296,10 +297,13 @@ function Poll(props) {
                         />)
                     }
                     
-                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-stone-600/90 rounded-xl shadow-md">
-                        <input ref={optionInput}  onChange = {() => setShowError(false)} className={`h-10 w-4/5 lg:w-3/4 text-white lg:text-lg p-1 bg-stone-600 focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
+                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-stone-600 rounded-xl shadow-md flex">
+                        <input ref={optionInput} 
+                            className={`h-10 flex-grow m-auto text-white lg:text-lg pl-3 bg-stone-600 focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
+                            onChange = {() => setShowError(false)}
                             placeholder={showError ? "Answer option can not be blank" : "Add an answer option..."}/>
-                        <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
+
+                        <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-lg">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                     </form>
 
                 </div>
