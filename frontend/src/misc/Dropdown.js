@@ -30,7 +30,7 @@ const Dropdown = (props) => {
             
              
             {props.show ? 
-            <div className = "absolute bg-stone-600 w-48 border border-stone-700 left-[-1px] rounded-tr-lg rounded-b-lg z-10 p-2 shadow-md">
+            <div className = "absolute bg-stone-600 w-48 border border-stone-700 left-[-1px] rounded-tr-lg rounded-b-lg z-20 p-2 shadow-md">
                 {props.children}
             </div> : null }
         </div>

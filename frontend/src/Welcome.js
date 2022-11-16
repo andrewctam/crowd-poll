@@ -154,35 +154,35 @@ function Welcome(props) {
 
 
             <div className="bg-stone-700 grid lg:h-screen items-center w-full">
-                <form className="p-10 bg-stone-600 shadow-xl rounded-xl mx-10 mt-5" onSubmit={createPoll}>
-                    <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
-                    <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/4 lg:w-1/2 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
-                    placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
+                <div>
+                    <form className="p-10 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-fit mx-auto" onSubmit={createPoll}>
+                        <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
+                        <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/4 lg:w-1/2 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
+                        placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
 
-                    <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
-                    <p className = "text-white mt-1 select-none">You can add answer options and edit settings once inside the poll</p>
-                </form>
+                        <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
+                        <p className = "text-white mt-1 select-none">You can add answer options and edit settings once inside the poll</p>
+                    </form>
 
 
-                {created ? 
-                <div className = "text-white h-full grid items-center p-2">
-                    <div className = "bg-stone-600 mx-auto p-6 mt-4 rounded-xl shadow-xl">
-                        <p className = "text-xl lg:text-2xl mb-4 select-none px-4">Your Created Polls</p>
+                    {created ? 
+                    <div className = "bg-stone-600 h-fit w-fit mx-auto p-6 mt-8 rounded-xl shadow-xl">
+                        <p className = "text-xl lg:text-2xl mb-4 select-none px-4 text-white">Your Created Polls</p>
 
                         <ul className = "max-h-72 overflow-y-auto mx-auto px-6 max-w-[50vh]">
                             {created}
                         </ul>
 
-                        <div className = "mt-4 flex justify-between">
-                            <label className = "text-white" onClick = {deletePolls}>
+                        <div className = "mt-4" onClick = {deletePolls}>
+                            <label className = "text-red-100" >
                                 {"Delete Selected Polls"}
                             </label>
                             
-                            <button onClick = {deletePolls} className = "bg-red-100 rounded border border-black ml-2 px-2 text-black text-xs self-center">{selectedDelete.length}</button>
+                            <button onClick = {deletePolls} className = "bg-red-200 rounded border border-black ml-2 px-2 text-black text-xs self-center">{selectedDelete.length}</button>
                         </div>
                     </div>
-                </div> 
-                : null}
+                    : null}
+                </div>
             </div>
         </div>
     );

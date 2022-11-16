@@ -174,11 +174,11 @@ function Poll(props) {
 
 
                 <div className="flex justify-between">
-                    <label className="px-1 mr-2 text-white" onClick={deleteSelected}>
+                    <label className="px-1 mr-2 text-red-100" onClick={deleteSelected}>
                         {"Delete Selected Options"}
                     </label>
 
-                    <button onClick={deleteSelected} className="bg-red-100 rounded border border-black h-fit self-center px-2 text-black text-xs">{selectedOptions.length}</button>
+                    <button onClick={deleteSelected} className="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">{selectedOptions.length}</button>
                 </div>
             </div>)
     } else if (props.settings["disableVoting"] || props.settings["hideVotes"] || props.settings["limitOneVote"] || props.settings["approvalRequired"]) {
@@ -297,13 +297,13 @@ function Poll(props) {
                         />)
                     }
                     
-                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-stone-600 rounded-xl shadow-md flex">
+                    <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-[#4b4a49] rounded-xl shadow-md flex">
                         <input ref={optionInput} 
-                            className={`h-10 flex-grow m-auto text-white lg:text-lg pl-3 bg-stone-600 focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
+                            className={`h-10 flex-grow m-auto text-white lg:text-lg pl-3 bg-transparent focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
                             onChange = {() => setShowError(false)}
                             placeholder={showError ? "Answer option can not be blank" : "Add an answer option..."}/>
 
-                        <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-lg">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
+                        <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-md">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                     </form>
 
                 </div>
