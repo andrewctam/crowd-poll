@@ -2,6 +2,29 @@ export {};
 
 const mongoose = require('mongoose')
 
+export type Option = {
+    optionTitle: string,
+    votes: number,
+    approved: boolean
+}
+
+export type VotedFor = {
+    userId: string,
+    optionIds: [string]
+};
+
+export type Poll = {
+    title: string,
+    options: [Option],
+    votes: [VotedFor],
+    owner: string,
+    limitOneVote: boolean,
+    approvalRequired: boolean,
+    autoApproveOwner: boolean,
+    hideVotes: boolean,
+    hideVotesForOwner: boolean,
+    disableVoting: boolean
+}
 const pollSchema = mongoose.Schema({
     title: String,
     options:[{ optionTitle: String, votes: Number, approved: Boolean}],

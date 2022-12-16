@@ -1,8 +1,8 @@
-import "./index.css"
 import React, { useEffect, useRef, useState } from "react";
-import CreatedBox from "./misc/CreatedBox";
+import { useNavigate } from "react-router";
+import CreatedBox from "./CreatedBox";
 
-interface WelcomeProps {
+interface WelcomeProps{
     userId: string
     verifyId: () => void 
     addAlert: (msg: string, time: number, type? : string) => void
@@ -15,6 +15,7 @@ function Welcome(props: WelcomeProps) {
     const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
     const [allSelected, setAllSelected] = useState(false);
 
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (allSelected) {
@@ -64,7 +65,7 @@ function Welcome(props: WelcomeProps) {
         }
 
         props.setPollId(response["pollId"]); //calls getPoll after useEffect
-        window.history.replaceState(null, "", `?poll=${response["pollId"]}`);
+        navigate(`/poll/?id=${response["pollId"]}`)
 
 
         const createdPolls = localStorage.getItem("created")

@@ -4,8 +4,8 @@ import Dropdown from "./misc/Dropdown"
 import SettingCheckBox from './misc/SettingCheckBox';
 import SettingListDisplay from './misc/SettingListDisplay';
 import DropdownOption from './misc/DropdownOption';
-import Statistics from './misc/Statistics';
-import useAlert from './useAlert';
+import Statistics from './Statistics';
+import useAlert from '../hooks/useAlert';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 interface PollProps {
@@ -243,7 +243,7 @@ function Poll(props: PollProps) {
                 "zIndex": "1"
             }}>
                 <div>
-                    <a href="." className="mx-auto text-5xl block lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
+                    <a href="/" className="mx-auto text-5xl block lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
                     <input readOnly={true} onClick={(e) => (e.target as HTMLTextAreaElement).select()} className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location.toString()} />
 

@@ -6,16 +6,7 @@ const User = require("./models/userModel")
 
 const wsConnections = require("./server")
 
-type Option = {
-    optionTitle: string,
-    votes: number,
-    approved: boolean
-}
-
-type VotedFor = {
-    userId: string,
-    optionIds: [string]
-};
+import {Option, VotedFor} from "./models/pollModel"
 
 const sendUpdatedPoll = async (pollId: string) => {
     console.log(wsConnections)

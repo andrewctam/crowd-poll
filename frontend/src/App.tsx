@@ -1,10 +1,13 @@
 import "./index.css"
 import { useState, useEffect, useRef } from "react";
-import Poll from "./Poll"
-import Welcome from "./Welcome";
+import Poll from "./poll/Poll"
+import Welcome from "./welcome/Welcome";
 
+import { BrowserRouter, Route, Routes} from "react-router-dom";
+  
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-import useAlert from "./useAlert";
+import useAlert from "./hooks/useAlert";
+import PollLoading from "./welcome/PollLoading";
 
 function App() {
 	const [pollData, setPollData] = useState(null);
@@ -55,7 +58,7 @@ function App() {
 	useEffect(() => {
 		verifyId();
 
-		const idParam = new URLSearchParams(window.location.search).get("poll")
+		const idParam = new URLSearchParams(window.location.search).get("id")
 		if (idParam)
 			setPollId(idParam);
 			
@@ -149,39 +152,37 @@ function App() {
 		pingRef.current = ping;
 	}
 
-
-	let display = null;
-	if (pollId) {
-		if (pollData && wsRef && wsRef.current) 
-			display = <Poll pollId={pollData["pollId"]}
-							title={pollData["title"]}
-							options={pollData["options"]}
-							settings={pollData["settings"]}
-							isOwner={pollData["owner"]}
-							votedFor={pollData["votedFor"]}
-							userId={userId}
-							ws={wsRef.current}
-						/>
-		else
-			display = (<div className = "m-4 text-gray-100 animate-fade">
-							{"If the poll does not load, click "}
-							<button className="animate-fade underline" onClick={() => getPoll()}>here</button>
-							{" to retry the connection. Otherwise, there may be a problem with the server. Click "}
-							<a className="animate-fade underline" href = "./">here</a>
-							{" to go back to the home page."}
-						</div>)
-	} else {
-		display = <Welcome 
-					setPollId={setPollId} 
-					userId={userId} 
-					verifyId = {verifyId} 
-					addAlert = {addAlert} />
-	}
-
-
-	return (<>
-		{alerts}
-		{display}
+	return (
+	<>
+	{alerts}
+	<BrowserRouter>
+		<Routes>
+			<Route path = "/" element = {
+				<Welcome 
+					setPollId={setPollId}
+					userId={userId}
+					verifyId = {verifyId}
+					addAlert = {addAlert}  
+				/>}
+			/>
+			
+			<Route path = "/poll" element = {
+				pollData && wsRef && wsRef.current ?
+					<Poll pollId={pollData["pollId"]}
+					title={pollData["title"]}
+					options={pollData["options"]}
+					settings={pollData["settings"]}
+					isOwner={pollData["owner"]}
+					votedFor={pollData["votedFor"]}
+					userId={userId}
+					ws={wsRef.current}
+					/> 
+				: 
+					<PollLoading addAlert = {addAlert}/>}
+			/>
+		</Routes>
+		
+	</BrowserRouter>
 	</>)
 
 }
