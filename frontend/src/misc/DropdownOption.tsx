@@ -1,6 +1,13 @@
+import React from "react"
 
-const DropdownOption = (props) => {
-    const setSorting = (e) => {
+interface DropdownOptionProps {
+    selected: boolean
+    disabled: boolean
+    name: string
+    setSortingMethod: (str: string) => void
+}
+const DropdownOption = (props: DropdownOptionProps) => {
+    const setSorting = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         props.setSortingMethod(props.name);
     }

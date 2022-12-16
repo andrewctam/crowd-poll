@@ -6,24 +6,24 @@ import Welcome from "./Welcome";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import useAlert from "./useAlert";
 
-function App(props) {
-	const [poll, setPoll] = useState(null);
+function App() {
+	const [pollData, setPollData] = useState(null);
 
 	const [pollId, setPollId] = useState("")
 	const [userId, setUserId] = useState("")
 
-	const pingRef = useRef(null);
+	const pingRef = useRef<NodeJS.Timer | null>(null);
+	const wsRef = useRef<W3CWebSocket | null>(null);
 
 	const [alerts, addAlert] = useAlert();
 
 	const verifyId = async () => {
+		let storedUserId = "";
+
 		if (userId !== "") {
-			var storedUserId = userId
+			storedUserId = userId
 		} else {
-			storedUserId = localStorage.getItem("userId")
-			if (!storedUserId) {
-				storedUserId = "null";
-			}
+			storedUserId = localStorage.getItem("userId") ?? "null"
 		}
 
 		//verify that the user id is in the database
@@ -63,12 +63,15 @@ function App(props) {
 	}, [])
 
 	useEffect(() => {
-		clearInterval(pingRef.current)
+		if (pingRef.current)
+			clearInterval(pingRef.current)
 
 		if (pollId && userId)
 			getPoll()
-		else
-			setPoll(null)
+		else {
+			setPollData(null)
+			wsRef.current = null;
+		}
 
 		// eslint-disable-next-line
 	}, [pollId, userId])
@@ -81,6 +84,7 @@ function App(props) {
 		//open a websocket connection to communicate with the server
 		const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_WS_URL : process.env.REACT_APP_PROD_WS_URL}?poll=${pollId}&user=${userId}`
 		const ws = new W3CWebSocket(url);
+		wsRef.current = ws;
 
 		ws.onopen = () => {
 			console.log("Successfully Connected to Server")
@@ -94,7 +98,7 @@ function App(props) {
 		}
 
 		ws.onmessage = (message) => {
-			const data = JSON.parse(message.data)
+			const data = JSON.parse(message.data.toString())
 			console.log(data)
 			
 			//catch any errors. server will only send an "error" in data if there is an error
@@ -102,7 +106,7 @@ function App(props) {
 				switch (data["error"]) {
 					case "Invalid Poll ID":
 						addAlert("Poll Deleted or Does Not Exist", 10000, "error");
-						setPollId(null)
+						setPollId("")
 						break;
 
 					case "Invalid User ID":
@@ -114,7 +118,7 @@ function App(props) {
 						break;
 					case "Poll Deleted":
 						addAlert("Poll Was Deleted", 10000, "error");
-						setPollId(null)
+						setPollId("")
 						break;
 					default: //other kind of error, no need to handle
 						console.log(data["error"])
@@ -126,17 +130,7 @@ function App(props) {
 			
 			//server will only send update if there is an "update" in data
 			if (data["update"]) {
-				//update poll with data from server
-				setPoll( 
-					<Poll pollId={data["pollId"]}
-						title={data["title"]}
-						options={data["options"]}
-						settings={data["settings"]}
-						isOwner={data["owner"]}
-						votedFor={data["votedFor"]}
-						userId={userId}
-						ws={ws}
-					/>)
+				setPollData(data)
 			}
 
 		}
@@ -151,13 +145,23 @@ function App(props) {
 				ws.send(JSON.stringify({"type": "ping"}))
 			}
 		}, 5000)
+		
 		pingRef.current = ping;
 	}
 
 
+	let display = null;
 	if (pollId) {
-		if (poll) 
-			var display = poll
+		if (pollData && wsRef && wsRef.current) 
+			display = <Poll pollId={pollData["pollId"]}
+							title={pollData["title"]}
+							options={pollData["options"]}
+							settings={pollData["settings"]}
+							isOwner={pollData["owner"]}
+							votedFor={pollData["votedFor"]}
+							userId={userId}
+							ws={wsRef.current}
+						/>
 		else
 			display = (<div className = "m-4 text-gray-100 animate-fade">
 							{"If the poll does not load, click "}
@@ -167,7 +171,11 @@ function App(props) {
 							{" to go back to the home page."}
 						</div>)
 	} else {
-		display = <Welcome setPollId={setPollId} userId={userId} verifyId = {verifyId} addAlert = {addAlert} />
+		display = <Welcome 
+					setPollId={setPollId} 
+					userId={userId} 
+					verifyId = {verifyId} 
+					addAlert = {addAlert} />
 	}
 
 

@@ -1,26 +1,37 @@
 import "./index.css"
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CreatedBox from "./misc/CreatedBox";
 
+interface WelcomeProps {
+    userId: string
+    verifyId: () => void 
+    addAlert: (msg: string, time: number, type? : string) => void
+    setPollId: (str: string) => void 
+}
 
-function Welcome(props) {
-    const titleInput = useRef(null);
+function Welcome(props: WelcomeProps) {
+    const titleInput = useRef<HTMLInputElement>(null);
     const [showError, setShowError] = useState(false);
-    const [selectedDelete, setSelectedDelete] = useState([]);
+    const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
     const [allSelected, setAllSelected] = useState(false);
 
 
     useEffect(() => {
         if (allSelected) {
-            const createdPolls = JSON.parse(localStorage.getItem("created"))
-            setSelectedDelete(Object.keys(createdPolls))
+            const createdPolls = localStorage.getItem("created")
+            if (!createdPolls)
+                return;
+
+            setSelectedDelete(Object.keys(JSON.parse(createdPolls)))
         } else
             setSelectedDelete([]);
     }, [allSelected])
 
-    const createPoll = async (e) => {
+    const createPoll = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+        if (!titleInput.current)
+            return;
+            
         const title = titleInput.current.value
         if (title === "") {
             setShowError(true);
@@ -53,7 +64,7 @@ function Welcome(props) {
         }
 
         props.setPollId(response["pollId"]); //calls getPoll after useEffect
-        window.history.replaceState(null, null, `?poll=${response["pollId"]}`);
+        window.history.replaceState(null, "", `?poll=${response["pollId"]}`);
 
 
         const createdPolls = localStorage.getItem("created")
@@ -70,8 +81,8 @@ function Welcome(props) {
 
     }
 
-    const toggleSelected = (e) => {
-        const id = e.target.id
+    const toggleSelected = (e: React.FormEvent<HTMLInputElement>) => {
+        const id = (e.target as HTMLInputElement).id
         
         for (let i = 0 ; i < selectedDelete.length; i++)
             if (selectedDelete[i] === id) {
@@ -99,16 +110,21 @@ function Welcome(props) {
                 body: JSON.stringify({pollIds: pollIds, userId: props.userId })
             }).then(response => response.json());
 
-            const createdPolls = JSON.parse(localStorage.getItem("created"))
+            //this should find data unless the user deletes it for some reason
+            const createdPolls = localStorage.getItem("created")
 
-            selectedDelete.forEach((id) => {
-                delete createdPolls[id]
-            })
+            if (createdPolls) {
+                const trimmed = JSON.parse(createdPolls);
 
-            if (Object.keys(createdPolls).length === 0)
-                localStorage.removeItem("created")
-            else
-                localStorage.setItem("created", JSON.stringify(createdPolls)); 
+                selectedDelete.forEach((id) => {
+                    delete trimmed[id]
+                })
+
+                if (Object.keys(trimmed).length === 0)
+                    localStorage.removeItem("created")
+                else
+                    localStorage.setItem("created", JSON.stringify(trimmed)); 
+            }
 
             props.addAlert("Polls Deleted", 2000);
             setSelectedDelete([])
@@ -116,27 +132,29 @@ function Welcome(props) {
         }
     }
 
-    const createdPolls = JSON.parse(localStorage.getItem("created"))
+    const createdPolls = localStorage.getItem("created")
+    let createdPollsList = null;
+
     if (createdPolls) {
-        var created = Object.keys(createdPolls).reverse().map((id) =>
-                <CreatedBox 
-                    id = {id} 
-                    key = {id}
-                    title = {createdPolls[id]} 
-                    toggleSelected = {toggleSelected} 
-                    selected = {selectedDelete.includes(id)}
-                    checked = {selectedDelete.includes(id)}/>
+        const polls = JSON.parse(createdPolls)
+        createdPollsList = Object.keys(polls).reverse().map((id) =>
+            <CreatedBox 
+                id = {id} 
+                key = {id}
+                title = {polls[id]} 
+                toggleSelected = {toggleSelected} 
+                selected = {selectedDelete.includes(id)}
+                checked = {selectedDelete.includes(id)}/>
         )
 
-        created.unshift(
+        createdPollsList.unshift(
             <li key = "selectAll" className = "h-fit flex justify-between">
                 <label htmlFor = "selectAll" className = "text-gray-300 select-none">{"Select All"}</label>
                 <input id = "selectAll" checked = {allSelected} onChange = {() => {setAllSelected(!allSelected)}} className = "border border-black ml-2" type="checkbox"></input>
             </li>
         )
 
-    } else
-        created = null;    
+    } 
     
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-center text-center">
@@ -165,12 +183,12 @@ function Welcome(props) {
                     </form>
 
 
-                    {created ? 
+                    {createdPollsList ? 
                     <div className = "bg-stone-600 h-fit w-fit mx-auto p-6 mt-8 rounded-xl shadow-xl">
                         <p className = "text-xl lg:text-2xl mb-4 select-none px-4 text-white">Your Created Polls</p>
 
                         <ul className = "max-h-72 overflow-y-auto mx-auto px-6 max-w-[50vh]">
-                            {created}
+                            {createdPollsList}
                         </ul>
 
                         <div className = "mt-4" onClick = {deletePolls}>

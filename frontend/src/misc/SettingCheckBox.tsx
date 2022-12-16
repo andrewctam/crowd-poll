@@ -1,13 +1,24 @@
 import {useState, useEffect} from 'react';
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const SettingCheckBox = (props) => {
+interface SettingCheckBoxProps {
+    active: boolean
+    ws: W3CWebSocket
+    pollId: string
+    userId: string
+    name: string
+    indent: boolean
+    text: string
+}
+
+const SettingCheckBox = (props: SettingCheckBoxProps) => {
     const [clientActive, setClientActive] = useState(props.active); //allows settings to be responsive even if there is server delay
 
     useEffect(() => {
         setClientActive(props.active);
     }, [props.active])
 
-    const handleChange = async (e) => {        
+    const handleChange = async (e: React.FormEvent<HTMLInputElement>) => {        
         setClientActive(!clientActive);
 
         props.ws.send(JSON.stringify({
@@ -15,7 +26,7 @@ const SettingCheckBox = (props) => {
             pollId: props.pollId,
             userId: props.userId,
             setting: props.name,
-            newValue: e.target.checked
+            newValue: (e.target as HTMLInputElement).checked
         }));
 
 

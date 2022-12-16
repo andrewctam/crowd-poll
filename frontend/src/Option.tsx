@@ -1,6 +1,25 @@
 import { useEffect, useState, memo } from 'react'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-function Option(props) {
+interface OptionProps {
+    userId: string
+    pollId: string
+    isOwner: boolean
+    addAlert: (msg: string, time: number, type?: string) => void
+    ws: W3CWebSocket
+    votes: number
+    optionTitle: string
+    optionId: string
+    key: string
+    voted: boolean
+    pieSelected: boolean
+    toggleSelection: (optionId: string) => void
+    approved: boolean
+    disableVoting: boolean
+    alreadyVoted: boolean
+}
+
+function Option(props : OptionProps) {
     const [showBox, setShowBox] = useState(false);
     const [selected, setSelected] = useState(false);
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
@@ -10,7 +29,7 @@ function Option(props) {
         //once an update is received, voting is finished
     }, [props.voted])
 
-    const castVote = async (e) => {
+    const castVote = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         //check for settings to avoid sending unnecessary requests that would be rejected
@@ -41,7 +60,7 @@ function Option(props) {
 
     }
 
-    const approveDenyOption = async (approved) => {
+    const approveDenyOption = async (approved: boolean) => {
         props.ws.send(JSON.stringify({
             type: "approveDenyOption",
             pollId: props.pollId,
@@ -59,7 +78,9 @@ function Option(props) {
     }
 
     let style = {
-        borderColor: "rgb(255, 255, 255)"
+        borderColor: "rgb(255, 255, 255)",
+        transform: "",
+        backgroundImage: ""
     };
 
     if (!props.approved)
@@ -78,7 +99,7 @@ function Option(props) {
         style["backgroundImage"] = "linear-gradient(to right, rgb(89 100 90), rgb(92 92 90))"
 
 
-    const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
 
     console.log(props.optionTitle)
     if (props.approved)

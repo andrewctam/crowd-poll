@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, useReducer } from 'react'
+import React, { useRef, useState, useEffect, useCallback, useReducer } from 'react'
 import Option from "./Option"
 import Dropdown from "./misc/Dropdown"
 import SettingCheckBox from './misc/SettingCheckBox';
@@ -6,11 +6,41 @@ import SettingListDisplay from './misc/SettingListDisplay';
 import DropdownOption from './misc/DropdownOption';
 import Statistics from './misc/Statistics';
 import useAlert from './useAlert';
-function Poll(props) {
-    const optionInput = useRef(null);
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+interface PollProps {
+    pollId: string
+    title: string
+    isOwner: boolean
+    userId: string
+    options: {
+        approved: boolean
+        optionTitle: string
+        votes: number
+        _id: string
+    }[]
+    votedFor: string[]
+    ws: W3CWebSocket
+    settings: {
+        hideVotes: boolean
+        hideVotesForOwner: boolean
+        approvalRequired: boolean
+        autoApproveOwner: boolean
+        disableVoting: boolean
+        limitOneVote: boolean
+    }
+}
+
+type SelectedOptionsAction = 
+    {type: "TOGGLE", payload: {optionId: string}} |
+    {type: "CLEAR"}
+
+
+function Poll(props: PollProps) {
+    const optionInput = useRef<HTMLInputElement>(null);
     const [showError, setShowError] = useState(false);
 
-    const [selectedOptions, dispatch] = useReducer((state, action) => {
+    const [selectedOptions, dispatch] = useReducer((state: string[], action: SelectedOptionsAction) => {
         switch (action.type) {
             case "TOGGLE":
                 if (state.includes(action.payload.optionId)) {
@@ -25,7 +55,7 @@ function Poll(props) {
         }
     }, []);
 
-    const toggleSelection = useCallback((optionId) => {
+    const toggleSelection = useCallback((optionId: string) => {
         dispatch({ type: "TOGGLE", payload: {"optionId": optionId} });
     }, []);
 
@@ -35,7 +65,8 @@ function Poll(props) {
     const [filterMethod, setFilterMethod] = useState("All");
     const [showFilter, setShowFilter] = useState(false);
 
-    const [pieSelected, setPieSelected] = useState(null);
+    const [pieSelected, setPieSelected] = useState<string>("");
+
     useEffect(() => {
         if ((sortingMethod === "Vote Count" && props.settings["hideVotes"]) &&
             (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
@@ -54,8 +85,11 @@ function Poll(props) {
 
     const [alerts, addAlert] = useAlert();
 
-    const addOption = async (e) => {
+    const addOption = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (!optionInput.current)
+            return;
 
         const optionTitle = optionInput.current.value
 
@@ -83,7 +117,7 @@ function Poll(props) {
     }
 
   
-    const deleteSelected = async (e) => {
+    const deleteSelected = async (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLLabelElement>) => {
         if (selectedOptions.length === 0 || !props.isOwner)
             return;
 
@@ -152,8 +186,10 @@ function Poll(props) {
 
 
     //what to display for settings. Owner sees box to change settings. Other users see which settings, null if none, a box if at least 1 setting
+    let settingsDisplay = null;
+
     if (props.isOwner) {
-        var settingsDisplay = (
+        settingsDisplay = (
             <div className="bg-slate-600 mt-4 p-3 w-fit mx-auto rounded-xl shadow-md">
                 <h1 className='text-white text-2xl mb-2 font-semibold'>Settings</h1>
                 <SettingCheckBox ws={props.ws} text="Disable Voting" name="disableVoting" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["disableVoting"]} />
@@ -194,8 +230,7 @@ function Poll(props) {
                 </ul>
             </div>
         )
-    } else
-        settingsDisplay = null;
+    } 
 
 
     return ( 
@@ -210,7 +245,7 @@ function Poll(props) {
                 <div>
                     <a href="." className="mx-auto text-5xl block lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
-                    <input readOnly={true} onClick={(e) => e.target.select()} className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location} />
+                    <input readOnly={true} onClick={(e) => (e.target as HTMLTextAreaElement).select()} className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location.toString()} />
 
                     {settingsDisplay}
 
@@ -239,7 +274,7 @@ function Poll(props) {
                             name="Sort By"
                             show={showSorting}
                             setShow={setShowSorting}
-                            selected={sortingMethod}
+                            method={sortingMethod}
 
                             children={[
                                 <DropdownOption key={"Order Created"} name={"Order Created"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Order Created"} disabled={false} />,
@@ -254,7 +289,7 @@ function Poll(props) {
                             name="Filter By"
                             show={showFilter}
                             setShow={setShowFilter}
-                            selected={filterMethod}
+                            method={filterMethod}
 
                             children={[
                                 <DropdownOption key={"All"} name={"All"} setSortingMethod={setFilterMethod} selected={filterMethod === "All"} disabled={false} />,
