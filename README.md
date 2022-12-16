@@ -8,6 +8,7 @@ Owner View                   |  User View
 ![Owner View](ownerdemo.png) | ![User View](userdemo.png)
 
 ## Technologies
+- [Typescript](https://www.typescriptlang.org/download)
 - [MongoDB](https://www.mongodb.com/try/download/community)
 - [Express](https://expressjs.com/en/starter/installing.html)
 - [WebSockets](https://www.npmjs.com/package/ws)
