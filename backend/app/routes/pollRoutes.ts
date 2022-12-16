@@ -1,12 +1,13 @@
-const express = require('express')
 var ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("../models/pollModel")
 const User = require("../models/userModel")
-const router = express.Router();
+const router = require('express').Router();
+import { Request, Response } from 'express';
+import { UserConnection } from '../server';
 
-const wsConnections = require("../server")
+const connections = require("../server")
 
-router.post("/create", async (req, res) => {
+router.post("/create", async (req: Request, res: Response ) => {
     const {title, userId} = req.body;
     
     if (title) {
@@ -24,7 +25,7 @@ router.post("/create", async (req, res) => {
 
 })
 
-router.delete("/delete", async (req, res) => {
+router.delete("/delete", async (req: Request, res: Response) => {
     const {pollIds, userId} = req.body;
 
     if (!pollIds)
@@ -35,18 +36,18 @@ router.delete("/delete", async (req, res) => {
         res.status(410).send("Error")
     
 
-    pollsToDelete.forEach(async (pollId) => {
+    pollsToDelete.forEach(async (pollId: typeof ObjectId) => {
         if (ObjectId.isValid(pollId)) {
             await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
             
-            const connectedUsers = wsConnections.get(pollId)
+            const connectedUsers = connections.get(pollId)
             if (connectedUsers) {
-                connectedUsers.forEach((user) => {
+                connectedUsers.forEach((user: UserConnection) => {
                     user.ws.send(JSON.stringify({"error": "Poll Deleted"}))
                     user.ws.close()
                 })
 
-                wsConnections.delete(pollId)
+                connections.delete(pollId)
             }
             
         } else {

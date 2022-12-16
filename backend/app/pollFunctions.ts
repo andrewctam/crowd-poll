@@ -1,29 +1,42 @@
+import { UserConnection } from "./server";
+
 var ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("./models/pollModel")
 const User = require("./models/userModel")
 
 const wsConnections = require("./server")
 
-const sendUpdatedPoll = async (pollId) => {
+type Option = {
+    optionTitle: string,
+    votes: number,
+    approved: boolean
+}
+
+type VotedFor = {
+    userId: string,
+    optionIds: [string]
+};
+
+const sendUpdatedPoll = async (pollId: string) => {
     console.log(wsConnections)
     const connectedUsers = wsConnections.get(pollId);
 
     if (connectedUsers) {
-        connectedUsers.forEach( async (user) => { //send updated poll to all connected users
+        connectedUsers.forEach( async (user: UserConnection) => { //send updated poll to all connected users
             user["ws"].send(await getPoll(user["userId"], pollId))
         });
     }
 }
 
-const checkPollId = async (pollId) => {
+const checkPollId = async (pollId: string) => {
     return ObjectId.isValid(pollId) && await Poll.exists({_id: pollId})
 }
 
-const checkUserId = async (userId) => {
+const checkUserId = async (userId: string) => {
     return ObjectId.isValid(userId) && await User.exists({_id: userId})
 }
 
-const getPoll = async (userId, pollId) => {
+const getPoll = async (userId: string, pollId: string) => {
     if (!await checkPollId(pollId)) {
         return JSON.stringify({"error": "Invalid Poll ID"})
     }
@@ -37,13 +50,15 @@ const getPoll = async (userId, pollId) => {
         return JSON.stringify({"error": "Poll expired or Invalid ID."})
     }
 
+    
+   
+
     //check if the user voted before
-    //votes = [ {userId: [optionIds] } ]
     if (await Poll.exists({_id: pollId, "votes.userId": userId})) { //check if the poll has an array of votedFor for the user
-        const ids = poll["votes"]
+        const votes = poll["votes"]
 
         //find the user's ids and get the options they voted for
-        var optionIds = ids.find(option => option["userId"] === userId)["optionIds"]
+        var optionsVotedFor = votes.find((vote: VotedFor) => vote["userId"] === userId)["optionIds"]
     } else { //user has never voted before, create new array
         await Poll.updateOne({_id: pollId}, {
             $push: {
@@ -53,23 +68,24 @@ const getPoll = async (userId, pollId) => {
                 }
             }
         });
-        optionIds = []
+        optionsVotedFor = []
     }
 
+    
 
     const isOwner = userId === poll["owner"]
     var options = poll["options"]
 
     if (isOwner) {
         if (poll["hideVotes"] && poll["hideVotesForOwner"])
-            options.forEach(option => option["votes"] = -1) //set -1 to indicate votes hidden
+            options.forEach((option: Option) => option["votes"] = -1) //set -1 to indicate votes hidden
 
     } else {
         if (poll['approvalRequired'])
-            options = options.filter(element => element["approved"]) //filter out to only show approved options. show all if approval is not required
+            options = options.filter((option: Option) => option["approved"]) //filter out to only show approved options. show all if approval is not required
     
         if (poll['hideVotes']) {
-            options.forEach(option => option["votes"] = - 1) //set -1 to indicate votes hidden
+            options.forEach((option: Option) => option["votes"] = -1) //set -1 to indicate votes hidden
         }
     }
         
@@ -87,12 +103,12 @@ const getPoll = async (userId, pollId) => {
             disableVoting: poll["disableVoting"],
             hideVotesForOwner: poll["hideVotesForOwner"],
         },
-        votedFor: optionIds
+        votedFor: optionsVotedFor
     })
 
 }
 
-const addOption = async (userId, pollId, optionTitle) => {
+const addOption = async (userId: string, pollId: string, optionTitle: string) => {
     if (optionTitle && await checkPollId(pollId) && await checkUserId(userId)) 
         var poll = await Poll.findOne({_id: pollId})
     else {
@@ -117,7 +133,7 @@ const addOption = async (userId, pollId, optionTitle) => {
     return JSON.stringify({"success": "Option Added"})
 }
 
-const deleteOptions = async (userId, pollId, optionsToDelete) => {
+const deleteOptions = async (userId: string, pollId: string, optionsToDelete: string[]) => {
     for (let i = 0; i < optionsToDelete.length; i++) {
         if (!ObjectId.isValid(optionsToDelete[i]))
             return JSON.stringify({"error" : "Invalid: " + optionsToDelete[i]})
@@ -143,7 +159,7 @@ const deleteOptions = async (userId, pollId, optionsToDelete) => {
     }
 }    
 
-const approveDenyOption = async (userId, pollId, optionId, approved) => {
+const approveDenyOption = async (userId: string, pollId: string, optionId: string, approved: boolean) => {
     if (await checkPollId(pollId) && await checkUserId(userId) && ObjectId.isValid(optionId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
@@ -170,7 +186,7 @@ const approveDenyOption = async (userId, pollId, optionId, approved) => {
     }
 }
 
-const vote = async (userId, pollId, optionId) => {
+const vote = async (userId: string , pollId: string, optionId: string) => {
     if (await checkPollId(pollId) && await checkUserId(userId) && ObjectId.isValid(optionId)) {
         var poll = await Poll.findOne({_id: pollId})
     } else {
@@ -185,7 +201,7 @@ const vote = async (userId, pollId, optionId) => {
     const ids = poll["votes"]
     
     try {
-        var optionIds = ids.find(option => option["userId"] === userId)["optionIds"] //get array of optionIds user has voted for
+        var optionIds = ids.find((vote: VotedFor) => vote["userId"] === userId)["optionIds"] //get array of optionIds user has voted for
     } catch (error) {
         return JSON.stringify({"error": "Invalid ID"})
     }
@@ -224,7 +240,7 @@ const vote = async (userId, pollId, optionId) => {
     
 }
 
-const updateSetting = async (userId, pollId, setting, newValue) => {   
+const updateSetting = async (userId: string, pollId: string, setting: string, newValue: boolean) => {   
     if (await checkPollId(pollId) && await checkUserId(userId))  
         var poll = await Poll.findOne({_id: pollId})
     else {
@@ -235,9 +251,11 @@ const updateSetting = async (userId, pollId, setting, newValue) => {
         return JSON.stringify({"error" : "Permission Denied"})
     }
 
+    type SettingUpdate = {limitOneVote: boolean} | {approvalRequired: boolean} | {hideVotes: boolean} | {hideVotesForOwner: boolean} | {disableVoting: boolean} | {autoApproveOwner: boolean}
+    
     switch (setting) {
         case "limitOneVote":
-            var update = { limitOneVote: newValue }; 
+            var update : SettingUpdate = { limitOneVote: newValue }; 
             break;
         case "approvalRequired":
             update = { approvalRequired: newValue };

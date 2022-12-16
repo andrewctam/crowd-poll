@@ -3,8 +3,8 @@ if (process.env.NODE_ENV !== 'production')
 
 const port = process.env.PORT || 6000
 
-const connectMongoDB = require("./database");
-connectMongoDB();
+const connectDB = require("./database");
+connectDB();
 
 //maps poll ids to a set containing ws user info
 //Map(1) {{POLLID} => Set(1) { { ws: [WebSocket], userId: {USERID} } }}
@@ -26,15 +26,15 @@ app.use("/api/users", require("./routes/userRoutes"))
 app.use("/api/polls", require("./middleware/pollMiddleware"))
 app.use("/api/polls", require("./routes/pollRoutes"))
 const expressServer = app.listen(port, () => {console.log(`Server started on port ${port}`)})
-
+import { WebSocket } from 'ws';
 
 //websocket server
 const server = require("ws")
 const wss = new server.Server({server: expressServer})
 
 const pollFunctions = require("./pollFunctions")
-wss.on("connection", async (ws, req) => {
-    ws.on("message", async message => {
+wss.on("connection", async (ws: WebSocket, req: any) => {
+    ws.on("message", async (message: any) => {
         const data = JSON.parse(message)
         const type = data.type
         const pollId = data.pollId
@@ -99,12 +99,12 @@ wss.on("connection", async (ws, req) => {
     }
 
     console.log("User " + userId + " connected to poll " + pollId)
-    const user = {
+    const user : UserConnection = {
         "ws": ws, 
-        "userId": userId
+        "userId": userId ?? ""
     } 
 
-    //add use to poll's set of current connections
+    //add user to poll's set of current connections
     var connectedToPoll = wsConnections.get(pollId)
     if (!connectedToPoll) {
         connectedToPoll = new Set()
@@ -131,3 +131,8 @@ wss.on("connection", async (ws, req) => {
     })
     
 })
+
+export interface UserConnection {
+    ws: WebSocket
+    userId: string
+}
