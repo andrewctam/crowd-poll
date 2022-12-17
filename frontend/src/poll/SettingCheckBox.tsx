@@ -37,7 +37,7 @@ const SettingCheckBox = (props: SettingCheckBoxProps) => {
             {props.text}
         </label>
 
-        <input className = "border border-black ml-1 self-center" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive}></input>
+        <input className = "border border-black ml-1 self-center" id={props.name} type="checkbox" onChange = {handleChange} checked = {clientActive} />
     </div>)
 }
 

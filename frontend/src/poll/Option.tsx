@@ -14,15 +14,15 @@ interface OptionProps {
     key: string
     voted: boolean
     pieSelected: boolean
-    toggleSelection: (optionId: string) => void
     approved: boolean
     disableVoting: boolean
     alreadyVoted: boolean
+    selected: boolean
+    toggleSelection: (optionId: string) => void
 }
 
 function Option(props: OptionProps) {
     const [showBox, setShowBox] = useState(false);
-    const [selected, setSelected] = useState(false);
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
     
     useEffect(() => {
@@ -72,10 +72,6 @@ function Option(props: OptionProps) {
         props.addAlert(`Option ${approved ? "approved." : "rejected."}`, 2000);
     }
 
-    const toggleSelection = () => {
-        setSelected(!selected)
-        props.toggleSelection(props.optionId)
-    }
 
     let style = {
         borderColor: "rgb(255, 255, 255)",
@@ -85,7 +81,7 @@ function Option(props: OptionProps) {
 
     if (!props.approved)
         style["borderColor"] = "rgb(255, 0, 0)"
-    else if (selected)
+    else if (props.selected)
         style["borderColor"] = "rgb(255 127 127)"
     else if (voting)
         style["borderColor"] = "rgb(200 236 180)"
@@ -114,9 +110,9 @@ function Option(props: OptionProps) {
             <div className="text-xl px-10 relative text-left text-ellipsis overflow-hidden ">
                 {props.optionTitle}
 
-                {showBox || selected || (props.isOwner && touchscreen) ?
-                    <input type="checkbox" checked={selected} className="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
-                        onChange={toggleSelection} onClick={(e) => e.stopPropagation()}></input>
+                {showBox || props.selected || (props.isOwner && touchscreen) ?
+                    <input type="checkbox" checked={props.selected} className="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
+                        onChange={() => {props.toggleSelection(props.optionId)}} onClick={(e) => e.stopPropagation()}></input>
                     : null}
 
             </div>

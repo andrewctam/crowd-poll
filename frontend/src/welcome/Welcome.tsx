@@ -193,8 +193,8 @@ function Welcome(props: WelcomeProps) {
                             {createdPollsList}
                         </ul>
 
-                        <div className = "mt-4" onClick = {deletePolls}>
-                            <label className = "text-red-100" >
+                        <div className = "mt-4" >
+                            <label className = "text-red-100" onClick = {deletePolls}>
                                 {"Delete Selected Polls"}
                             </label>
                             

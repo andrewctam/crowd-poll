@@ -16,7 +16,8 @@ interface PollProps extends PollData {
 
 type SelectedOptionsAction = 
     {type: "TOGGLE", payload: {optionId: string}} |
-    {type: "CLEAR"}
+    {type: "CLEAR"} |
+    {type: "SELECT_ALL"}
 
 function Poll(props: PollProps) {
     const optionInput = useRef<HTMLInputElement>(null);
@@ -30,6 +31,8 @@ function Poll(props: PollProps) {
                 } else {
                     return [...state, action.payload.optionId];
                 }
+            case "SELECT_ALL":
+                return props.options.map((option) => option._id)
             case "CLEAR":
                 return [];
             default:
@@ -157,10 +160,6 @@ function Poll(props: PollProps) {
     }
 
 
-
-    //what to display for settings. Owner sees box to change settings. Other users see which settings, null if none, a box if at least 1 setting
-
-
     return ( 
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
@@ -207,6 +206,7 @@ function Poll(props: PollProps) {
                     </p>
                     :
                     <div>
+
                         <Dropdown
                             name="Sort By"
                             show={showSorting}
@@ -242,6 +242,28 @@ function Poll(props: PollProps) {
                                     /> : null
                             ]}
                         />
+
+                        {selectedOptions.length > 0 ? 
+                            <div className = "text-white mt-2 justify-center flex">
+                                <label htmlFor={"selectAll"}>
+                                    Select All
+                                </label>
+
+                                <input 
+                                    className="w-4 h-4 rounded-xl ml-2 self-center" 
+                                    id = {"selectAll"} 
+                                    type="checkbox"
+                                    checked={selectedOptions.length ===  props.options.length} 
+                                    onChange={() => {
+                                        if (selectedOptions.length === props.options.length)
+                                            dispatch({type: "CLEAR"})
+                                        else
+                                            dispatch({type: "SELECT_ALL"});
+                                    }}/>
+                                
+                            </div>
+                        : null}
+
                     </div>}
 
                 <div className='mx-10 my-3 lg:h-fit h-screen'>
@@ -260,7 +282,7 @@ function Poll(props: PollProps) {
 
                             voted={props.votedFor.includes(obj["_id"])}
                             pieSelected = {selectedSlice === obj["_id"]}
-
+                            selected = {selectedOptions.includes(obj["_id"])}
                             toggleSelection={toggleSelection}
                             approved={!props.settings["approvalRequired"] || obj["approved"]}
                             disableVoting={props.settings["disableVoting"]}
