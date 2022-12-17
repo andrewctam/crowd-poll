@@ -8,7 +8,7 @@ Owner View                   |  User View
 ![Owner View](ownerdemo.png) | ![User View](userdemo.png)
 
 ## Technologies
-- [Typescript](https://www.typescriptlang.org/download)
+- [TypeScript](https://www.typescriptlang.org/download)
 - [MongoDB](https://www.mongodb.com/try/download/community)
 - [Express](https://expressjs.com/en/starter/installing.html)
 - [WebSockets](https://www.npmjs.com/package/ws)
@@ -23,15 +23,13 @@ Clone this repository. Then, in the backend and frontend folders, update the env
 git clone https://github.com/tamandrew/CrowdPoll.git
 ```
 
-To run the local servers, in each of the backend and frontend folders install npm dependencies and run ```npm start```.
+To run with docker, run ```docker compose up``` at the root. 
+```
+docker compose up
+```
+
+To run the local servers, in each of the backend and frontend folders install npm dependencies and run ```npm start``` in /frontend and /backend.
 
 ```
-cd backend
-npm install
-npm start
-```
-```
-cd ../frontend
-npm install
 npm start
 ```
