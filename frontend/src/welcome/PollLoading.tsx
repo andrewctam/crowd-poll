@@ -1,9 +1,11 @@
 
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import { useNavigate } from 'react-router';
 
+import { AddAlert } from '../hooks/useAlert';
+
 interface PollLoadingProps {
-    addAlert: (str: string, time: number, msg?: string) => void
+    addAlert: AddAlert
 }
 
 function PollLoading(props: PollLoadingProps) {
@@ -11,11 +13,13 @@ function PollLoading(props: PollLoadingProps) {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            props.addAlert("Poll not found", 1000, "error");
+            props.addAlert("Returned to Home Page", 1000, "error");
             navigate("/");
         }, 2000);
 
         return () => clearTimeout(timeout);
+
+    // eslint-disable-next-line 
     }, []) 
 
 

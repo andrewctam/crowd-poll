@@ -1,34 +1,37 @@
 import React, { useRef, useState, useEffect, useCallback, useReducer } from 'react'
 import Option from "./Option"
-import Dropdown from "./misc/Dropdown"
-import SettingCheckBox from './misc/SettingCheckBox';
-import SettingListDisplay from './misc/SettingListDisplay';
-import DropdownOption from './misc/DropdownOption';
+import Dropdown from "./Dropdown"
+import DropdownOption from './DropdownOption';
 import Statistics from './Statistics';
+import Settings from './Settings';
 import useAlert from '../hooks/useAlert';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+import TitleBox from './TitleBox';
+
+
+export interface PollSettings {
+    hideVotes: boolean
+    hideVotesForOwner: boolean
+    approvalRequired: boolean
+    autoApproveOwner: boolean
+    disableVoting: boolean
+    limitOneVote: boolean
+}
 
 interface PollProps {
     pollId: string
+    userId: string
     title: string
     isOwner: boolean
-    userId: string
+    ws: W3CWebSocket
+    votedFor: string[]
+    settings: PollSettings
     options: {
         approved: boolean
         optionTitle: string
         votes: number
         _id: string
     }[]
-    votedFor: string[]
-    ws: W3CWebSocket
-    settings: {
-        hideVotes: boolean
-        hideVotesForOwner: boolean
-        approvalRequired: boolean
-        autoApproveOwner: boolean
-        disableVoting: boolean
-        limitOneVote: boolean
-    }
 }
 
 type SelectedOptionsAction = 
@@ -66,8 +69,11 @@ function Poll(props: PollProps) {
     const [showFilter, setShowFilter] = useState(false);
 
     const [pieSelected, setPieSelected] = useState<string>("");
+    
+    const [alerts, addAlert] = useAlert();
 
     useEffect(() => {
+        //Reset sorting method if votes are hidden and Vote Count is selected
         if ((sortingMethod === "Vote Count" && props.settings["hideVotes"]) &&
             (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
             setSortingMethod("Order Created");
@@ -76,6 +82,7 @@ function Poll(props: PollProps) {
     }, [props.settings["hideVotes"], props.settings["hideVotesForOwner"], props.isOwner]);
 
     useEffect(() => {
+        //Reset filter method if Pending Approval is disabled
         if (filterMethod === "Pending Approval" && !props.settings["approvalRequired"])
             setFilterMethod("All")
 
@@ -83,16 +90,12 @@ function Poll(props: PollProps) {
     }, [props.settings["approvalRequired"]]);
 
 
-    const [alerts, addAlert] = useAlert();
-
     const addOption = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         if (!optionInput.current)
             return;
 
         const optionTitle = optionInput.current.value
-
         if (optionTitle === "") {
             setShowError(true);
             return;
@@ -116,7 +119,6 @@ function Poll(props: PollProps) {
         optionInput.current.value = "";
     }
 
-  
     const deleteSelected = async (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLLabelElement>) => {
         if (selectedOptions.length === 0 || !props.isOwner)
             return;
@@ -134,8 +136,7 @@ function Poll(props: PollProps) {
     }
 
 
-    var displayedOptions = [...props.options];
-
+    let displayedOptions = [...props.options];
     switch (filterMethod) {
         case "Voted For":
             displayedOptions = displayedOptions.filter((option) => {
@@ -186,68 +187,36 @@ function Poll(props: PollProps) {
 
 
     //what to display for settings. Owner sees box to change settings. Other users see which settings, null if none, a box if at least 1 setting
-    let settingsDisplay = null;
-
-    if (props.isOwner) {
-        settingsDisplay = (
-            <div className="bg-slate-600 mt-4 p-3 w-fit mx-auto rounded-xl shadow-md">
-                <h1 className='text-white text-2xl mb-2 font-semibold'>Settings</h1>
-                <SettingCheckBox ws={props.ws} text="Disable Voting" name="disableVoting" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["disableVoting"]} />
-
-                <SettingCheckBox ws={props.ws} text="Hide Vote Count" name="hideVotes" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["hideVotes"]} />
-
-                {props.isOwner && props.settings["hideVotes"] ?
-                    <SettingCheckBox ws={props.ws} text="Hide Vote Count For You" name="hideVotesForOwner" indent={true} pollId={props.pollId} userId={props.userId} active={props.settings["hideVotesForOwner"]} />
-                    : null}
-
-                <SettingCheckBox ws={props.ws} text="Limit Users To One Vote" name="limitOneVote" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["limitOneVote"]} />
-
-                <SettingCheckBox ws={props.ws} text="New Options Require Approval" name="approvalRequired" indent={false} pollId={props.pollId} userId={props.userId} active={props.settings["approvalRequired"]} />
-
-                {props.isOwner && props.settings["approvalRequired"] ?
-                    <SettingCheckBox ws={props.ws} text="Auto Approve Your Options" name="autoApproveOwner" indent={true} pollId={props.pollId} userId={props.userId} active={props.settings["autoApproveOwner"]} />
-                    : null}
-
-
-                <div className="flex justify-between">
-                    <label className="px-1 mr-2 text-red-100" onClick={deleteSelected}>
-                        {"Delete Selected Options"}
-                    </label>
-
-                    <button onClick={deleteSelected} className="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">{selectedOptions.length}</button>
-                </div>
-            </div>)
-    } else if (props.settings["disableVoting"] || props.settings["hideVotes"] || props.settings["limitOneVote"] || props.settings["approvalRequired"]) {
-        settingsDisplay = (
-            <div className="p-4 rounded-xl mx-auto w-fit mt-4 bg-slate-600 shadow-md">
-                <h1 className="text-center text-2xl font-semibold pt-1 text-white select-none mb-3">Settings</h1>
-
-                <ul className="text-left">
-                    <SettingListDisplay text="Adding and removing votes is disabled" display={props.settings["disableVoting"]} />
-                    <SettingListDisplay text="Vote counts are hidden" display={props.settings["hideVotes"]} />
-                    <SettingListDisplay text="You may only cast one vote at a time" display={props.settings["limitOneVote"]} />
-                    <SettingListDisplay text="New options require approval from the owner" display={props.settings["approvalRequired"]} />
-                </ul>
-            </div>
-        )
-    } 
 
 
     return ( 
         <>
         {alerts}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
-
             <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
-                "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
-                "zIndex": "1"
-            }}>
+                    "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
+                    "zIndex": "1"
+                }}>
+                    
                 <div>
-                    <a href="/" className="mx-auto text-5xl block lg:text-7xl font-semibold text-gray-200 select-none">Crowd Poll</a>
+                    <a href="/" className="mx-auto text-5xl block lg:text-6xl font-semibold text-gray-200 select-none">Crowd Poll</a>
 
-                    <input readOnly={true} onClick={(e) => (e.target as HTMLTextAreaElement).select()} className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" value={window.location.toString()} />
+                    <input
+                        readOnly={true} 
+                        onClick={(e) => (e.target as HTMLTextAreaElement).select()} 
+                        className="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2" 
+                        value={window.location.toString()} 
+                    />
 
-                    {settingsDisplay}
+                    <Settings 
+                        ws = {props.ws}
+                        isOwner = {props.isOwner}
+                        pollId = {props.pollId}
+                        userId = {props.userId}
+                        deleteSelected = {deleteSelected}
+                        numSelectedOptions = {selectedOptions.length}
+                        settings = {props.settings}
+                    />
 
                     <Statistics
                         options={props.options}
@@ -260,12 +229,10 @@ function Poll(props: PollProps) {
 
             <div className="bg-stone-700 lg:h-screen overflow-y-auto">
 
-                <div className="grid items-center m-5 rounded-xl bg-stone-600/75 py-3 text-3xl bold text-white shadow-lg sticky top-5 z-10 overflow-hidden text-ellipsis">
-                    {props.title}
-                </div>
+                <TitleBox title = {props.title} />
 
                 {props.options.length === 0 ?
-                    <p className='text-md lg:text-lg mb-10 text-white'>
+                    <p className='text-md lg:text-lg text-white'>
                         {"No answer options yet, add one below!"}
                     </p>
                     :
@@ -313,9 +280,8 @@ function Poll(props: PollProps) {
                             userId={props.userId}
                             pollId={props.pollId}
                             isOwner={props.isOwner}
-
-                            addAlert={addAlert}
                             ws={props.ws}
+                            addAlert={addAlert}
 
                             votes={obj["votes"]}
                             optionTitle={obj["optionTitle"]}
@@ -342,7 +308,6 @@ function Poll(props: PollProps) {
                     </form>
 
                 </div>
-
 
             </div>
 

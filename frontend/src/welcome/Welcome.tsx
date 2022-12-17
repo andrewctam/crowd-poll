@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import CreatedBox from "./CreatedBox";
+import { AddAlert } from "../hooks/useAlert";
 
 interface WelcomeProps{
     userId: string
     verifyId: () => void 
-    addAlert: (msg: string, time: number, type? : string) => void
+    addAlert: AddAlert
     setPollId: (str: string) => void 
 }
 
@@ -165,7 +166,7 @@ function Welcome(props: WelcomeProps) {
                 "zIndex": "1"
             }}>
                 <div>
-                    <a href="."><h1 className="mx-auto text-5xl lg:text-7xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
+                    <a href="."><h1 className="mx-auto text-5xl lg:text-6xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
                     <p className="text-sm lg:text-xl pt-1 mt-2 text-gray-300 select-none">Share a poll with a title <br /> Crowd source answer options <br />Collectively vote on the best one</p>
                 </div>
             </div>

@@ -6,6 +6,8 @@ interface Alert {
     timeout: NodeJS.Timeout
 }
 
+export type AddAlert = (str: string, time: number, msg?: string) => void
+
 type AlertAction = 
     { type: "ADD_ALERT", payload: { msg: string, time: number, type: string } } |
     { type: "REMOVE_ALERT", payload: { id: number } } 

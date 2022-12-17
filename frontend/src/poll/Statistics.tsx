@@ -5,14 +5,12 @@ type OptionData = {
     optionTitle: string
     votes: number
     _id: string
-
 }
 
 interface StatisticsProps {
     options: OptionData[]
     setPieSelected: (str: string) => void
 }
-
 
 interface PieChartProps {
     data: OptionData[]

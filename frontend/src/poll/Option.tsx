@@ -1,11 +1,12 @@
 import { useEffect, useState, memo } from 'react'
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+import { AddAlert } from '../hooks/useAlert';
 
 interface OptionProps {
     userId: string
     pollId: string
     isOwner: boolean
-    addAlert: (msg: string, time: number, type?: string) => void
+    addAlert: AddAlert
     ws: W3CWebSocket
     votes: number
     optionTitle: string
@@ -19,7 +20,7 @@ interface OptionProps {
     alreadyVoted: boolean
 }
 
-function Option(props : OptionProps) {
+function Option(props: OptionProps) {
     const [showBox, setShowBox] = useState(false);
     const [selected, setSelected] = useState(false);
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay

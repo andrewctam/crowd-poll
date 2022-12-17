@@ -4,16 +4,17 @@ import Poll from "./poll/Poll"
 import Welcome from "./welcome/Welcome";
 
 import { BrowserRouter, Route, Routes} from "react-router-dom";
-  
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+
 import useAlert from "./hooks/useAlert";
 import PollLoading from "./welcome/PollLoading";
+
 
 function App() {
 	const [pollData, setPollData] = useState(null);
 
-	const [pollId, setPollId] = useState("")
-	const [userId, setUserId] = useState("")
+	const [pollId, setPollId] = useState<string>("")
+	const [userId, setUserId] = useState<string>("")
 
 	const pingRef = useRef<NodeJS.Timer | null>(null);
 	const wsRef = useRef<W3CWebSocket | null>(null);
@@ -169,21 +170,21 @@ function App() {
 			<Route path = "/poll" element = {
 				pollData && wsRef && wsRef.current ?
 					<Poll pollId={pollData["pollId"]}
-					title={pollData["title"]}
-					options={pollData["options"]}
-					settings={pollData["settings"]}
-					isOwner={pollData["owner"]}
-					votedFor={pollData["votedFor"]}
-					userId={userId}
-					ws={wsRef.current}
+						title={pollData["title"]}
+						options={pollData["options"]}
+						settings={pollData["settings"]}
+						isOwner={pollData["owner"]}
+						votedFor={pollData["votedFor"]}
+						userId={userId}
+						ws={wsRef.current}
 					/> 
 				: 
 					<PollLoading addAlert = {addAlert}/>}
 			/>
 		</Routes>
-		
 	</BrowserRouter>
-	</>)
+	</>
+	)
 
 }
 

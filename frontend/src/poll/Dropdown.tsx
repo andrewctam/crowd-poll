@@ -4,11 +4,10 @@ interface DropdownProps {
     name: string
     method: string
     show: boolean
-    setShow: (bool: boolean) => void
+    setShow: (show: boolean) => void
     children: (JSX.Element | null)[]
-
-
 }
+
 const Dropdown = (props: DropdownProps) => {
     const handleClick = () => {
         props.setShow(!props.show);
@@ -23,9 +22,9 @@ const Dropdown = (props: DropdownProps) => {
             
         }
 
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("click", handleClickOutside);
         };
         // eslint-disable-next-line
     }, [ref]);
