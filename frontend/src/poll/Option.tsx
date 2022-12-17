@@ -26,8 +26,7 @@ function Option(props: OptionProps) {
     const [voting, setVoting] = useState(false); //allows voting to be responsive even if there is server delay
     
     useEffect(() => {
-        setVoting(false);
-        //once an update is received, voting is finished
+        setVoting(false); //once an update is received, voting is finished
     }, [props.voted])
 
     const castVote = async (e: React.MouseEvent<HTMLButtonElement>) => {

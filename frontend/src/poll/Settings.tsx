@@ -1,7 +1,7 @@
 import SettingCheckBox from './SettingCheckBox';
 import SettingListDisplay from './SettingListDisplay';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { PollSettings } from './Poll';
+import { PollSettings } from '../App';
 
 
 interface SettingsProps {

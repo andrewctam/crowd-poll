@@ -66,7 +66,7 @@ function Welcome(props: WelcomeProps) {
         }
 
         props.setPollId(response["pollId"]); //calls getPoll after useEffect
-        navigate(`/poll/?id=${response["pollId"]}`)
+        navigate(`/poll?id=${response["pollId"]}`)
 
 
         const createdPolls = localStorage.getItem("created")

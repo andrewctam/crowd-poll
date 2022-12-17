@@ -62,8 +62,6 @@ const getPoll = async (userId: string, pollId: string) => {
         optionsVotedFor = []
     }
 
-    
-
     const isOwner = userId === poll["owner"]
     var options = poll["options"]
 
@@ -85,7 +83,7 @@ const getPoll = async (userId: string, pollId: string) => {
         pollId: poll["_id"],
         title: poll["title"],
         options: options,
-        owner: isOwner,
+        isOwner: isOwner,
         settings: {
             limitOneVote: poll["limitOneVote"],
             approvalRequired: poll["approvalRequired"],

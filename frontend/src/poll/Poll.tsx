@@ -4,40 +4,19 @@ import Dropdown from "./Dropdown"
 import DropdownOption from './DropdownOption';
 import Statistics from './Statistics';
 import Settings from './Settings';
-import useAlert from '../hooks/useAlert';
+import { AddAlert } from '../hooks/useAlert';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import TitleBox from './TitleBox';
+import { PollData } from '../App';
 
-
-export interface PollSettings {
-    hideVotes: boolean
-    hideVotesForOwner: boolean
-    approvalRequired: boolean
-    autoApproveOwner: boolean
-    disableVoting: boolean
-    limitOneVote: boolean
-}
-
-interface PollProps {
-    pollId: string
-    userId: string
-    title: string
-    isOwner: boolean
+interface PollProps extends PollData {
     ws: W3CWebSocket
-    votedFor: string[]
-    settings: PollSettings
-    options: {
-        approved: boolean
-        optionTitle: string
-        votes: number
-        _id: string
-    }[]
+    addAlert: AddAlert
 }
 
 type SelectedOptionsAction = 
     {type: "TOGGLE", payload: {optionId: string}} |
     {type: "CLEAR"}
-
 
 function Poll(props: PollProps) {
     const optionInput = useRef<HTMLInputElement>(null);
@@ -68,9 +47,7 @@ function Poll(props: PollProps) {
     const [filterMethod, setFilterMethod] = useState("All");
     const [showFilter, setShowFilter] = useState(false);
 
-    const [pieSelected, setPieSelected] = useState<string>("");
-    
-    const [alerts, addAlert] = useAlert();
+    const [selectedSlice, setSelectedSlice] = useState("");
 
     useEffect(() => {
         //Reset sorting method if votes are hidden and Vote Count is selected
@@ -111,9 +88,9 @@ function Poll(props: PollProps) {
         }));
 
         if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"])) {
-            addAlert("Request to add option sent!", 2000);
+            props.addAlert("Request to add option sent!", 2000);
         } else {
-            addAlert("Option added!", 2000);
+            props.addAlert("Option added!", 2000);
         }
         
         optionInput.current.value = "";
@@ -130,7 +107,7 @@ function Poll(props: PollProps) {
             "optionsToDelete": selectedOptions.join(".")
         }));
 
-        addAlert("Options deleted!", 2000);
+        props.addAlert("Options deleted!", 2000);
         
         dispatch({ type: "CLEAR" });
     }
@@ -167,12 +144,7 @@ function Poll(props: PollProps) {
 
     switch (sortingMethod) {
         case "Alphabetical Order":
-            displayedOptions = displayedOptions.sort((a, b) => {
-                if (b["optionTitle"] > a["optionTitle"])
-                    return -1;
-                else
-                    return 1;
-            })
+            displayedOptions = displayedOptions.sort((a, b) => { return (a["optionTitle"] > b["optionTitle"]) ? 1 : -1 })
             break;
 
         case "Vote Count":
@@ -190,8 +162,6 @@ function Poll(props: PollProps) {
 
 
     return ( 
-        <>
-        {alerts}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
             <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
                     "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
@@ -220,7 +190,7 @@ function Poll(props: PollProps) {
 
                     <Statistics
                         options={props.options}
-                        setPieSelected={setPieSelected}
+                        setSelectedSlice={setSelectedSlice}
                     />
                 </div>
 
@@ -233,7 +203,7 @@ function Poll(props: PollProps) {
 
                 {props.options.length === 0 ?
                     <p className='text-md lg:text-lg text-white'>
-                        {"No answer options yet, add one below!"}
+                        {"No Answer Options Yet"}
                     </p>
                     :
                     <div>
@@ -281,7 +251,7 @@ function Poll(props: PollProps) {
                             pollId={props.pollId}
                             isOwner={props.isOwner}
                             ws={props.ws}
-                            addAlert={addAlert}
+                            addAlert={props.addAlert}
 
                             votes={obj["votes"]}
                             optionTitle={obj["optionTitle"]}
@@ -289,7 +259,7 @@ function Poll(props: PollProps) {
                             key={obj["_id"]}
 
                             voted={props.votedFor.includes(obj["_id"])}
-                            pieSelected = {pieSelected === obj["_id"]}
+                            pieSelected = {selectedSlice === obj["_id"]}
 
                             toggleSelection={toggleSelection}
                             approved={!props.settings["approvalRequired"] || obj["approved"]}
@@ -297,6 +267,7 @@ function Poll(props: PollProps) {
                             alreadyVoted = {props.settings["limitOneVote"] && props.votedFor.length > 0}
                         />)
                     }
+                    
                     
                     <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-[#4b4a49] rounded-xl shadow-md flex">
                         <input ref={optionInput} 
@@ -307,12 +278,11 @@ function Poll(props: PollProps) {
                         <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-md">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
                     </form>
 
-                </div>
 
             </div>
 
         </div>
-        </>)
+        </div>)
 
 }
 

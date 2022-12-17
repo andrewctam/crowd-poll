@@ -1,21 +1,15 @@
 import * as d3 from 'd3';
-
-type OptionData = {
-    approved: boolean
-    optionTitle: string
-    votes: number
-    _id: string
-}
+import {OptionData} from '../App';
 
 interface StatisticsProps {
     options: OptionData[]
-    setPieSelected: (str: string) => void
+    setSelectedSlice: (str: string) => void
 }
 
 interface PieChartProps {
     data: OptionData[]
     voteSum: number
-    setPieSelected: (str: string) => void
+    setSelectedSlice: (str: string) => void
  }
 
 
@@ -43,7 +37,7 @@ const Statistics = (props: StatisticsProps) => {
     return (<div className="w-full p-5 h-fit mx-auto">
             <svg className="w-1/2 h-full mx-auto" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
                 <g transform="translate(200,200)">
-                    <PieChart data={data} voteSum = {voteSum} setPieSelected = {props.setPieSelected} />
+                    <PieChart data={data} voteSum = {voteSum} setSelectedSlice = {props.setSelectedSlice} />
                 </g>
             </svg>
         </div>)
@@ -53,7 +47,7 @@ const Statistics = (props: StatisticsProps) => {
 
 
 const PieChart = (props: PieChartProps) => {
-        const colors = d3.scaleOrdinal(["#c2d9f2","#abcbeb","#98b9ed","#afcbe6","#7dbbf5","#76a7d6","#72cae0","#88d4d9"]);
+    const colors = d3.scaleOrdinal(["#c2d9f2","#afcbe6","#7dbbf5","#76a7d6","#72cae0","#88d4d9"]);
 
     const radius = 200
 
@@ -82,7 +76,7 @@ const PieChart = (props: PieChartProps) => {
     return (
         <g>
             {arcs.map((d, i) => (
-                <g key={i} onMouseEnter = {() => {props.setPieSelected(d.data["_id"])}} onMouseLeave = {() => {props.setPieSelected("")}} className = "cursor-crosshair">
+                <g key={i} onMouseEnter = {() => {props.setSelectedSlice(d.data["_id"])}} onMouseLeave = {() => {props.setSelectedSlice("")}} className = "cursor-crosshair">
                     <path d={arc(d) ?? ""} fill={i === arcs.length - 1 && colors(i + '') === colors("0") ? colors((i + 1) + '') : colors(i + '')} />
                     <text transform={`translate(${labelArc.centroid(d)})`} textAnchor="middle" fill="black" fontSize="14px">{`${d.data.optionTitle} (${Math.round((d.data.votes / props.voteSum) * 100)}%)`}</text>
                 </g>

@@ -9,14 +9,39 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import useAlert from "./hooks/useAlert";
 import PollLoading from "./welcome/PollLoading";
 
+export interface PollSettings {
+    hideVotes: boolean
+    hideVotesForOwner: boolean
+    approvalRequired: boolean
+    autoApproveOwner: boolean
+    disableVoting: boolean
+    limitOneVote: boolean
+}
+
+export type OptionData = {
+    approved: boolean
+    optionTitle: string
+    votes: number
+    _id: string
+}
+
+export interface PollData {
+    pollId: string
+    userId: string
+    title: string
+    isOwner: boolean
+    votedFor: string[]
+    settings: PollSettings
+    options: OptionData[]
+}
 
 function App() {
-	const [pollData, setPollData] = useState(null);
+	const [pollData, setPollData] = useState<PollData | null> (null);
 
-	const [pollId, setPollId] = useState<string>("")
-	const [userId, setUserId] = useState<string>("")
+	const [pollId, setPollId] = useState("")
+	const [userId, setUserId] = useState("")
 
-	const pingRef = useRef<NodeJS.Timer | null>(null);
+	const pingIntervalRef = useRef<NodeJS.Timer | null>(null);
 	const wsRef = useRef<W3CWebSocket | null>(null);
 
 	const [alerts, addAlert] = useAlert();
@@ -67,8 +92,8 @@ function App() {
 	}, [])
 
 	useEffect(() => {
-		if (pingRef.current)
-			clearInterval(pingRef.current)
+		if (pingIntervalRef.current)
+			clearInterval(pingIntervalRef.current)
 
 		if (pollId && userId)
 			getPoll()
@@ -135,6 +160,7 @@ function App() {
 			//server will only send update if there is an "update" in data
 			if (data["update"]) {
 				setPollData(data)
+				console.log(data)
 			}
 
 		}
@@ -150,7 +176,7 @@ function App() {
 			}
 		}, 5000)
 		
-		pingRef.current = ping;
+		pingIntervalRef.current = ping;
 	}
 
 	return (
@@ -169,11 +195,13 @@ function App() {
 			
 			<Route path = "/poll" element = {
 				pollData && wsRef && wsRef.current ?
-					<Poll pollId={pollData["pollId"]}
+					<Poll
+						addAlert={addAlert}
+						pollId={pollData["pollId"]}
 						title={pollData["title"]}
 						options={pollData["options"]}
 						settings={pollData["settings"]}
-						isOwner={pollData["owner"]}
+						isOwner={pollData["isOwner"]}
 						votedFor={pollData["votedFor"]}
 						userId={userId}
 						ws={wsRef.current}
