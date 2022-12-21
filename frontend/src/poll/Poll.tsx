@@ -58,7 +58,7 @@ function Poll(props: PollProps) {
     useEffect(() => {
         //Reset sorting method if votes are hidden and Vote Count is selected
         if ((sortingMethod === "Vote Count" && props.settings["hideVotes"]) &&
-            (!props.isOwner || (props.isOwner && props.settings["hideVotesForOwner"]))) {
+            (!props.isOwner || (userView && props.settings["hideVotesForOwner"]))) {
             setSortingMethod("Order Created");
         }
         // eslint-disable-next-line
@@ -82,6 +82,7 @@ function Poll(props: PollProps) {
             body: JSON.stringify({userId: props.userId, newValue: !userView })
         })
 
+        //refresh poll with what the users see
         props.ws.send(JSON.stringify({
             "type": "getPoll",
             "pollId": props.pollId,
@@ -112,7 +113,7 @@ function Poll(props: PollProps) {
             "optionTitle": optionTitle
         }));
 
-        if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"])) {
+        if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"] || userView)) {
             props.addAlert("Request to add option sent!", 2000);
         } else {
             props.addAlert("Option added!", 2000);
@@ -184,7 +185,7 @@ function Poll(props: PollProps) {
 
     return ( 
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none ">
-            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center relative" style = {{
+            <div className="lg:h-screen overflow-y-auto pt-5 pb-10 bg-slate-700 grid items-center relative" style = {{
                     "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
                     "zIndex": "1"
                 }}>
@@ -201,7 +202,7 @@ function Poll(props: PollProps) {
 
 
                     {props.isOwner ? <>
-                        <div className = "absolute bottom-1 right-2 text-xs text-white">                 
+                        <div className = "absolute bottom-2 right-2 text-xs text-white">                 
                             <div className="flex justify-between">
                                 <label htmlFor={"userView"} className = "text-white">
                                     View as User
@@ -218,7 +219,7 @@ function Poll(props: PollProps) {
                         </div>
 
 
-                        <div className = "absolute bottom-1 left-2 text-xs text-white">
+                        <div className = "absolute bottom-2 left-2 text-xs text-white">
                             <p className = "inline">
                                 {"Viewing as "}
                             </p>
@@ -231,16 +232,15 @@ function Poll(props: PollProps) {
                     
 
 
-                        <Settings 
-                            ws = {props.ws}
-                            isOwner = {props.isOwner}
-                            pollId = {props.pollId}
-                            userId = {props.userId}
-                            deleteSelected = {deleteSelected}
-                            numSelectedOptions = {selectedOptions.length}
-                            settings = {props.settings}
-                        />
-
+                    <Settings 
+                        ws = {props.ws}
+                        isOwner = {!userView && props.isOwner}
+                        pollId = {props.pollId}
+                        userId = {props.userId}
+                        deleteSelected = {deleteSelected}
+                        numSelectedOptions = {selectedOptions.length}
+                        settings = {props.settings}
+                    />
                     
 
                     <Statistics
@@ -263,43 +263,29 @@ function Poll(props: PollProps) {
                     :
                     <div>
 
-                        <Dropdown
-                            name="Sort By"
-                            show={showSorting}
-                            setShow={setShowSorting}
-                            method={sortingMethod}
+                        <Dropdown name="Sort By" show={showSorting} setShow={setShowSorting} method={sortingMethod}>
+                            <DropdownOption key={"Order Created"} name={"Order Created"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Order Created"} disabled={false} />
+                            <DropdownOption key={"Vote Count"} name={"Vote Count"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Vote Count"}
+                                disabled={props.settings["hideVotes"] && (!props.isOwner || userView || props.settings["hideVotesForOwner"])} />
 
-                            children={[
-                                <DropdownOption key={"Order Created"} name={"Order Created"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Order Created"} disabled={false} />,
-                                <DropdownOption key={"Vote Count"} name={"Vote Count"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Vote Count"}
-                                    disabled={(props.settings["hideVotes"] && (!props.isOwner || (props.isOwner && (props.settings["hideVotesForOwner"]))))} />,
+                            <DropdownOption key={"Alphabetical Order"} name={"Alphabetical Order"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Alphabetical Order"} disabled={false} />
+                        </Dropdown>
 
-                                <DropdownOption key={"Alphabetical Order"} name={"Alphabetical Order"} setSortingMethod={setSortingMethod} selected={sortingMethod === "Alphabetical Order"} disabled={false} />
-                            ]}
-                        />
+                        <Dropdown name="Filter By" show={showFilter} setShow={setShowFilter} method={filterMethod}>
+                            <DropdownOption key={"All"} name={"All"} setSortingMethod={setFilterMethod} selected={filterMethod === "All"} disabled={false} />
+                            <DropdownOption key={"Voted For"} name={"Voted For"} setSortingMethod={setFilterMethod} selected={filterMethod === "Voted For"} disabled={false} />
+                            <DropdownOption key={"Not Voted For"} name={"Not Voted For"} setSortingMethod={setFilterMethod} selected={filterMethod === "Not Voted For"} disabled={false} />
 
-                        <Dropdown
-                            name="Filter By"
-                            show={showFilter}
-                            setShow={setShowFilter}
-                            method={filterMethod}
+                            {!userView && props.isOwner ?
+                                <DropdownOption key={"Approved"} name={"Approved"} setSortingMethod={setFilterMethod} selected={filterMethod === "Approved"} disabled={false}
+                                /> : null}
 
-                            children={[
-                                <DropdownOption key={"All"} name={"All"} setSortingMethod={setFilterMethod} selected={filterMethod === "All"} disabled={false} />,
-                                <DropdownOption key={"Voted For"} name={"Voted For"} setSortingMethod={setFilterMethod} selected={filterMethod === "Voted For"} disabled={false} />,
-                                <DropdownOption key={"Not Voted For"} name={"Not Voted For"} setSortingMethod={setFilterMethod} selected={filterMethod === "Not Voted For"} disabled={false} />,
+                            {!userView && props.isOwner ?
+                                <DropdownOption key={"Pending Approval"} name={"Pending Approval"} setSortingMethod={setFilterMethod} selected={filterMethod === "Pending Approval"} disabled={!props.settings["approvalRequired"]}
+                                /> : null}
+                        </Dropdown>
 
-                                props.isOwner ?
-                                    <DropdownOption key={"Approved"} name={"Approved"} setSortingMethod={setFilterMethod} selected={filterMethod === "Approved"} disabled={false}
-                                    /> : null,
-
-                                props.isOwner ?
-                                    <DropdownOption key={"Pending Approval"} name={"Pending Approval"} setSortingMethod={setFilterMethod} selected={filterMethod === "Pending Approval"} disabled={!props.settings["approvalRequired"]}
-                                    /> : null
-                            ]}
-                        />
-
-                        {selectedOptions.length > 0 ? 
+                        {props.isOwner && selectedOptions.length > 0 ? 
                             <div className = "text-white mt-2 justify-center flex">
                                 <label htmlFor={"selectAll"}>
                                     Select All
@@ -309,7 +295,7 @@ function Poll(props: PollProps) {
                                     className="w-4 h-4 rounded-xl ml-2 self-center" 
                                     id = {"selectAll"} 
                                     type="checkbox"
-                                    checked={selectedOptions.length ===  props.options.length} 
+                                    checked={selectedOptions.length === props.options.length} 
                                     onChange={() => {
                                         if (selectedOptions.length === props.options.length)
                                             dispatch({type: "CLEAR"})
@@ -327,7 +313,7 @@ function Poll(props: PollProps) {
                         <Option
                             userId={props.userId}
                             pollId={props.pollId}
-                            isOwner={props.isOwner}
+                            isOwner={!userView && props.isOwner}
                             ws={props.ws}
                             addAlert={props.addAlert}
 

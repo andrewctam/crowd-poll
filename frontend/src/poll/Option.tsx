@@ -97,11 +97,10 @@ function Option(props: OptionProps) {
 
     const touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
 
-    console.log(props.optionTitle)
     if (props.approved)
         return (<button
             onClick={castVote}
-            onMouseEnter={() => setShowBox(props.isOwner && true)}
+            onMouseEnter={() => setShowBox(props.isOwner)}
             onMouseLeave={() => setShowBox(false)}
             className={`w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3 shadow-md`}
             style={style}
