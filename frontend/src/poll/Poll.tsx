@@ -23,6 +23,9 @@ function Poll(props: PollProps) {
     const optionInput = useRef<HTMLInputElement>(null);
     const [showError, setShowError] = useState(false);
 
+    //View as user. Still the owner and 
+    const [userView, setUserView] = useState(false);
+
     const [selectedOptions, dispatch] = useReducer((state: string[], action: SelectedOptionsAction) => {
         switch (action.type) {
             case "TOGGLE":
@@ -68,6 +71,25 @@ function Poll(props: PollProps) {
 
         // eslint-disable-next-line
     }, [props.settings["approvalRequired"]]);
+
+    const toggleUserView = async () => {
+        const url = `${process.env.NODE_ENV !== "production" ? process.env.REACT_APP_DEV_HTTP_URL : process.env.REACT_APP_PROD_HTTP_URL}/api/users/userView`
+        await fetch(url, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({userId: props.userId, newValue: !userView })
+        })
+
+        props.ws.send(JSON.stringify({
+            "type": "getPoll",
+            "pollId": props.pollId,
+            "userId": props.userId
+        }));
+
+        setUserView(!userView)
+    }
 
 
     const addOption = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -161,8 +183,8 @@ function Poll(props: PollProps) {
 
 
     return ( 
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none">
-            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center" style = {{
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none ">
+            <div className="lg:h-screen overflow-y-auto py-5 bg-slate-700 grid items-center relative" style = {{
                     "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
                     "zIndex": "1"
                 }}>
@@ -177,15 +199,49 @@ function Poll(props: PollProps) {
                         value={window.location.toString()} 
                     />
 
-                    <Settings 
-                        ws = {props.ws}
-                        isOwner = {props.isOwner}
-                        pollId = {props.pollId}
-                        userId = {props.userId}
-                        deleteSelected = {deleteSelected}
-                        numSelectedOptions = {selectedOptions.length}
-                        settings = {props.settings}
-                    />
+
+                    {props.isOwner ? <>
+                        <div className = "absolute bottom-1 right-2 text-xs text-white">                 
+                            <div className="flex justify-between">
+                                <label htmlFor={"userView"} className = "text-white">
+                                    View as User
+                                </label>
+
+                                <input 
+                                    className="w-4 h-4 rounded-xl ml-2 self-center" 
+                                    id = {"userView"} 
+                                    type="checkbox"
+                                    checked={userView} 
+                                    onChange={toggleUserView}
+                                />
+                            </div>
+                        </div>
+
+
+                        <div className = "absolute bottom-1 left-2 text-xs text-white">
+                            <p className = "inline">
+                                {"Viewing as "}
+                            </p>
+                            <p className = {`inline ${userView ? "text-rose-200" : "text-sky-200"}`}>
+                                {userView ? "User" : "Owner"}
+                            </p>
+                        </div>
+
+                    </>: null}
+                    
+
+
+                        <Settings 
+                            ws = {props.ws}
+                            isOwner = {props.isOwner}
+                            pollId = {props.pollId}
+                            userId = {props.userId}
+                            deleteSelected = {deleteSelected}
+                            numSelectedOptions = {selectedOptions.length}
+                            settings = {props.settings}
+                        />
+
+                    
 
                     <Statistics
                         options={props.options}

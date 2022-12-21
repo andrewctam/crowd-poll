@@ -41,8 +41,10 @@ const getPoll = async (userId: string, pollId: string) => {
         return JSON.stringify({"error": "Poll expired or Invalid ID."})
     }
 
-    
-   
+    let user = await User.findOne({_id: userId})
+    if (!user) {
+        return JSON.stringify({"error": "User not found"})
+    }
 
     //check if the user voted before
     if (await Poll.exists({_id: pollId, "votes.userId": userId})) { //check if the poll has an array of votedFor for the user
@@ -62,10 +64,9 @@ const getPoll = async (userId: string, pollId: string) => {
         optionsVotedFor = []
     }
 
-    const isOwner = userId === poll["owner"]
     var options = poll["options"]
 
-    if (isOwner) {
+    if (userId === poll["owner"] && !user["userView"]) {
         if (poll["hideVotes"] && poll["hideVotesForOwner"])
             options.forEach((option: Option) => option["votes"] = -1) //set -1 to indicate votes hidden
 
@@ -83,7 +84,7 @@ const getPoll = async (userId: string, pollId: string) => {
         pollId: poll["_id"],
         title: poll["title"],
         options: options,
-        isOwner: isOwner,
+        isOwner: userId === poll["owner"],
         settings: {
             limitOneVote: poll["limitOneVote"],
             approvalRequired: poll["approvalRequired"],
@@ -108,12 +109,18 @@ const addOption = async (userId: string, pollId: string, optionTitle: string) =>
         return JSON.stringify({"error" : "Poll Invalid"})
     }
 
+    let user = await User.findOne({_id: userId})
+    if (!user) {
+        return JSON.stringify({"error" : "User Invalid"})
+    }
+
     await Poll.updateOne({_id: pollId}, {
         $push: {
             options: {
                 optionTitle: optionTitle, 
                 votes: 0,
-                approved: !poll["approvalRequired"] || (poll["autoApproveOwner"] && userId === poll["owner"]) 
+                approved: !poll["approvalRequired"] || 
+                          (poll["autoApproveOwner"] && userId === poll["owner"] && !user["userView"]) 
             },
         },
     });
