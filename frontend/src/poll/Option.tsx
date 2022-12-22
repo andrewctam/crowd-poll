@@ -6,7 +6,7 @@ interface OptionProps {
     userId: string
     pollId: string
     isOwner: boolean
-    addAlert: AddAlert
+    alertDispatch: React.Dispatch<any>
     ws: W3CWebSocket
     votes: number
     optionTitle: string
@@ -34,12 +34,21 @@ function Option(props: OptionProps) {
 
         //check for settings to avoid sending unnecessary requests that would be rejected
         if (props.disableVoting) {
-            props.addAlert("Adding and removing votes is currently disabled.", 2000, "error");
+            props.alertDispatch({type: "ADD_ALERT", payload: {
+                msg: "Adding and removing votes is currently disabled.",
+                time: 2000,
+                type: "error"
+            }})
+
             return;
         }
 
         if (!props.voted && props.alreadyVoted) {
-            props.addAlert("You can only vote for one option.", 2000, "error");
+            props.alertDispatch({type: "ADD_ALERT", payload: {
+                msg: "You can only vote for one option.",
+                time: 2000,
+                type: "error"
+            }})
             return;
         }
 
@@ -69,7 +78,12 @@ function Option(props: OptionProps) {
             approved: approved
         }));
 
-        props.addAlert(`Option ${approved ? "approved." : "rejected."}`, 2000);
+
+        props.alertDispatch({type: "ADD_ALERT", payload: {
+            msg: `Option ${approved ? "approved." : "rejected."}`,
+            time: 2000,
+            type: "success"
+        }})
     }
 
 

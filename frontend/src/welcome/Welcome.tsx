@@ -6,8 +6,8 @@ import { AddAlert } from "../hooks/useAlert";
 interface WelcomeProps{
     userId: string
     verifyId: () => void 
-    addAlert: AddAlert
-    setPollId: (str: string) => void 
+    alertDispatch: React.Dispatch<any>
+    setPollId: (str: string) => void
 }
 
 function Welcome(props: WelcomeProps) {
@@ -128,7 +128,12 @@ function Welcome(props: WelcomeProps) {
                     localStorage.setItem("created", JSON.stringify(trimmed)); 
             }
 
-            props.addAlert("Polls Deleted", 2000);
+            props.alertDispatch({type: "ADD_ALERT", payload: {
+                message: "Polls Deleted",
+                time: 2000,
+                type: "success"
+            }})
+
             setSelectedDelete([])
 
         }

@@ -1,23 +1,29 @@
 import { useCallback, useMemo, useState, useReducer } from "react";
 
-interface Alert {
+export interface Alert {
     index: number
+    msg: string
     alert: JSX.Element
     timeout: NodeJS.Timeout
 }
 
-export type AddAlert = (str: string, time: number, msg?: string) => void
+export type AddAlert = (str: string, time: number, msg?: string) => (() => void)
 
 type AlertAction = 
     { type: "ADD_ALERT", payload: { msg: string, time: number, type: string } } |
-    { type: "REMOVE_ALERT", payload: { id: number } } 
+    { type: "REMOVE_ALERT_BY_INDEX", payload: { id: number } } |
+    { type: "REMOVE_ALERT_BY_MSG", payload: { msg: string } }
+    
 
 
-const useAlert = () : [JSX.Element, (msg: string, time: number, type?: string) => void ] => {
+const useAlert = (): [JSX.Element, React.Dispatch<any> ] => {
     const [count, setCount] = useState(0);
-    const createAlert = ((msg: string, time: number, type: string) : Alert => {
+
+
+    const createAlert = ((msg: string, time: number, type: string): Alert => {
         const timeout = setTimeout(() => {
-            dispatch({ type: "REMOVE_ALERT", payload: { "id": count } })
+            alertDispatch({ type: "REMOVE_ALERT_BY_INDEX", payload: { "id": count } })
+            console.log(time)
         }, time)
 
         const alert = (
@@ -25,43 +31,55 @@ const useAlert = () : [JSX.Element, (msg: string, time: number, type?: string) =
                 key={`alert${count}`}
                 className={`rounded px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 shadow-md ${type === "error" ? "bg-rose-300" : "bg-sky-200"}`}
                 onClick={() => {
-                    dispatch({ type: "REMOVE_ALERT", payload: { "id": count } })
+                    alertDispatch({ type: "REMOVE_ALERT_BY_INDEX", payload: { "id": count } })
                 }}>
 
                 <p>{msg}</p>
             </div>
         )
+
         setCount(count + 1);
 
 
         return {
             index: count,
+            msg: msg,
             alert: alert,
             timeout: timeout
         };
 
     })
-
+    
     const reducer = (state: Alert[], action: AlertAction) => {
         switch (action.type) {
-            case "ADD_ALERT":
-                return [...state, createAlert(action.payload.msg, action.payload.time, action.payload.type)];
-
-            case "REMOVE_ALERT":
-                const alert = state.find(alert => alert.index === action.payload.id);
+            case "ADD_ALERT": {
+                let newAlert = createAlert(action.payload.msg, action.payload.time, action.payload.type)
+                return [...state, newAlert];
+            }
+            case "REMOVE_ALERT_BY_INDEX": {
+                let alert = state.find(alert => alert.index === action.payload.id);
                 if (alert) {
                     clearTimeout(alert.timeout);
                     return state.filter(alert => alert.index !== action.payload.id);
                 }
 
                 return state;
+            }
+            case "REMOVE_ALERT_BY_MSG": {
+                let alert = state.find(alert => alert.msg === action.payload.msg);
+                if (alert) {
+                    clearTimeout(alert.timeout);
+                    return state.filter(alert => alert.msg !== action.payload.msg);
+                }
 
+                return state;
+            }
             default:
                 return state;
         }
     }
 
-    const [alerts, dispatch] = useReducer(reducer, []);
+    const [alerts, alertDispatch] = useReducer(reducer, []);
 
     const alertContainer = useMemo(() => {
         return <div className="fixed top-0 left-0 m-1 z-20">
@@ -70,13 +88,7 @@ const useAlert = () : [JSX.Element, (msg: string, time: number, type?: string) =
     }, [alerts]);
 
 
-    const addAlert = useCallback((msg: string, time: number, type = "success") => {
-        dispatch({ type: "ADD_ALERT", payload: { msg: msg, time: time, type: type } })
-    }, [dispatch]);
-
-    return [alertContainer, addAlert];
-
-
+    return [alertContainer, alertDispatch];
 
 }
 

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { AddAlert } from '../hooks/useAlert';
 
 interface PollLoadingProps {
-    addAlert: AddAlert
+    dispatch: React.Dispatch<any>
 }
 
 function PollLoading(props: PollLoadingProps) {
@@ -13,9 +13,8 @@ function PollLoading(props: PollLoadingProps) {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            props.addAlert("Returned to Home Page", 1000, "error");
             navigate("/");
-        }, 2000);
+        }, 10000);
 
         return () => clearTimeout(timeout);
 

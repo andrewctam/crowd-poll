@@ -6,7 +6,7 @@ import Welcome from "./welcome/Welcome";
 import { BrowserRouter, Route, Routes} from "react-router-dom";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-import useAlert from "./hooks/useAlert";
+import useAlert, { Alert } from "./hooks/useAlert";
 import PollLoading from "./welcome/PollLoading";
 
 export interface PollSettings {
@@ -44,9 +44,9 @@ function App() {
 	const pingIntervalRef = useRef<NodeJS.Timer | null>(null);
 	const wsRef = useRef<W3CWebSocket | null>(null);
 
-	const [alerts, addAlert] = useAlert();
+	const [alerts, alertDispatch] = useAlert();
 
-	const verifyId = async () => {
+	const verifyId = async (retrying = false) => {
 		let storedUserId = "";
 
 		if (userId !== "") {
@@ -65,8 +65,20 @@ function App() {
 			});
 
 		if (!message) { //error
-			addAlert("Failed to connect to server. Please try again in a moment", 10000, "error");
+			alertDispatch({type: "ADD_ALERT", payload: {
+				msg: "Can not connect to server. Trying to connect...",
+				time: 1000,
+				type: "error"
+			}})
+
+			setTimeout(() => { verifyId(true) }, 1100);
 			return;
+		} else if (retrying) {
+			alertDispatch({type: "ADD_ALERT", payload: {
+				msg: "Successfully connected",
+				time: 1000,
+				type: "success"
+			}})
 		}
 
 		localStorage.setItem("userId", message)
@@ -105,7 +117,7 @@ function App() {
 		// eslint-disable-next-line
 	}, [pollId, userId])
 
-	const getPoll = async () => {
+	const getPoll = async (reconnecting = false) => {
 		if (!pollId) {
 			return false;
 		}  
@@ -118,10 +130,23 @@ function App() {
 		ws.onopen = () => {
 			console.log("Successfully Connected to Server")
 			console.log(ws)
+
+			if (reconnecting) {
+				alertDispatch({type: "REMOVE_ALERT_BY_MSG", payload: {
+					msg: "Connection to server lost. Trying to reconnect..."
+				}})
+
+				
+				alertDispatch({type: "ADD_ALERT", payload: {
+					msg: "Successfully reconnected",
+					time: 1000,
+					type: "success"
+				}})
+			}
+
 		}
 
 		ws.onerror = (error) => {
-			addAlert("Failed to connect to server. Please refresh and try again", 10000, "error");
 			console.log(error)
 			ws.close();
 		}
@@ -134,19 +159,36 @@ function App() {
 			if (data["error"]) {
 				switch (data["error"]) {
 					case "Invalid Poll ID":
-						addAlert("Poll Deleted or Does Not Exist", 10000, "error");
+						alertDispatch({type: "ADD_ALERT", payload: {
+							msg: "Poll Deleted or Does Not Exist",
+							time: 10000,
+							type: "error"
+						}})
 						setPollId("")
 						break;
 
 					case "Invalid User ID":
-						addAlert("User ID Invalid", 10000, "error");
+						alertDispatch({type: "ADD_ALERT", payload: {
+							msg: "User ID Invalid",
+							time: 10000,
+							type: "error"
+						}})
 						verifyId();
 						break;
 					case "Permission Denied":
-						addAlert("Permission Denied, Not Owner.", 10000, "error");
+						alertDispatch({type: "ADD_ALERT", payload: {
+							msg: "Permission Denied, Not Owner.",
+							time: 10000,
+							type: "error"
+							}})
+
 						break;
 					case "Poll Deleted":
-						addAlert("Poll Was Deleted", 10000, "error");
+						alertDispatch({type: "ADD_ALERT", payload: {
+							msg: "Poll Was Deleted",
+							time: 10000,
+							type: "error"
+							}})
 						setPollId("")
 						break;
 					default: //other kind of error, no need to handle
@@ -160,7 +202,6 @@ function App() {
 			//server will only send update if there is an "update" in data
 			if (data["update"]) {
 				setPollData(data)
-				console.log(data)
 			}
 
 		}
@@ -169,8 +210,13 @@ function App() {
 		const ping = setInterval(() => {
 			if (ws.readyState === ws.CLOSED) {
 				clearInterval(ping)
-				addAlert("Connection to server lost. Trying to reconnect...", 5000, "error");
-				getPoll(); //retry to connect
+				alertDispatch({type: "ADD_ALERT", payload: {
+					msg: "Connection to server lost. Trying to reconnect...",
+					time: 4500,
+					type: "error"
+				}})
+
+				getPoll(true); //retry to connect
 			} else {
 				ws.send(JSON.stringify({"type": "ping"}))
 			}
@@ -189,14 +235,14 @@ function App() {
 					setPollId={setPollId}
 					userId={userId}
 					verifyId = {verifyId}
-					addAlert = {addAlert}  
+					alertDispatch = {alertDispatch}  
 				/>}
 			/>
 			
 			<Route path = "/poll" element = {
 				pollData && wsRef && wsRef.current ?
 					<Poll
-						addAlert={addAlert}
+						alertDispatch={alertDispatch}
 						pollId={pollData["pollId"]}
 						title={pollData["title"]}
 						options={pollData["options"]}
@@ -207,7 +253,7 @@ function App() {
 						ws={wsRef.current}
 					/> 
 				: 
-					<PollLoading addAlert = {addAlert}/>}
+					<PollLoading dispatch = {alertDispatch}/>}
 			/>
 		</Routes>
 	</BrowserRouter>

@@ -11,7 +11,7 @@ import { PollData } from '../App';
 
 interface PollProps extends PollData {
     ws: W3CWebSocket
-    addAlert: AddAlert
+    alertDispatch: React.Dispatch<any>
 }
 
 type SelectedOptionsAction = 
@@ -114,9 +114,18 @@ function Poll(props: PollProps) {
         }));
 
         if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"] || userView)) {
-            props.addAlert("Request to add option sent!", 2000);
+            props.alertDispatch({type: "ADD_ALERT", payload: {
+                msg: "Request to add option sent!",
+                time: 2000,
+                type: "success"
+            }})
+
         } else {
-            props.addAlert("Option added!", 2000);
+            props.alertDispatch({type: "ADD_ALERT", payload: {
+                msg: "Option added!",
+                time: 2000,
+                type: "success"
+            }})
         }
         
         optionInput.current.value = "";
@@ -133,7 +142,11 @@ function Poll(props: PollProps) {
             "optionsToDelete": selectedOptions.join(".")
         }));
 
-        props.addAlert("Options deleted!", 2000);
+        props.alertDispatch({type: "ADD_ALERT", payload: {
+            msg: "Options deleted!",
+            time: 2000,
+            type: "success"
+        }})
         
         dispatch({ type: "CLEAR" });
     }
@@ -315,7 +328,7 @@ function Poll(props: PollProps) {
                             pollId={props.pollId}
                             isOwner={!userView && props.isOwner}
                             ws={props.ws}
-                            addAlert={props.addAlert}
+                            alertDispatch={props.alertDispatch}
 
                             votes={obj["votes"]}
                             optionTitle={obj["optionTitle"]}
