@@ -7,16 +7,14 @@ export interface Alert {
     timeout: NodeJS.Timeout
 }
 
-type AlertAction = 
+export type AlertAction = 
     { type: "ADD_ALERT", payload: { msg: string, time: number, type: string } } |
     { type: "REMOVE_ALERT_BY_INDEX", payload: { id: number } } |
     { type: "REMOVE_ALERT_BY_MSG", payload: { msg: string } }
     
 
-
-const useAlert = (): [JSX.Element, React.Dispatch<any> ] => {
+const useAlert = (): [JSX.Element, React.Dispatch<AlertAction> ] => {
     const [count, setCount] = useState(0);
-
 
     const createAlert = ((msg: string, time: number, type: string): Alert => {
         const timeout = setTimeout(() => {

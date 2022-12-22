@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { AlertAction } from "../hooks/useAlert";
 import CreatedBox from "./CreatedBox";
 
 interface WelcomeProps{
     userId: string
     verifyId: () => void 
-    alertDispatch: React.Dispatch<any>
+    alertDispatch: React.Dispatch<AlertAction>
     setPollId: (str: string) => void
 }
 
@@ -128,7 +129,7 @@ function Welcome(props: WelcomeProps) {
             }
 
             props.alertDispatch({type: "ADD_ALERT", payload: {
-                message: "Polls Deleted",
+                msg: "Polls Deleted",
                 time: 2000,
                 type: "success"
             }})

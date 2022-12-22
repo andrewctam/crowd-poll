@@ -1,11 +1,13 @@
 import { useEffect, useState, memo } from 'react'
 import { w3cwebsocket as W3CWebSocket } from "websocket";
+import { AlertAction } from '../hooks/useAlert';
+
 
 interface OptionProps {
     userId: string
     pollId: string
     isOwner: boolean
-    alertDispatch: React.Dispatch<any>
+    alertDispatch: React.Dispatch<AlertAction>
     ws: W3CWebSocket
     votes: number
     optionTitle: string

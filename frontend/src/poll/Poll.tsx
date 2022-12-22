@@ -7,10 +7,11 @@ import Settings from './Settings';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import TitleBox from './TitleBox';
 import { PollData } from '../App';
+import { AlertAction } from '../hooks/useAlert';
 
 interface PollProps extends PollData {
     ws: W3CWebSocket
-    alertDispatch: React.Dispatch<any>
+    alertDispatch: React.Dispatch<AlertAction>
 }
 
 type SelectedOptionsAction = 
