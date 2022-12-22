@@ -30,7 +30,7 @@ function Welcome(props: WelcomeProps) {
 
     const createPoll = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!titleInput.current)
+        if (!titleInput.current || props.userId === "")
             return;
             
         const title = titleInput.current.value
@@ -179,14 +179,29 @@ function Welcome(props: WelcomeProps) {
 
             <div className="bg-stone-700 grid lg:h-screen items-center w-full">
                 <div>
-                    <form className="p-10 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-fit mx-auto" onSubmit={createPoll}>
-                        <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4 mb-2">Create New Poll</h1>
+                    <form className="p-10 pb-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-fit mx-auto" onSubmit={createPoll}>
+                        <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4">Create New Poll</h1>
+
                         <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/4 lg:w-1/2 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
                         placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
 
-                        <button type="submit" className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
+                        <button type="submit" disabled = {props.userId === ""} className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
+
+                        
+                            
                         <p className = "text-white mt-1 select-none">You can add answer options and edit settings once inside the poll</p>
+
+                        {props.userId ? 
+                            <div className = "select-none text-green-100 mt-6">
+                                Connected to server!
+                            </div>
+                            : 
+                            <div className = "select-none text-rose-100 mt-6">
+                                Connecting to server...
+                            </div>}
+                        
                     </form>
+
 
 
                     {createdPollsList ? 
