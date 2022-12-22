@@ -2,7 +2,6 @@
 import {useEffect} from 'react';
 import { useNavigate } from 'react-router';
 
-import { AddAlert } from '../hooks/useAlert';
 
 interface PollLoadingProps {
     dispatch: React.Dispatch<any>

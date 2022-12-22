@@ -9,8 +9,6 @@ interface SettingsProps {
     isOwner: boolean
     pollId: string
     userId: string
-    deleteSelected: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLLabelElement>) => void
-    numSelectedOptions: number
     settings: PollSettings
 }
 
@@ -35,14 +33,6 @@ function Settings(props: SettingsProps) {
                     <SettingCheckBox ws={props.ws} text="Auto Approve Your Options" name="autoApproveOwner" indent={true} pollId={props.pollId} userId={props.userId} active={props.settings["autoApproveOwner"]} />
                     : null}
 
-
-                <div className="flex justify-between">
-                    <label className="px-1 mr-2 text-red-100" onClick={props.deleteSelected}>
-                        {"Delete Selected Options"}
-                    </label>
-
-                    <button onClick={props.deleteSelected} className="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">{props.numSelectedOptions}</button>
-                </div>
             </div>)
 
     } else if (props.settings["disableVoting"] || props.settings["hideVotes"] || props.settings["limitOneVote"] || props.settings["approvalRequired"]) {

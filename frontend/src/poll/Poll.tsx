@@ -4,7 +4,6 @@ import Dropdown from "./Dropdown"
 import DropdownOption from './DropdownOption';
 import Statistics from './Statistics';
 import Settings from './Settings';
-import { AddAlert } from '../hooks/useAlert';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import TitleBox from './TitleBox';
 import { PollData } from '../App';
@@ -250,8 +249,6 @@ function Poll(props: PollProps) {
                         isOwner = {!userView && props.isOwner}
                         pollId = {props.pollId}
                         userId = {props.userId}
-                        deleteSelected = {deleteSelected}
-                        numSelectedOptions = {selectedOptions.length}
                         settings = {props.settings}
                     />
                     
@@ -299,23 +296,35 @@ function Poll(props: PollProps) {
                         </Dropdown>
 
                         {props.isOwner && selectedOptions.length > 0 ? 
-                            <div className = "text-white mt-2 justify-center flex">
-                                <label htmlFor={"selectAll"}>
-                                    Select All
-                                </label>
+                            <div className = "text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-stone-600 w-fit mx-auto shadow-md">
+                                    <label htmlFor={"selectAll"}>
+                                        Select All
+                                    </label>
 
-                                <input 
-                                    className="w-4 h-4 rounded-xl ml-2 self-center" 
-                                    id = {"selectAll"} 
-                                    type="checkbox"
-                                    checked={selectedOptions.length === props.options.length} 
-                                    onChange={() => {
-                                        if (selectedOptions.length === props.options.length)
-                                            dispatch({type: "CLEAR"})
-                                        else
-                                            dispatch({type: "SELECT_ALL"});
+                                    <input 
+                                        className="w-4 h-4 rounded-xl ml-1 self-center" 
+                                        id = {"selectAll"} 
+                                        type="checkbox"
+                                        checked={selectedOptions.length === props.options.length} 
+                                        onChange={() => {
+                                            if (selectedOptions.length === props.options.length)
+                                                dispatch({type: "CLEAR"})
+                                            else
+                                                dispatch({type: "SELECT_ALL"});
                                     }}/>
-                                
+
+
+
+                                    <label className="px-1 ml-6 text-red-100" onClick={deleteSelected}>
+                                        {"Delete Selected Options"}
+                                    </label>
+
+                                    <button onClick={deleteSelected}
+                                        className="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs"
+                                    >     
+                                        {selectedOptions.length}
+                                    </button>
+
                             </div>
                         : null}
 

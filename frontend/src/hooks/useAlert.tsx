@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useReducer } from "react";
+import { useMemo, useState, useReducer } from "react";
 
 export interface Alert {
     index: number
@@ -6,8 +6,6 @@ export interface Alert {
     alert: JSX.Element
     timeout: NodeJS.Timeout
 }
-
-export type AddAlert = (str: string, time: number, msg?: string) => (() => void)
 
 type AlertAction = 
     { type: "ADD_ALERT", payload: { msg: string, time: number, type: string } } |
@@ -23,7 +21,6 @@ const useAlert = (): [JSX.Element, React.Dispatch<any> ] => {
     const createAlert = ((msg: string, time: number, type: string): Alert => {
         const timeout = setTimeout(() => {
             alertDispatch({ type: "REMOVE_ALERT_BY_INDEX", payload: { "id": count } })
-            console.log(time)
         }, time)
 
         const alert = (

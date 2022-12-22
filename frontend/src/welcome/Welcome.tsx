@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import CreatedBox from "./CreatedBox";
-import { AddAlert } from "../hooks/useAlert";
 
 interface WelcomeProps{
     userId: string

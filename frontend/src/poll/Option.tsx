@@ -1,6 +1,5 @@
 import { useEffect, useState, memo } from 'react'
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { AddAlert } from '../hooks/useAlert';
 
 interface OptionProps {
     userId: string

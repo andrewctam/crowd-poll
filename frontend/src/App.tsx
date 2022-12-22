@@ -6,7 +6,7 @@ import Welcome from "./welcome/Welcome";
 import { BrowserRouter, Route, Routes} from "react-router-dom";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-import useAlert, { Alert } from "./hooks/useAlert";
+import useAlert from "./hooks/useAlert";
 import PollLoading from "./welcome/PollLoading";
 
 export interface PollSettings {
