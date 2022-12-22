@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production')
     require('dotenv').config()
 
-const port = process.env.PORT || 6000
+const port = process.env.PORT || 8080
 
 const connectDB = require("./database");
 connectDB();
@@ -18,7 +18,11 @@ const pings = new Map();
 const express = require('express');
 const cors = require('cors');
 const app = express()
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:3000", "https://crowdpolls.web.app"],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
 app.use("/api/users", require("./routes/userRoutes"))
