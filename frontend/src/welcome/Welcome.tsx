@@ -157,7 +157,7 @@ function Welcome(props: WelcomeProps) {
         createdPollsList.unshift(
             <li key = "selectAll" className = "h-fit flex justify-between">
                 <label htmlFor = "selectAll" className = "text-gray-300 select-none">{"Select All"}</label>
-                <input id = "selectAll" checked = {allSelected} onChange = {() => {setAllSelected(!allSelected)}} className = "border border-black ml-2" type="checkbox"></input>
+                <input id = "selectAll" checked = {allSelected} onChange = {() => {setAllSelected(!allSelected)}} className = "border border-black ml-32" type="checkbox"></input>
             </li>
         )
 
@@ -166,7 +166,7 @@ function Welcome(props: WelcomeProps) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-center text-center">
 
-            <div className="py-10 bg-slate-700 h-full grid items-center" style = {{
+            <div className="py-10 bg-slate-700 h-full w-full grid items-center" style = {{
                 "boxShadow": "0px 0px 10px 0px rgba(0,0,0,0.5)",
                 "zIndex": "1"
             }}>
@@ -178,38 +178,37 @@ function Welcome(props: WelcomeProps) {
          
 
 
-            <div className="bg-stone-700 grid lg:h-screen items-center w-full">
-                <div>
-                    <form className="p-10 pb-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-fit mx-auto" onSubmit={createPoll}>
+            <div className="bg-stone-700 flex lg:h-screen w-full overflow-auto">
+                <div className = "w-full my-auto pb-4">
+                    <form className="p-10 py-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-11/12 mx-auto" onSubmit={createPoll}>
                         <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4">Create New Poll</h1>
 
-                        <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/4 lg:w-1/2 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
+                        <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/5 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
                         placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
 
                         <button type="submit" disabled = {props.userId === ""} className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>
 
-                        
-                            
                         <p className = "text-white mt-1 select-none">You can add answer options and edit settings once inside the poll</p>
 
                         {props.userId ? 
-                            <div className = "select-none text-green-100 mt-6">
-                                Connected to server!
+                            <div className = "select-none text-green-100 mt-4">
+                                Connected to Server
                             </div>
                             : 
-                            <div className = "select-none text-rose-100 mt-6">
-                                Connecting to server...
-                            </div>}
+                            <div className = "select-none text-rose-100 mt-4">
+                                Connecting to Server...
+                            </div>
+                        }
                         
                     </form>
 
 
 
                     {createdPollsList ? 
-                    <div className = "bg-stone-600 h-fit w-fit mx-auto p-6 mt-8 rounded-xl shadow-xl">
+                    <div className = "bg-stone-600 h-fit w-11/12 mx-auto p-6 mt-8 rounded-xl shadow-xl">
                         <p className = "text-xl lg:text-2xl mb-4 select-none px-4 text-white">Your Created Polls</p>
 
-                        <ul className = "max-h-72 overflow-y-auto mx-auto px-6 max-w-[50vh]">
+                        <ul className = "overflow-y-auto mx-auto w-fit px-6">
                             {createdPollsList}
                         </ul>
 

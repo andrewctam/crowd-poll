@@ -124,7 +124,7 @@ function Option(props: OptionProps) {
             <div className="text-xl px-10 relative text-left text-ellipsis overflow-hidden ">
                 {props.optionTitle}
 
-                {showBox || props.selected || (props.isOwner && touchscreen) ?
+                {showBox || (props.isOwner && (props.selected || touchscreen)) ?
                     <input type="checkbox" checked={props.selected} className="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
                         onChange={() => {props.toggleSelection(props.optionId)}} onClick={(e) => e.stopPropagation()}></input>
                     : null}

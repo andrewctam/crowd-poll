@@ -296,7 +296,7 @@ function Poll(props: PollProps) {
                                 /> : null}
                         </Dropdown>
 
-                        {props.isOwner && selectedOptions.length > 0 ? 
+                        {props.isOwner && !userView && selectedOptions.length > 0 ? 
                             <div className = "text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-stone-600 w-fit mx-auto shadow-md">
                                     <label htmlFor={"selectAll"}>
                                         Select All
@@ -313,8 +313,6 @@ function Poll(props: PollProps) {
                                             else
                                                 dispatch({type: "SELECT_ALL"});
                                     }}/>
-
-
 
                                     <label className="px-1 ml-6 text-red-100" onClick={deleteSelected}>
                                         {"Delete Selected Options"}
