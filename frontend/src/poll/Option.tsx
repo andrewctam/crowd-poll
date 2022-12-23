@@ -96,7 +96,7 @@ function Option(props: OptionProps) {
 
     if (!props.approved)
         style["borderColor"] = "rgb(255, 0, 0)"
-    else if (props.selected)
+    else if (props.selected && props.isOwner)
         style["borderColor"] = "rgb(255 127 127)"
     else if (voting)
         style["borderColor"] = "rgb(200 236 180)"

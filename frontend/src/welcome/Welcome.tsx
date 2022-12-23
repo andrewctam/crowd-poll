@@ -171,16 +171,24 @@ function Welcome(props: WelcomeProps) {
                 "zIndex": "1"
             }}>
                 <div>
-                    <a href="."><h1 className="mx-auto text-5xl lg:text-6xl font-semibold text-gray-200 select-none px-4">Crowd Poll</h1></a>
-                    <p className="text-sm lg:text-xl pt-1 mt-2 text-gray-300 select-none">Share a poll with a title <br /> Crowd source answer options <br />Collectively vote on the best one</p>
+                    <a href=".">
+                        <h1 className="mx-auto text-5xl lg:text-6xl font-semibold text-gray-200 select-none px-4">
+                            Crowd Poll
+                        </h1>
+                    </a>
+
+                    <p className="text-sm lg:text-xl pt-1 mt-2 text-gray-300 select-none">
+                        Share a poll with a title <br/>
+                        Crowd source answer options <br/>
+                        Collectively vote on the best one
+                    </p>
                 </div>
             </div>
          
 
-
             <div className="bg-stone-700 flex lg:h-screen w-full overflow-auto">
                 <div className = "w-full my-auto pb-4">
-                    <form className="p-10 py-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-11/12 mx-auto" onSubmit={createPoll}>
+                    <form className="p-10 py-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-5/6 mx-auto" onSubmit={createPoll}>
                         <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4">Create New Poll</h1>
 
                         <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/5 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
@@ -205,7 +213,7 @@ function Welcome(props: WelcomeProps) {
 
 
                     {createdPollsList ? 
-                    <div className = "bg-stone-600 h-fit w-11/12 mx-auto p-6 mt-8 rounded-xl shadow-xl">
+                    <div className = "bg-stone-600 h-fit w-5/6 mx-auto p-6 mt-8 rounded-xl shadow-xl">
                         <p className = "text-xl lg:text-2xl mb-4 select-none px-4 text-white">Your Created Polls</p>
 
                         <ul className = "overflow-y-auto mx-auto w-fit px-6">

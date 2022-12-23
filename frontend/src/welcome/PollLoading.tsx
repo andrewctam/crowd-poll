@@ -13,6 +13,12 @@ function PollLoading(props: PollLoadingProps) {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
+            props.dispatch({type: "ADD_ALERT", payload: {
+                msg: "Error loading poll",
+                time: 1000,
+                type: "error"
+            }});
+            
             navigate("/");
         }, 10000);
 
