@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AlertAction } from "../hooks/useAlert";
 import CreatedBox from "./CreatedBox";
@@ -11,7 +11,7 @@ interface WelcomeProps{
 }
 
 function Welcome(props: WelcomeProps) {
-    const titleInput = useRef<HTMLInputElement>(null);
+    const [titleInput, setTitleInput] = useState("");
     const [showError, setShowError] = useState(false);
     const [selectedDelete, setSelectedDelete] = useState<string[]>([]);
     const [allSelected, setAllSelected] = useState(false);
@@ -31,11 +31,9 @@ function Welcome(props: WelcomeProps) {
 
     const createPoll = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!titleInput.current || props.userId === "")
-            return;
-            
-        const title = titleInput.current.value
-        if (title === "") {
+
+
+        if (titleInput === "") {
             setShowError(true);
             return;
         }
@@ -45,7 +43,7 @@ function Welcome(props: WelcomeProps) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({title: title, userId: props.userId })
+            body: JSON.stringify({title: titleInput, userId: props.userId })
         }).then((response) => {
 
             if (response.status === 404)
@@ -74,10 +72,10 @@ function Welcome(props: WelcomeProps) {
         if (createdPolls) {
             const temp = JSON.parse(createdPolls)
 
-            temp[response["pollId"]] = title;
+            temp[response["pollId"]] = titleInput;
             localStorage.setItem("created", JSON.stringify(temp));
         } else {
-            localStorage.setItem("created", JSON.stringify({[response["pollId"]]: title}));
+            localStorage.setItem("created", JSON.stringify({[response["pollId"]]: titleInput}));
         }
        
 
@@ -191,7 +189,13 @@ function Welcome(props: WelcomeProps) {
                     <form className="p-10 py-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-5/6 mx-auto" onSubmit={createPoll}>
                         <h1 className="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4">Create New Poll</h1>
 
-                        <input ref={titleInput} onChange = {() => setShowError(false)} className={`h-10 w-3/5 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
+                        <input 
+                        value = {titleInput}
+                        onChange = { (e) => {
+                            setTitleInput(e.target.value)
+                            setShowError(false)
+                        }}
+                        className={`h-10 w-3/5 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md ${showError ? "placeholder:text-red-300" : "placeholder:text-white/90"}`} 
                         placeholder= {`${showError ? "Title can not be blank" : "Enter a title..."}`} />
 
                         <button type="submit" disabled = {props.userId === ""} className="bg-black text-gray-200 border border-black p-2 m-2 rounded">Create Poll</button>

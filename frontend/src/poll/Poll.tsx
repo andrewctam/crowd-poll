@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useReducer } from 'react'
+import React, { useState, useEffect, useCallback, useReducer } from 'react'
 import Option from "./Option"
 import Dropdown from "./Dropdown"
 import DropdownOption from './DropdownOption';
@@ -20,10 +20,10 @@ type SelectedOptionsAction =
     {type: "SELECT_ALL"}
 
 function Poll(props: PollProps) {
-    const optionInput = useRef<HTMLInputElement>(null);
+    const [optionInput, setOptionInput] = useState("");
     const [showError, setShowError] = useState(false);
 
-    //View as user. Still the owner and 
+    //View as user. 
     const [userView, setUserView] = useState(false);
 
     const [selectedOptions, dispatch] = useReducer((state: string[], action: SelectedOptionsAction) => {
@@ -95,11 +95,8 @@ function Poll(props: PollProps) {
 
     const addOption = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!optionInput.current)
-            return;
 
-        const optionTitle = optionInput.current.value
-        if (optionTitle === "") {
+        if (optionInput === "") {
             setShowError(true);
             return;
         } else {
@@ -110,7 +107,7 @@ function Poll(props: PollProps) {
             "type": "addOption",
             "pollId": props.pollId,
             "userId": props.userId,
-            "optionTitle": optionTitle
+            "optionTitle": optionInput
         }));
 
         if (props.settings["approvalRequired"] && (!props.isOwner || !props.settings["autoApproveOwner"] || userView)) {
@@ -128,7 +125,7 @@ function Poll(props: PollProps) {
             }})
         }
         
-        optionInput.current.value = "";
+        setOptionInput("");
     }
 
     const deleteSelected = async (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLLabelElement>) => {
@@ -355,9 +352,13 @@ function Poll(props: PollProps) {
                     
                     
                     <form onSubmit={addOption} className="w-full sticky bottom-2 z-10 bg-[#4b4a49] rounded-xl shadow-md flex">
-                        <input ref={optionInput} 
+                        <input
+                            value = {optionInput}
                             className={`h-10 flex-grow m-auto text-white lg:text-lg pl-3 bg-transparent focus:outline-none ${showError ? "placeholder:text-red-300" : "placeholder:text-white/70"}`} 
-                            onChange = {() => setShowError(false)}
+                            onChange = {(e) => {
+                                setOptionInput(e.target.value)
+                                setShowError(false)
+                            }}
                             placeholder={showError ? "Answer option can not be blank" : "Add an answer option..."}/>
 
                         <button type="submit" className="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-md">{props.settings["approvalRequired"] ? "Request To Add Option" : "Add Option"}</button>
