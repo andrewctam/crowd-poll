@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { WsPollService } from 'src/app/services/ws-poll.service';
 import { BooleanEmitPayload } from 'src/app/types/types';
 
 @Component({

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { AlertService } from 'src/app/services/alert.service';
 import { BooleanEmitPayload, Option } from 'src/app/types/types';
 
 @Component({
@@ -7,9 +8,13 @@ import { BooleanEmitPayload, Option } from 'src/app/types/types';
 })
 export class PollOptionComponent {
 
+  constructor(private alertService: AlertService) { }
+
   @Input() data!: Option;
   @Input() isOwner!: boolean;
   @Input() voted!: boolean;
+  @Input() votedAny!: boolean;
+  @Input() votingDisabled!: boolean;
   @Input() selectedDelete!: boolean;
   @Input() selectedSlice!: boolean;
 
@@ -26,19 +31,23 @@ export class PollOptionComponent {
   backgroundImage: string = "";
   transform: string = "";
   updateStyles() {
+    const showVote = (this.voted && !this.currentlyVoting) || (this.currentlyVoting && !this.voted);
+
     this.borderColor = (
       this.data?.approved === false ? "rgb(255, 0, 0)" :
                 this.selectedDelete ? "rgb(255, 127, 127)" :
-               this.currentlyVoting ? "rgb(200, 236, 180)" :
-                         this.voted ? "rgb(154, 236, 180)" :
+                showVote ? "rgb(154, 236, 180)" :
                                       "rgb(255, 255, 255)"
     );
 
     this.transform = this.selectedSlice ? "scale(1.1)" : "";
-    this.backgroundImage = this.voted ? "linear-gradient(to right, rgb(89 100 90), rgb(92 92 90))" : "";          
+    this.backgroundImage = showVote ? "linear-gradient(to right, rgb(89 100 90), rgb(92 92 90))" : "";          
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    if (changes["voted"]) {
+      this.currentlyVoting = false;
+    }
     if (changes["data"] || changes["selectedDelete"] || changes["voted"] || changes["currentlyVoting"] || changes["selectedSlice"]) {
       this.updateStyles();
     }
@@ -46,6 +55,16 @@ export class PollOptionComponent {
 
   vote(event: MouseEvent) {
     event?.stopPropagation();
+
+    if (this.votingDisabled) {
+      this.alertService.addAlert("Changing votes is disabled!", 2000, "error");
+      return;
+    }
+
+    if (!this.voted && this.votedAny) {
+      this.alertService.addAlert("Already voted for another option!", 2000, "error");
+      return;
+    }
 
     if (!this.currentlyVoting) {
       this.currentlyVoting = true;

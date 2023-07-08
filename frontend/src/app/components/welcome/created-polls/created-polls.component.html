@@ -1,39 +1,53 @@
-<div *ngIf="createdPolls.length > 0" class="bg-stone-600 h-fit w-5/6 mx-auto p-6 mt-8 rounded-xl shadow-xl">
-    <p class="text-xl lg:text-2xl mb-4 select-none px-4 text-white">
-        Your Created Polls
-    </p>
+<div
+  *ngIf="createdPolls.length > 0"
+  class="bg-stone-600 h-fit w-5/6 mx-auto p-6 mt-8 rounded-xl shadow-xl"
+>
+  <p class="text-xl lg:text-2xl mb-4 select-none px-4 text-white">
+    Your Created Polls
+  </p>
 
-    <ul class="overflow-y-auto mx-auto w-fit px-6 min-w-32">
-        <li class="h-fit flex justify-between" (click)="setAll()">
-            <label for="selectAll" class="text-gray-300 select-none">
-                Select All
-            </label>
+  <ul class="overflow-y-auto mx-auto w-fit px-6 min-w-32">
+    <div *ngIf="pollsSelected > 0"
+        class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-gray-600 w-fit mx-auto shadow-md">
+        <label htmlFor="selectAll">
+            Select All
+        </label>
 
-            <input 
-                id="selectAll" [checked]="isAllSelected" class="border border-black"
-                type="checkbox" />
-        </li>
+        <input class="w-4 h-4 rounded-xl ml-1 self-center" id="selectAll" type="checkbox"
+            [checked]="isAllSelected"
+            (click)="setAll()" />
 
-        <li class="h-fit flex justify-between" *ngFor="let poll of createdPolls">
-            <a href="poll/{{poll.pollId}}">
-                <label class="truncate" [ngClass]="poll.selected ? 'text-red-200' : 'text-blue-200'">
-                    {{ poll.title }}
-                </label>
-            </a>
 
-            <input type="checkbox" [id]="poll.pollId" [(ngModel)]="poll.selected"
-                class="border border-black ml-2 self-center" />
-        </li>
-    </ul>
-
-    <div class="mt-4">
-        <label class="text-red-100" (click)="deletePolls()">
+        <label class="px-1 ml-6 text-red-200" (click)="deletePolls()">
             Delete Selected Polls
         </label>
 
         <button (click)="deletePolls()"
-            class="bg-red-200 rounded border border-black ml-2 px-2 text-black text-xs self-center">
+            class="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">
             {{pollsSelected}}
         </button>
     </div>
+    <a
+      *ngFor="let poll of createdPolls; let i = index"
+      href="poll/{{ poll.pollId }}"
+    >
+      <li
+        class="h-fit flex justify-between p-2 rounded mt-2 shadow-md"
+        [ngClass]="i % 2 === 0 ? 'bg-gray-600' : 'bg-gray-700'"
+      >
+        <label
+          class="break-all cursor-pointer"
+          [ngClass]="poll.selected ? 'text-red-200' : 'text-blue-200'"
+        >
+          {{ poll.title }}
+        </label>
+        <input
+          type="checkbox"
+          [id]="poll.pollId"
+          [(ngModel)]="poll.selected"
+          class="border border-black ml-2 self-center"
+        />
+      </li>
+    </a>
+  </ul>
 </div>

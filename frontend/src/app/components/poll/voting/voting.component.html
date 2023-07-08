@@ -84,7 +84,7 @@
                 (click)="selectAll()" />
 
 
-            <label class="px-1 ml-6 text-red-100" (onClick)="deleteSelectedOptions">
+            <label class="px-1 ml-6 text-red-100" (click)="deleteSelectedOptions()">
                 Delete Selected Options
             </label>
 
@@ -92,7 +92,6 @@
                 class="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">
                 {{selectedOptions.length}}
             </button>
-
         </div>
     </ng-template>
 
@@ -104,6 +103,9 @@
            [selectedDelete]="selectedOptions.includes(o._id)"
            [selectedSlice]="selectedSlice === o._id"
            [voted]="pollData.votedFor.includes(o._id)"
+           [votedAny]="pollData.votedFor.length > 0 && pollData.settings['limitOneVote']"
+           [votingDisabled]="pollData.settings.disableVoting"
+
            (castVote)="castVote($event)"
            (toggleSelected)="toggleSelected($event)"
            (approveDeny)="approveDenyOption($event)"

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AlertService } from 'src/app/services/alert.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 import { WsPollService } from 'src/app/services/ws-poll.service';
-import { BooleanEmitPayload, FilterMethod, PollData, SortingMethod } from 'src/app/types/types';
+import { BooleanEmitPayload, FilterMethod, Option, PollData, SortingMethod } from 'src/app/types/types';
 
 @Component({
   selector: 'voting',
