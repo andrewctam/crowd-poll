@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Observer, map } from 'rxjs';
 import { AnonymousSubject, Subject } from 'rxjs/internal/Subject';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 import { AlertService } from './alert.service';
 
 @Injectable({
