@@ -1,0 +1,19 @@
+<div
+  (click)="show = !show"
+  class="relative lg:inline-block w-fit rounded-lg bg-slate-300/20 px-2 py-1 mx-auto my-1 lg:my-0 lg:mx-2 shadow-md"
+>
+  <div class="inline-block text-white font-semibold text-wrap-">{{ name }}</div>
+  <div class="inline-block text-sky-300 mx-1 font-semibold text-wrap-">
+    {{ selected }}
+  </div>
+  <div class="inline-block text-white text-wrap-">
+    {{ show ? "↑" : "↓" }}
+  </div>
+
+  <div
+    *ngIf="show"
+    class="absolute bg-stone-600 w-48 border border-stone-700 left-[-1px] rounded-tr-lg rounded-b-lg z-20 p-2 shadow-md"
+  >
+    <ng-content />
+  </div>
+</div>

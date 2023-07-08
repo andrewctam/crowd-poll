@@ -1,0 +1,39 @@
+<div *ngIf="createdPolls.length > 0" class="bg-stone-600 h-fit w-5/6 mx-auto p-6 mt-8 rounded-xl shadow-xl">
+    <p class="text-xl lg:text-2xl mb-4 select-none px-4 text-white">
+        Your Created Polls
+    </p>
+
+    <ul class="overflow-y-auto mx-auto w-fit px-6 min-w-32">
+        <li class="h-fit flex justify-between" (click)="setAll()">
+            <label for="selectAll" class="text-gray-300 select-none">
+                Select All
+            </label>
+
+            <input 
+                id="selectAll" [checked]="isAllSelected" class="border border-black"
+                type="checkbox" />
+        </li>
+
+        <li class="h-fit flex justify-between" *ngFor="let poll of createdPolls">
+            <a href="poll/{{poll.pollId}}">
+                <label class="truncate" [ngClass]="poll.selected ? 'text-red-200' : 'text-blue-200'">
+                    {{ poll.title }}
+                </label>
+            </a>
+
+            <input type="checkbox" [id]="poll.pollId" [(ngModel)]="poll.selected"
+                class="border border-black ml-2 self-center" />
+        </li>
+    </ul>
+
+    <div class="mt-4">
+        <label class="text-red-100" (click)="deletePolls()">
+            Delete Selected Polls
+        </label>
+
+        <button (click)="deletePolls()"
+            class="bg-red-200 rounded border border-black ml-2 px-2 text-black text-xs self-center">
+            {{pollsSelected}}
+        </button>
+    </div>
+</div>

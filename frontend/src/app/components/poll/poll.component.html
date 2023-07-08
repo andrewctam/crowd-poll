@@ -1,0 +1,74 @@
+<div
+  *ngIf="pollData != null"
+  class="grid grid-cols-1 lg:grid-cols-2 items-center justify-center text-center select-none"
+>
+  <div
+    class="lg:h-screen overflow-y-auto pt-5 pb-10 bg-slate-700 grid items-center relative"
+    [ngStyle]="{
+      boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.5)',
+      zIndex: '1'
+    }"
+  >
+    <div>
+      <a
+        href="/"
+        class="mx-auto text-5xl block lg:text-6xl font-semibold text-gray-200 select-none"
+      >
+        <h1>Crowd Poll</h1>
+      </a>
+
+      <input
+        readOnly="true"
+        (click)="selectInput($event)"
+        class="h-10 w-2/3 lg:w-1/2 rounded mt-4 text-black placeholder:text-black shadow-md bg-slate-300 px-2"
+        [value]="url"
+      />
+
+      <div
+        *ngIf="pollData.isOwner"
+        class="absolute bottom-2 right-2 text-xs text-white"
+      >
+        <div class="flex justify-between">
+          <label htmlFor="userView" class="text-white"> View as User </label>
+
+          <input
+            class="w-4 h-4 rounded-xl ml-2 self-center"
+            id="userView"
+            type="checkbox"
+            [checked]="userView"
+            (click)="toggleUserView()"
+          />
+        </div>
+      </div>
+
+      <div
+        *ngIf="pollData.isOwner"
+        class="absolute bottom-2 left-2 text-xs text-white"
+      >
+        <p class="inline">Viewing as</p>
+        <p
+          class="inline"
+          [ngClass]="userView ? 'text-rose-200' : 'text-sky-200'"
+        >
+          {{ userView ? " User" : " Owner" }}
+        </p>
+      </div>
+
+      <settings
+        [isOwner]="!userView && pollData.isOwner"
+        [pollId]="pollData.pollId"
+        [settings]="pollData.settings"
+      />
+
+      <statistics 
+        (setSelectedSlice)="setSelectedSlice($event)"
+        [options]="pollData.options"
+      />
+    </div>
+  </div>
+
+  <voting 
+    [pollData]="pollData" 
+    [selectedSlice]="selectedSlice" 
+  />
+</div>

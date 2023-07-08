@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}", , "./public/index.html"],
+  content: [
+    "./src/**/*.{html,ts}",
+  ],
   theme: {
     extend: {
       height: {
@@ -12,6 +14,7 @@ module.exports = {
       
       minWidth: {
         "4": "1rem",
+        "32": "8rem"
       },
 
       // that is animation class

@@ -1,0 +1,11 @@
+<div *ngIf="disabled; else elseBlock" class="block text-center w-full text-gray-400">
+    {{ name }}
+</div>
+
+<ng-template #elseBlock>
+    <div (click)="set()" 
+        class="cursor-pointer block w-full text-center"
+        [ngClass]="selected ? 'text-sky-300' : 'text-white'">
+            {{ name }}
+    </div>
+</ng-template>

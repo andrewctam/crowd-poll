@@ -1,0 +1,9 @@
+<div class="fixed top-0 left-0 m-1 z-20">
+  <div
+    *ngFor="let alert of alerts"
+    class="rounded px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 shadow-md"
+    [ngClass]="alert.type === 'error' ? 'bg-rose-300' : 'bg-sky-200'"
+  >
+    {{ alert.msg }}
+  </div>
+</div>

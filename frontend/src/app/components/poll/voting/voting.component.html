@@ -1,0 +1,124 @@
+<div class="bg-stone-700 lg:h-screen overflow-y-auto">
+    <div (click)="expandedTitle = !expandedTitle"
+        class="items-center m-5 p-3 rounded-xl bg-stone-600/75  text-3xl bold text-white shadow-lg sticky top-5 z-10 overflow-hidden text-ellipsis cursor-pointer"
+        [ngStyle]="{ 
+            'overflowWrap': expandedTitle ? 'break-word' : 'normal' 
+        }">
+        {{pollData.title}}
+    </div>
+
+    <p *ngIf="pollData.options.length === 0; else elseBlock" class='text-md lg:text-lg text-white'>
+        No Answer Options Yet
+    </p>
+    <ng-template #elseBlock>
+        <dropdown [name]="'Sort By'" [selected]="sortingMethod">
+            <dropdown-option 
+                [name]="'Order Created'" 
+                [selected]="sortingMethod === 'Order Created'" 
+                [disabled]="false"
+                (setSelectedMethod)="setSortingMethod($event)"
+            />
+            <dropdown-option 
+                [name]="'Vote Count'"
+                [selected]="sortingMethod === 'Vote Count'" 
+                [disabled]="pollData.settings['hideVotes'] && (!pollData.isOwner || userView || pollData.settings['hideVotesForOwner'])"
+                (setSelectedMethod)="setSortingMethod($event)" 
+            />
+            <dropdown-option 
+                [name]="'Alphabetical Order'" 
+                [selected]="sortingMethod === 'Alphabetical Order'" 
+                [disabled]="false"
+                (setSelectedMethod)="setSortingMethod($event)"
+            />
+        </dropdown>
+
+        <dropdown [name]="'Filter By'" [selected]="filterMethod">
+            <dropdown-option 
+                [name]="'All'" 
+                [selected]="filterMethod === 'All'" 
+                [disabled]="false"
+                (setSelectedMethod)="setFilterMethod($event)"
+            />
+
+            <dropdown-option 
+                [name]="'Voted For'" 
+                [selected]="filterMethod === 'Voted For'" 
+                [disabled]="false"
+                (setSelectedMethod)="setFilterMethod($event)"
+            />
+
+            <dropdown-option 
+                [name]="'Not Voted For'" 
+                [selected]="filterMethod === 'Not Voted For'" 
+                [disabled]="false"
+                (setSelectedMethod)="setFilterMethod($event)"
+            />
+
+            <div *ngIf="!userView && pollData.isOwner">
+                <dropdown-option 
+                    [name]="'Approved'" 
+                    [selected]="filterMethod === 'Approved'" 
+                    [disabled]="false"
+                    (setSelectedMethod)="setFilterMethod($event)"
+                />
+
+                <dropdown-option 
+                    [name]="'Pending Approval'" 
+                    [selected]="filterMethod === 'Pending Approval'" 
+                    [disabled]="!pollData.settings['approvalRequired']"
+                    (setSelectedMethod)="setFilterMethod($event)"
+                />
+            </div>
+    
+        </dropdown>
+
+        
+        <div *ngIf="pollData.isOwner && !userView && selectedOptions.length > 0"
+            class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-stone-600 w-fit mx-auto shadow-md">
+            <label htmlFor="selectAll">
+                Select All
+            </label>
+
+            <input class="w-4 h-4 rounded-xl ml-1 self-center" id="selectAll" type="checkbox"
+                [checked]="selectedOptions.length === pollData.options.length" 
+                (click)="selectAll()" />
+
+
+            <label class="px-1 ml-6 text-red-100" (onClick)="deleteSelectedOptions">
+                Delete Selected Options
+            </label>
+
+            <button (click)="deleteSelectedOptions()"
+                class="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">
+                {{selectedOptions.length}}
+            </button>
+
+        </div>
+    </ng-template>
+
+    <div class='mx-10 my-3 lg:h-fit h-screen'>
+       
+        <poll-option *ngFor="let o of (pollData.options | filter: filterMethod : pollData.votedFor | sort: sortingMethod)"
+           [data]="o"
+           [isOwner]="pollData.isOwner"
+           [selectedDelete]="selectedOptions.includes(o._id)"
+           [selectedSlice]="selectedSlice === o._id"
+           [voted]="pollData.votedFor.includes(o._id)"
+           (castVote)="castVote($event)"
+           (toggleSelected)="toggleSelected($event)"
+           (approveDeny)="approveDenyOption($event)"
+        />
+
+        <form (submit)="addOption()" class="w-full sticky bottom-2 z-10 bg-[#4b4a49] rounded-xl shadow-md flex">
+            <input [(ngModel)]="optionInput" name="optionInput" class="h-10 flex-grow m-auto text-white lg:text-lg pl-3
+                bg-transparent focus:outline-none" placeholder="Add an answer option..." />
+
+            <button type="submit" class="bg-stone-900 text-gray-200 p-2 m-2 rounded text-sm lg:text-md"
+                [disabled]="optionInput.length === 0">
+
+                {{pollData.settings['approvalRequired'] ? "Request To Add Option" : "Add Option"}}
+            </button>
+        </form>
+
+    </div>
+</div>

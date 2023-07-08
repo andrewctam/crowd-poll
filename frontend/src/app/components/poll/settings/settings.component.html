@@ -1,0 +1,82 @@
+<div
+  *ngIf="isOwner; else elseBlock"
+  class="bg-slate-600 mt-4 p-3 w-fit mx-auto rounded-xl shadow-md"
+>
+  <h1 class="text-white text-2xl mb-2 font-semibold">Settings</h1>
+
+  <settings-checkbox
+    text="Disable Voting"
+    name="disableVoting"
+    [indent]="false"
+    (toggleSetting)="setSetting($event)"
+    [defaultChecked]="settings['disableVoting']"
+  />
+
+  <settings-checkbox
+    text="Hide Vote Count"
+    name="hideVotes"
+    [indent]="false"
+    (toggleSetting)="setSetting($event)"
+    [defaultChecked]="settings['hideVotes']"
+  />
+
+  <settings-checkbox
+    *ngIf="settings['hideVotes']"
+    text="Hide Vote Count For You"
+    name="hideVotesForOwner"
+    (toggleSetting)="setSetting($event)"
+    [indent]="true"
+    [defaultChecked]="settings['hideVotesForOwner']"
+  />
+
+  <settings-checkbox
+    text="Limit Users To One Vote"
+    name="limitOneVote"
+    [indent]="false"
+    (toggleSetting)="setSetting($event)"
+    [defaultChecked]="settings['limitOneVote']"
+  />
+
+  <settings-checkbox
+    text="New Options Require Approval"
+    name="approvalRequired"
+    [indent]="false"
+    (toggleSetting)="setSetting($event)"
+    [defaultChecked]="settings['approvalRequired']"
+  />
+
+  <settings-checkbox
+    *ngIf="settings['approvalRequired']"
+    text="Auto Approve Your Options"
+    name="autoApproveOwner"
+    [indent]="true"
+    (toggleSetting)="setSetting($event)"
+    [defaultChecked]="settings['autoApproveOwner']"
+  />
+</div>
+
+<ng-template #elseBlock>
+  <div
+    *ngIf="anySettingActive"
+    class="p-4 rounded-xl mx-auto w-fit mt-4 bg-slate-600 shadow-md"
+  >
+    <h1
+      class="text-center text-2xl font-semibold pt-1 text-white select-none mb-3"
+    >
+      Settings
+    </h1>
+
+    <ul class="text-left text-white text-md">
+      <li *ngIf="settings['disableVoting']">
+        Adding and removing votes is disabled
+      </li>
+      <li *ngIf="settings['hideVotes']">Vote counts are hidden</li>
+      <li *ngIf="settings['limitOneVote']">
+        You may only cast one vote at a time
+      </li>
+      <li *ngIf="settings['approvalRequired']">
+        New options require approval from the owner
+      </li>
+    </ul>
+  </div>
+</ng-template>

@@ -1,0 +1,35 @@
+<div *ngIf="data.length > 0" class="w-full p-5 h-fit mx-auto">
+  <svg
+    class="w-1/2 h-full mx-auto"
+    viewBox="0 0 400 400"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <g transform="translate(200, 200)">
+      <g
+        *ngFor="let d of arcs; let i = index"
+        (mouseenter)="setSlice(d.data['_id'])"
+        (mouseleave)="setSlice('')"
+        class="cursor-crosshair"
+      >
+        <path [attr.d]="arc(d)" [attr.fill]="getColor(i)" />
+        <text
+          [attr.transform]="arcLabelTranslate(d)"
+          text-anchor="middle"
+          fill="black"
+          font-size="16px"
+        >
+          {{ label(d.data.optionTitle, d.data.votes) }}
+        </text>
+      </g>
+
+      <text
+        [attr.transform]="middlePieTranslate(arcs[0])"
+        text-anchor="middle"
+        fill="white"
+        font-size="24px"
+      >
+        {{ voteSum + (voteSum === 1 ? " vote" : " votes") }}
+      </text>
+    </g>
+  </svg>
+</div>

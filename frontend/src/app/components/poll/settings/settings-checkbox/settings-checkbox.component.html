@@ -1,0 +1,17 @@
+<div class="text-white flex justify-between">
+  <label
+    [htmlFor]="name"
+    class="px-1 mr-2"
+    [ngClass]="indent ? 'text-gray-300 ml-4' : 'text-white'"
+  >
+    {{ text }}
+  </label>
+
+  <input
+    type="checkbox"
+    class="border border-black ml-1 self-center"
+    [id]="name"
+    (click)="toggle()"
+    [checked]="checked"
+  />
+</div>

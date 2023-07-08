@@ -1,0 +1,58 @@
+<button
+  *ngIf="data.approved; else elseBlock"
+  (click)="(castVote)"
+  (mouseenter)="showBox = true"
+  (mouseleave)="showBox = false"
+  class="w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3 shadow-md"
+  [ngStyle]="{ backgroundImage, transform, borderColor }"
+  (click)="vote($event)"
+>
+  <div class="text-xl px-10 relative text-left text-ellipsis overflow-hidden">
+    {{ data.optionTitle }}
+
+    <input
+      *ngIf="showBox || (isOwner && (selectedDelete || touchscreen))"
+      type="checkbox"
+      [checked]="selectedDelete"
+      (click)="toggleSelection($event)"
+      class="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
+    />
+  </div>
+
+  <div class="grid-row w-full px-10 rounded-xl text-left">
+    {{
+      data.votes >= 0
+        ? data.votes + (data.votes === 1 ? " vote" : " votes")
+        : "Votes Hidden"
+    }}
+  </div>
+</button>
+
+<ng-template #elseBlock>
+  <div
+    class="w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 py-3 grid items-center bg-gradient-to-r from-rose-400/20 via-rose-400/10 to-slate-400/10 shadow-md"
+  >
+    <div class="text-xl px-10 w-full relative text-left">
+      {{ data.optionTitle }}
+    </div>
+    <div class="px-10 w-full relative text-left text-sm">
+      Pending Approval. Only you can see this option.
+    </div>
+
+    <div class="grid-row px-10 rounded-xl text-left text-sm mt-2">
+      <button
+        (click)="approveDenyOption(false)"
+        class="inline bg-rose-300/25 text-white w-1/2 px-3 py-2 rounded-l-lg"
+      >
+        Reject
+      </button>
+
+      <button
+        (click)="approveDenyOption(true)"
+        class="inline bg-emerald-400/25 text-white w-1/2 px-3 py-2 rounded-r-lg"
+      >
+        Approve
+      </button>
+    </div>
+  </div>
+</ng-template>

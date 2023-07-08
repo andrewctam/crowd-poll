@@ -1,0 +1,57 @@
+<div class="grid grid-cols-1 lg:grid-cols-2 w-full items-center text-center">
+    <div class="py-10 bg-slate-700 h-full w-full grid items-center" [ngStyle]="{
+        'boxShadow': '0px 0px 10px 0px rgba(0,0,0,0.5)',
+        'zIndex': '1'
+    }">
+        <div>
+            <a href=".">
+                <h1 class="mx-auto text-5xl lg:text-6xl font-semibold text-gray-200 select-none px-4">
+                    Crowd Poll
+                </h1>
+            </a>
+
+            <p class="text-sm lg:text-xl pt-1 mt-2 text-gray-300 select-none">
+                Share a poll with a title <br />
+                Crowd source answer options <br />
+                Collectively vote on the best one
+            </p>
+        </div>
+    </div>
+
+
+    <div class="bg-stone-700 flex lg:h-screen w-full overflow-auto">
+        <div class="w-full my-auto pb-4">
+            <form class="p-10 py-4 bg-stone-600 shadow-xl rounded-xl mt-5 h-fit w-5/6 mx-auto" (ngSubmit)="createPoll()">
+                <h1 class="mx-auto text-xl lg:text-2xl text-gray-200 select-none px-4">Create New Poll</h1>
+
+                <input [(ngModel)]="titleInput"
+                    class="h-10 w-3/5 rounded text-white text-lg  focus:outline-none bg-stone-500 px-2 shadow-md"
+                    placeholder="Enter a title..." name="titleInput"/>
+
+                <button
+                    type="submit"
+                    [disabled]="titleInput === '' || userId === ''"
+                    class="bg-black text-gray-200 border border-black p-2 m-2 rounded">
+                    Create Poll
+                </button>
+
+                <p class="text-white mt-1 select-none">
+                    You can add answer options and edit settings once inside the poll
+                </p>
+
+                <div *ngIf="userId; else elseBlock" class="select-none text-green-100 mt-4">
+                    Connected to Server
+                </div>
+                <ng-template #elseBlock>
+                    <div class="select-none text-rose-100 mt-4">
+                        Connecting to Server...
+                    </div>
+                </ng-template>
+
+            </form>
+
+            <created-polls [userId]="userId" />
+            
+        </div>
+    </div>
+</div>

@@ -12,6 +12,7 @@ node_modules
 /build
 frontend/build
 
+.vscode
 # misc
 .DS_Store
 *.pem

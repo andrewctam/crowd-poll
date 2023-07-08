@@ -113,6 +113,8 @@ const addOption = async (userId: string, pollId: string, optionTitle: string) =>
     if (!user) {
         return JSON.stringify({"error" : "User Invalid"})
     }
+    
+    const approved = !poll["approvalRequired"] || (poll["autoApproveOwner"] && userId === poll["owner"] && !user["userView"]) ;
 
     await Poll.updateOne({_id: pollId}, {
         $push: {
@@ -126,7 +128,7 @@ const addOption = async (userId: string, pollId: string, optionTitle: string) =>
     });
     
     sendUpdatedPoll(pollId);
-    return JSON.stringify({"success": "Option Added"})
+    return JSON.stringify({"success": approved ? "Option Added" : "Requested to Add Option"})
 }
 
 const deleteOptions = async (userId: string, pollId: string, optionsToDelete: string[]) => {
@@ -275,7 +277,7 @@ const updateSetting = async (userId: string, pollId: string, setting: string, ne
     await Poll.updateOne({_id: pollId}, update);
 
     sendUpdatedPoll(pollId)
-    return JSON.stringify({"success": setting + " Updated"})
+    return JSON.stringify({"success": "Setting Successfully Updated"})
 }
 
 module.exports = {getPoll, addOption, sendUpdatedPoll, deleteOptions, approveDenyOption, vote, updateSetting}

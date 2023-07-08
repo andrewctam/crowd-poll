@@ -13,23 +13,14 @@ Owner View                   |  User View
 - [Express](https://expressjs.com/en/starter/installing.html)
 - [WebSockets](https://www.npmjs.com/package/ws)
 - [Node.js](https://nodejs.org/en/download/)
-- [React](https://reactjs.org/docs/getting-started.html)
+- [Angular](https://angular.io/docs)
 - [Tailwind CSS](https://tailwindcss.com/docs/guides/create-react-app)
 
 ## Installation
-Clone this repository. Then, in the backend and frontend folders, update the environmental variables in .env.template (and rename it to .env).
+Clone this repository. Then, in the backend folder, update the environmental variables in .env.template (and rename it to .env).
 
 ```
 git clone https://github.com/tamandrew/CrowdPoll.git
 ```
 
-To run with docker, run ```docker compose up``` at the root. 
-```
-docker compose up
-```
-
-To run the local servers, in each of the backend and frontend folders install npm dependencies and run ```npm start``` in /frontend and /backend.
-
-```
-npm start
-```
+To run the local servers, in each of the backend and frontend folders install npm dependencies with `npm install` and run `npm start` in the backend and `ng serve` in the frontend.

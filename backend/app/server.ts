@@ -19,7 +19,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express()
 app.use(cors({
-    origin: ["http://localhost:3000", "https://crowdpolls.web.app"],
+    origin: ["http://localhost:3000", "http://localhost:4200", "https://crowdpolls.web.app"],
     credentials: true
 }));
 
