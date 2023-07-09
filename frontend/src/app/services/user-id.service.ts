@@ -41,7 +41,7 @@ export class UserIDService {
     else { 
       console.log("N " + id);
       localStorage.setItem("userId", id);
-      localStorage.removeItem("created"); //remove created polls since userId changed
+      localStorage.removeItem("createdPolls"); //remove created polls since userId changed
     }
   }
 

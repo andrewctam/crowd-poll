@@ -7,7 +7,7 @@
         {{pollData.title}}
     </div>
 
-    <p *ngIf="pollData.options.length === 0; else elseBlock" class='text-md lg:text-lg text-white'>
+    <p *ngIf="pollData.options.length === 0 && pendingOptions.length === 0 ; else elseBlock" class='text-md lg:text-lg text-white'>
         No Answer Options Yet
     </p>
     <ng-template #elseBlock>
@@ -73,7 +73,7 @@
         </dropdown>
 
         
-        <div *ngIf="pollData.isOwner && !userView && selectedOptions.length > 0"
+        <div *ngIf="pollData.isOwner && !userView && selectedOptions.length > 0 && (pendingOptions.length === 0 || pollData.options.length > 0)"
             class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-stone-600 w-fit mx-auto shadow-md">
             <label htmlFor="selectAll">
                 Select All
@@ -110,6 +110,8 @@
            (toggleSelected)="toggleSelected($event)"
            (approveDeny)="approveDenyOption($event)"
         />
+
+        <pending-option *ngFor="let o of pendingOptions" [optionTitle]="o.optionTitle" />
 
         <form (submit)="addOption()" class="w-full sticky bottom-2 z-10 bg-[#4b4a49] rounded-xl shadow-md flex">
             <input [(ngModel)]="optionInput" name="optionInput" class="h-10 flex-grow m-auto text-white lg:text-lg pl-3

@@ -20,6 +20,7 @@ import { DropdownOptionComponent } from './components/poll/voting/dropdown/dropd
 import { SortPipe } from './pipes/sort.pipe';
 import { FilterPipe } from './pipes/filter.pipe';
 import { StatisticsComponent } from './components/poll/statistics/statistics.component';
+import { PendingOptionComponent } from './components/poll/voting/pending-option/pending-option.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { StatisticsComponent } from './components/poll/statistics/statistics.com
     SortPipe,
     FilterPipe,
     StatisticsComponent,
+    PendingOptionComponent,
   ],
   imports: [
     CommonModule,

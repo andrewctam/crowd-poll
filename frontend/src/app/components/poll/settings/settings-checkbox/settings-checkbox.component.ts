@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { BooleanEmitPayload } from 'src/app/types/types';
 
 @Component({
@@ -9,22 +9,27 @@ export class SettingsCheckboxComponent {
   @Input() name!: string;
   @Input() text!: string;
   @Input() indent!: boolean;
-  @Input() defaultChecked!: boolean;
+  @Input() checked!: boolean;
 
   @Output() toggleSetting = new EventEmitter<BooleanEmitPayload>();
 
-  checked: boolean = false;
-  ngOnInit() {
-    this.checked = this.defaultChecked;
+  updating: boolean = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log(changes)
+    this.updating = false;
   }
 
-
   toggle() {
-    this.checked = !this.checked;
+    if (this.updating) {
+      return;
+    }
+      
+    this.updating = true;
 
     this.toggleSetting.emit({
       identifier: this.name,
-      newValue: this.checked
+      newValue: !this.checked
     });
     
   }

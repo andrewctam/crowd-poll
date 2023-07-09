@@ -9,7 +9,7 @@
     name="disableVoting"
     [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [defaultChecked]="settings['disableVoting']"
+    [checked]="settings['disableVoting']"
   />
 
   <settings-checkbox
@@ -17,7 +17,7 @@
     name="hideVotes"
     [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [defaultChecked]="settings['hideVotes']"
+    [checked]="settings['hideVotes']"
   />
 
   <settings-checkbox
@@ -26,7 +26,7 @@
     name="hideVotesForOwner"
     (toggleSetting)="setSetting($event)"
     [indent]="true"
-    [defaultChecked]="settings['hideVotesForOwner']"
+    [checked]="settings['hideVotesForOwner']"
   />
 
   <settings-checkbox
@@ -34,7 +34,7 @@
     name="limitOneVote"
     [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [defaultChecked]="settings['limitOneVote']"
+    [checked]="settings['limitOneVote']"
   />
 
   <settings-checkbox
@@ -42,7 +42,7 @@
     name="approvalRequired"
     [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [defaultChecked]="settings['approvalRequired']"
+    [checked]="settings['approvalRequired']"
   />
 
   <settings-checkbox
@@ -51,7 +51,7 @@
     name="autoApproveOwner"
     [indent]="true"
     (toggleSetting)="setSetting($event)"
-    [defaultChecked]="settings['autoApproveOwner']"
+    [checked]="settings['autoApproveOwner']"
   />
 </div>
 

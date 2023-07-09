@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { AlertService } from 'src/app/services/alert.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 import { WsPollService } from 'src/app/services/ws-poll.service';
@@ -20,11 +20,18 @@ export class VotingComponent {
 
   userView: boolean = false;
   expandedTitle: boolean = false;
-  selectedOptions: string[] = [];
   optionInput: string = '';
+  selectedOptions: string[] = [];
+  pendingOptions: Option[] = [];
 
   sortingMethod: SortingMethod = "Order Created";
   filterMethod: FilterMethod = "All";
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes["pollData"]) {
+      this.pendingOptions = [];
+    }
+  }
 
   selectAll() {
     if (this.selectedOptions.length === this.pollData.options.length) {
@@ -64,6 +71,20 @@ export class VotingComponent {
       userId: this.userIdService.userId,
       optionTitle: this.optionInput,
     });
+
+    const approved = (!this.pollData.settings["approvalRequired"]) ||
+        (this.pollData.isOwner && 
+         !this.userView &&
+         this.pollData.settings.autoApproveOwner);
+   
+    if (approved) {
+      this.pendingOptions.push({
+        approved: true,
+        optionTitle: this.optionInput,
+        votes: 0,
+        _id: ""
+      });
+    }
 
     this.optionInput = '';
   }

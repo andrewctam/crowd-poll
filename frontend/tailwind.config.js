@@ -14,7 +14,8 @@ module.exports = {
       
       minWidth: {
         "4": "1rem",
-        "32": "8rem"
+        "32": "8rem",
+        "48": "12rem",
       },
 
       // that is animation class
