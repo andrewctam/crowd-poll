@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { COLORS, EMPTY_POLL, GREEN_GRADIENT, LIGHTER_GREEN_GRADIENT } from 'src/app/constants/constants';
+import { COLORS, EMPTY_POLL, GREEN_GRADIENT } from 'src/app/constants/constants';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
 import { SelectedChartService } from 'src/app/services/selected-chart.service';
@@ -31,6 +31,7 @@ export class PollOptionComponent {
   selectedInChart: boolean = false;
 
   showBox: boolean = false;
+  voteAdjustment: number = 0;
   currentlyVoting: boolean = false;
   style = {};
   touchscreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
@@ -40,8 +41,15 @@ export class PollOptionComponent {
     this.pollDataService.pollData$.subscribe((pollData) => {
       if (pollData) {
         this.pollData = pollData;
-        this.isVoted = pollData.votedFor.includes(this.option._id);
-        this.currentlyVoting = false;
+        const newVoteStatus = pollData.votedFor.includes(this.option._id);
+
+        if (newVoteStatus !== this.isVoted) {
+          this.currentlyVoting = false;
+          this.voteAdjustment = 0;
+        }
+
+        this.isVoted = newVoteStatus;
+
         this.updateStyles();
       }
     });
@@ -60,16 +68,14 @@ export class PollOptionComponent {
   }
 
   updateStyles() {
-    this.style =  {
-      borderColor: this.option?.approved === false ? COLORS.RED :
-                    this.selectedForDelete ? COLORS.PINK :
-                    this.currentlyVoting ? COLORS.LIGTHER_GREEN :
-                    this.isVoted ? COLORS.GREEN :
-                               COLORS.WHITE,
+    const showVote = (this.currentlyVoting && !this.isVoted) || (!this.currentlyVoting && this.isVoted);
+    this.style = {
+      borderColor: (this.option?.approved === false ? COLORS.RED :
+                   this.selectedForDelete ? COLORS.PINK :
+                   showVote ? COLORS.GREEN :
+                               COLORS.WHITE),
 
-      backgroundImage: this.currentlyVoting ? LIGHTER_GREEN_GRADIENT :
-                      this.isVoted ? GREEN_GRADIENT
-                          : "",
+      backgroundImage: showVote ? GREEN_GRADIENT : "",
 
       transform: this.selectedInChart ? "scale(1.1)" : ""
     }     
@@ -115,6 +121,12 @@ export class PollOptionComponent {
       return;
     }
 
+    if (this.isVoted) {
+      this.voteAdjustment = -1;
+    } else {
+      this.voteAdjustment = 1;
+    }
+
     this.wsPollService.updates?.next({
       type: 'vote',
       pollId: this.pollData.pollId,
@@ -131,6 +143,14 @@ export class PollOptionComponent {
       userId: this.userId,
       approved
     });
+  }
+
+  getLabel() {
+    if (this.option.votes < 0)
+      return "Votes Hidden";
+
+    const effectiveVotes = this.option.votes + this.voteAdjustment; 
+    return `${effectiveVotes} ${effectiveVotes === 1 ? " vote" : " votes"}`;
   }
 
 }

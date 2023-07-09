@@ -1,21 +1,17 @@
-
 export interface Alert {
     msg: string,
     id: number,
     error: boolean
 }
 
-
 export interface StoredPoll {
     pollId: string,
     title: string
 }
 
-
 export interface CreatedPoll extends StoredPoll {
     selected: boolean
 }
-
 
 export interface PollSettings {
     hideVotes: boolean
@@ -42,7 +38,6 @@ export interface PollData {
     options: Option[]
 }
 
-
 export interface WSMessage extends Partial<PollData> {
     update?: string
     error?: string
@@ -54,7 +49,6 @@ export interface ToggleSettingEmit {
     setting: string
     newValue: boolean
 }
-
 
 export type SortingMethod = "Order Created" | "Vote Count" | "Alphabetical Order"
 export type FilterMethod = "All" | "Voted For" | "Not Voted For" | "Approved" | "Pending Approval"

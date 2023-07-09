@@ -27,7 +27,7 @@
       <settings [userView]="userView" />
       <statistics />
     </div>
-    
+
     <div
       *ngIf="pollData.isOwner"
       class="absolute bottom-2 left-2 text-xs text-white"
@@ -57,4 +57,18 @@
   </div>
 
   <voting />
+</div>
+
+<div *ngIf="pollData === null && showError" class="text-center mt-4">
+  <a href="/">
+    <h1 class="text-5xl text-white">Crowd Poll</h1>
+  </a>
+
+  <div class="text-lg text-gray-200 my-2">
+    Error loading poll. This poll does not exist or was deleted.
+  </div>
+
+  <a href="/" class="text-xl text-blue-200">
+    Back to Home Page
+  </a>
 </div>

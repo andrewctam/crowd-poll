@@ -20,11 +20,7 @@
   </div>
 
   <div class="grid-row w-full px-10 rounded-xl text-left">
-    {{
-      option.votes >= 0
-        ? option.votes + (option.votes === 1 ? " vote" : " votes")
-        : "Votes Hidden"
-    }}
+    {{ getLabel() }}
   </div>
 </button>
 

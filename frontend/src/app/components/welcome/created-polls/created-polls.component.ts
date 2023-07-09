@@ -43,5 +43,9 @@ export class CreatedPollsComponent {
       error: (response) => {console.log(response)},
     });
   }
+
+  trackCreatedPolls(index: number, poll: CreatedPoll) {
+    return poll.pollId;
+  }
   
 }

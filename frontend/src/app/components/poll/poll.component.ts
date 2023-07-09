@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
 import { UserIDService } from 'src/app/services/user-id.service';
@@ -20,12 +21,14 @@ export class PollComponent {
   userView: boolean = false;
 
   url: string = window.location.href;
+  showError: boolean = false;
 
   constructor(
     private wsPollService: WsPollService,
     private userIdService: UserIDService,
     private alertService: AlertService,
-    private pollDataService: PollDataService
+    private pollDataService: PollDataService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -52,12 +55,24 @@ export class PollComponent {
           this.reconnect = null;
         }
 
-        if (data.update) this.pollDataService.updatePollData(data as PollData);
-        else if (data.success) this.alertService.addAlert(data.success, 2000);
-        else if (data.error)
-          this.alertService.addAlert(data.error, 2000, true);
+        this.showError = false;
+        if (data.update) {
+          this.pollDataService.updatePollData(data as PollData);
+        } else if (data.success) { 
+          this.alertService.addAlert(data.success, 2000);
+        } else if (data.error) {
+          this.showError = true;
+
+          if (data.error === "Poll Deleted") {
+            this.alertService.addAlert("Poll Has Been Deleted", 2000, true);
+            this.router.navigate([""]);
+          } else {
+            this.alertService.addAlert(data.error, 2000, true);
+          }
+        } 
       },
       error: (err) => {
+        this.showError = true;
         console.log('Connection error:', err);
       },
       complete: () => {

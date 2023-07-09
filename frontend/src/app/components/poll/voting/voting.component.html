@@ -114,7 +114,8 @@
       *ngFor="
         let o of pollData.options
           | filter : filterMethod : pollData.votedFor
-          | sort : sortingMethod
+          | sort : sortingMethod; 
+          trackBy: trackOption
       "
       [option]="o"
     />

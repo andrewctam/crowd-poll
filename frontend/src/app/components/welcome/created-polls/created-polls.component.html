@@ -28,7 +28,7 @@
         </button>
     </div>
     <a
-      *ngFor="let poll of createdPolls; let i = index"
+      *ngFor="let poll of createdPolls; let i = index; trackBy:trackCreatedPolls"
       href="poll/{{ poll.pollId }}"
     >
       <li

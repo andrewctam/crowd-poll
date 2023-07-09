@@ -16,4 +16,8 @@ export class AlertsComponent {
       this.alerts = alerts;
     })
   }
+
+  trackAlert(index: number, alert: Alert) {
+    return alert.id;
+  }
 }

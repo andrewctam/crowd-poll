@@ -125,7 +125,9 @@ export class VotingComponent {
     });
   }
 
-
+  trackOption(index: number, option: Option) {
+    return option._id;
+  }
   setSortingMethod(method: string) {
     this.sortingMethod = method as SortingMethod;
   }
