@@ -1,8 +1,11 @@
+import { ObjectId } from "mongodb";
+
 export {};
 
 const mongoose = require('mongoose')
 
 export type Option = {
+    _id: ObjectId
     optionTitle: string,
     votes: number,
     approved: boolean
@@ -10,14 +13,15 @@ export type Option = {
 
 export type VotedFor = {
     userId: string,
-    optionIds: [string]
+    optionIds: ObjectId[]
 };
 
 export type Poll = {
+    _id: ObjectId
     title: string,
-    options: [Option],
-    votes: [VotedFor],
-    owner: string,
+    options: Option[],
+    votes: VotedFor[],
+    owner: ObjectId,
     limitOneVote: boolean,
     approvalRequired: boolean,
     autoApproveOwner: boolean,
@@ -25,11 +29,12 @@ export type Poll = {
     hideVotesForOwner: boolean,
     disableVoting: boolean
 }
+
 const pollSchema = mongoose.Schema({
     title: String,
-    options:[{ optionTitle: String, votes: Number, approved: Boolean}],
-    votes: [{userId: String, optionIds: [String]}],
-    owner: String,
+    options: [{ optionTitle: String, votes: Number, approved: Boolean}],
+    votes: [{userId: ObjectId, optionIds: [ObjectId]}],
+    owner: ObjectId,
 
     limitOneVote: { type: Boolean, default: false },
     approvalRequired: { type: Boolean, default: false },
@@ -37,8 +42,6 @@ const pollSchema = mongoose.Schema({
     hideVotes: { type: Boolean, default: false },
     hideVotesForOwner: { type: Boolean, default: false },
     disableVoting: { type: Boolean, default: false },
-    
-    
 })
     
 module.exports = mongoose.model("poll", pollSchema)

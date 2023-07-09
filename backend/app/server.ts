@@ -109,7 +109,7 @@ wss.on("connection", async (ws: WebSocket, req: any) => {
     } 
 
     //add user to poll's set of current connections
-    var connectedToPoll = wsConnections.get(pollId)
+    let connectedToPoll = wsConnections.get(pollId)
     if (!connectedToPoll) {
         connectedToPoll = new Set()
         wsConnections.set(pollId, connectedToPoll)

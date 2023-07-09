@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 const express = require('express')
-var ObjectId = require('mongoose').Types.ObjectId;
+const ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("../models/pollModel")
 const User = require("../models/userModel")
 const router = express.Router();

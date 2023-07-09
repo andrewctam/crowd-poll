@@ -1,24 +1,26 @@
-var ObjectId = require('mongoose').Types.ObjectId;
+const ObjectId = require('mongoose').Types.ObjectId;
 const Poll = require("../models/pollModel")
 const User = require("../models/userModel")
 const router = require('express').Router();
 import { Request, Response } from 'express';
 import { UserConnection } from '../server';
+import { Poll } from '../models/pollModel';
 
 const connections = require("../server")
 
 router.post("/create", async (req: Request, res: Response ) => {
     const {title, userId} = req.body;
-    
+    let poll: Poll | null = null;
+
     if (title) {
-        var poll = await Poll.create({title: title, owner: userId})
+         poll = await Poll.create({title: title, owner: userId})
     } else {
         res.status(400).json("Error. Enter a title")
         return;
     }
 
     if (poll) {
-        res.status(201).json({pollId: poll.id})
+        res.status(201).json({pollId: poll._id})
     } else {
         res.status(400).send("Error connecting to database");
     }
@@ -38,7 +40,7 @@ router.delete("/delete", async (req: Request, res: Response) => {
 
     pollsToDelete.forEach(async (pollId: typeof ObjectId) => {
         if (ObjectId.isValid(pollId)) {
-            await Poll.deleteOne({_id: new ObjectId(pollId), owner: userId});
+            await Poll.deleteOne({_id: pollId, owner: userId});
             
             const connectedUsers = connections.get(pollId)
             if (connectedUsers) {

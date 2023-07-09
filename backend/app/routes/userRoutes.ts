@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 const express = require('express')
 const User = require("../models/userModel")
 const router = express.Router();
-var ObjectId = require('mongoose').Types.ObjectId;
+const ObjectId = require('mongoose').Types.ObjectId;
 
 router.get("/:userId", async (req: Request, res: Response) => {
     const userId = req.params.userId;
