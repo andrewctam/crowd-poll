@@ -24,51 +24,37 @@
         [value]="url"
       />
 
-      <div
-        *ngIf="pollData.isOwner"
-        class="absolute bottom-2 right-2 text-xs text-white"
-      >
-        <div class="flex justify-between">
-          <label htmlFor="userView" class="text-white"> View as User </label>
+      <settings [userView]="userView" />
+      <statistics />
+    </div>
+    
+    <div
+      *ngIf="pollData.isOwner"
+      class="absolute bottom-2 left-2 text-xs text-white"
+    >
+      <p class="inline">Viewing as</p>
+      <p class="inline" [ngClass]="userView ? 'text-rose-200' : 'text-sky-200'">
+        {{ userView ? " User" : " Owner" }}
+      </p>
+    </div>
 
-          <input
-            class="w-4 h-4 rounded-xl ml-2 self-center"
-            id="userView"
-            type="checkbox"
-            [checked]="userView"
-            (click)="toggleUserView()"
-          />
-        </div>
+    <div
+      *ngIf="pollData.isOwner"
+      class="absolute bottom-2 right-2 text-xs text-white"
+    >
+      <div class="flex justify-between">
+        <label htmlFor="userView" class="text-white"> View as User </label>
+
+        <input
+          class="w-4 h-4 rounded-xl ml-2 self-center"
+          id="userView"
+          type="checkbox"
+          [checked]="userView"
+          (click)="toggleUserView()"
+        />
       </div>
-
-      <div
-        *ngIf="pollData.isOwner"
-        class="absolute bottom-2 left-2 text-xs text-white"
-      >
-        <p class="inline">Viewing as</p>
-        <p
-          class="inline"
-          [ngClass]="userView ? 'text-rose-200' : 'text-sky-200'"
-        >
-          {{ userView ? " User" : " Owner" }}
-        </p>
-      </div>
-
-      <settings
-        [isOwner]="!userView && pollData.isOwner"
-        [pollId]="pollData.pollId"
-        [settings]="pollData.settings"
-      />
-
-      <statistics 
-        (setSelectedSlice)="setSelectedSlice($event)"
-        [options]="pollData.options"
-      />
     </div>
   </div>
 
-  <voting 
-    [pollData]="pollData" 
-    [selectedSlice]="selectedSlice" 
-  />
+  <voting />
 </div>

@@ -7,8 +7,8 @@
     <g transform="translate(200, 200)">
       <g
         *ngFor="let d of arcs; let i = index"
-        (mouseenter)="setSlice(d.data['_id'])"
-        (mouseleave)="setSlice('')"
+        (mouseenter)="setSelected(d.data['_id'])"
+        (mouseleave)="setSelected('')"
         class="cursor-crosshair"
       >
         <path [attr.d]="arc(d)" [attr.fill]="getColor(i)" />

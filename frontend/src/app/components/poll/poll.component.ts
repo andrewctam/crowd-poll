@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AlertService } from 'src/app/services/alert.service';
+import { PollDataService } from 'src/app/services/poll-data.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 import { WsPollService } from 'src/app/services/ws-poll.service';
 import { PollData, WSMessage } from 'src/app/types/types';
@@ -13,72 +14,67 @@ export class PollComponent {
   @Input() pollId!: string;
 
   pollData: PollData | null = null;
-
-  url: string = window.location.href;
-  userView: boolean = false;
-  selectedSlice: string = "";
-
-  ngOnInit() {
-    this.userIdService.queryId().subscribe({
-      next: (response) => {
-        const userId = response as string;
-        this.userIdService.saveId(userId);
-
-        this.connectToPoll(userId);
-      },
-      error: (response) => {
-        console.log(response);
-        this.alertService.addAlert(
-          'Can not connect to server. Please refresh or try again later',
-          10000,
-          'error'
-        );
-      },
-    });
-  }
+  userId: string = '';
 
   reconnect: ReturnType<typeof setInterval> | null = null;
+  userView: boolean = false;
 
-  connectToPoll(userId: string) {
-    this.wsPollService.connect(this.pollId, userId).subscribe({
-      next: (msg) => {
-        const data: WSMessage = msg;
-
-        if (this.reconnect) {
-          this.alertService.addAlert("Succesfully Reconnected!");
-          clearInterval(this.reconnect)
-          this.reconnect = null;
-        }
-
-        if (data.update) 
-          this.pollData = data as PollData;
-        else if (data.success) 
-          this.alertService.addAlert(data.success, 2000);
-        else if (data.error)
-          this.alertService.addAlert(data.error, 2000, 'error');
-      },
-      error: (err) => { console.log("Connection error:", err) },
-      complete: () => {
-        this.reconnect = setInterval(() => {
-          this.alertService.addAlert("Disconnected from server. Trying to reconnect...", 4000, "error");
-          this.connectToPoll(userId);
-        }, 5000);
-      }
-    });
-  }
+  url: string = window.location.href;
 
   constructor(
     private wsPollService: WsPollService,
     private userIdService: UserIDService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private pollDataService: PollDataService
   ) {}
+
+  ngOnInit() {
+    this.userIdService.userId$.subscribe((userId) => {
+      this.userId = userId;
+      if (this.userId !== "")
+        this.connectToPoll();
+        
+    });
+
+    this.pollDataService.pollData$.subscribe(
+      (pollData) => (this.pollData = pollData)
+    );
+  }
+
+  connectToPoll() {
+    this.wsPollService.connect(this.pollId, this.userId).subscribe({
+      next: (msg) => {
+        const data: WSMessage = msg;
+
+        if (this.reconnect) {
+          this.alertService.addAlert('Succesfully Reconnected!');
+          clearInterval(this.reconnect);
+          this.reconnect = null;
+        }
+
+        if (data.update) this.pollDataService.updatePollData(data as PollData);
+        else if (data.success) this.alertService.addAlert(data.success, 2000);
+        else if (data.error)
+          this.alertService.addAlert(data.error, 2000, true);
+      },
+      error: (err) => {
+        console.log('Connection error:', err);
+      },
+      complete: () => {
+        this.reconnect = setInterval(() => {
+          this.alertService.addAlert(
+            'Disconnected from server. Trying to reconnect...',
+            4000,
+            true
+          );
+          this.connectToPoll();
+        }, 5000);
+      },
+    });
+  }
 
   selectInput(event: Event) {
     (event.target as HTMLInputElement).select();
-  }
-
-  setSelectedSlice(optionId: string) {
-    this.selectedSlice = optionId;
   }
 
   toggleUserView() {
@@ -88,16 +84,14 @@ export class PollComponent {
       next: () => {
         //refresh poll with what the users see
         this.wsPollService.updates?.next({
-          type: "getPoll",
+          type: 'getPoll',
           pollId: this.pollData?.pollId,
-          userId: this.userIdService.userId
-        })
+          userId: this.userId,
+        });
       },
-      error: (err) => {console.log(err)}
+      error: (err) => {
+        console.log(err);
+      },
     });
   }
-
-
-
-
 }

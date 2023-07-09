@@ -1,8 +1,16 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
+import { EMPTY_POLL } from 'src/app/constants/constants';
 import { AlertService } from 'src/app/services/alert.service';
+import { PollDataService } from 'src/app/services/poll-data.service';
+import { SelectedDeleteService } from 'src/app/services/selected-delete.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 import { WsPollService } from 'src/app/services/ws-poll.service';
-import { BooleanEmitPayload, FilterMethod, Option, PollData, SortingMethod } from 'src/app/types/types';
+import {
+  FilterMethod,
+  Option,
+  PollData,
+  SortingMethod,
+} from 'src/app/types/types';
 
 @Component({
   selector: 'voting',
@@ -12,54 +20,55 @@ export class VotingComponent {
   constructor(
     private wsPollService: WsPollService,
     private userIdService: UserIDService,
-    private alertService: AlertService
+    private pollDataService: PollDataService,
+    private alertService: AlertService,
+    private selectedDeleteService: SelectedDeleteService
   ) {}
 
-  @Input() pollData!: PollData;
-  @Input() selectedSlice!: string;
+  pollData: PollData = EMPTY_POLL;
+
+  userId: string = '';
 
   userView: boolean = false;
   expandedTitle: boolean = false;
   optionInput: string = '';
-  selectedOptions: string[] = [];
+
+  selectedDelete: string[] = [];
   pendingOptions: Option[] = [];
 
-  sortingMethod: SortingMethod = "Order Created";
-  filterMethod: FilterMethod = "All";
+  sortingMethod: SortingMethod = 'Order Created';
+  filterMethod: FilterMethod = 'All';
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes["pollData"]) {
-      this.pendingOptions = [];
-    }
+  ngOnInit() {
+    this.userIdService.userId$.subscribe((userId) => {
+      this.userId = userId;
+    });
+
+    this.pollDataService.pollData$.subscribe((pollData) => {
+      if (pollData) {
+        this.pollData = pollData;
+        this.pendingOptions = [];
+      }
+    })
+
+    this.selectedDeleteService.selectedDelete$.subscribe((sd) => {
+      this.selectedDelete = sd;
+    })
   }
 
   selectAll() {
-    if (this.selectedOptions.length === this.pollData.options.length) {
-      this.selectedOptions = [];
-    } else {
-      this.selectedOptions = this.pollData.options
-        .filter((o) => o.approved)
-        .map((o) => o._id);
-    }
-  }
-
-  toggleSelected(optionId: string) {
-    const i = this.selectedOptions.findIndex((id) => id === optionId);
-
-    if (i >= 0) {
-      this.selectedOptions.splice(i, 1);
-    } else {
-      this.selectedOptions.push(optionId);
-    }
+    this.selectedDeleteService.selectAll();
   }
 
   deleteSelectedOptions() {
     this.wsPollService.updates?.next({
       type: 'deleteOptions',
-      userId: this.userIdService.userId,
+      userId: this.userId,
       pollId: this.pollData.pollId,
-      optionsToDelete: this.selectedOptions.join('.'),
+      optionsToDelete: this.selectedDelete.join('.'),
     });
+
+    this.selectedDeleteService.clear();
   }
 
   addOption() {
@@ -68,21 +77,22 @@ export class VotingComponent {
     this.wsPollService.updates?.next({
       type: 'addOption',
       pollId: this.pollData.pollId,
-      userId: this.userIdService.userId,
+      userId: this.userId,
       optionTitle: this.optionInput,
     });
 
-    const approved = (!this.pollData.settings["approvalRequired"]) ||
-        (this.pollData.isOwner && 
-         !this.userView &&
-         this.pollData.settings.autoApproveOwner);
-   
+    const approved =
+      !this.pollData.settings['approvalRequired'] ||
+      (this.pollData.isOwner &&
+      !this.userView &&
+      this.pollData.settings.autoApproveOwner);
+
     if (approved) {
       this.pendingOptions.push({
         approved: true,
         optionTitle: this.optionInput,
         votes: 0,
-        _id: ""
+        _id: '',
       });
     }
 
@@ -91,7 +101,7 @@ export class VotingComponent {
 
   castVote(optionId: string) {
     if (this.pollData.settings['disableVoting']) {
-      this.alertService.addAlert('Voting is disabled', 2000, 'error');
+      this.alertService.addAlert('Voting is disabled', 2000, true);
       return;
     }
 
@@ -102,7 +112,7 @@ export class VotingComponent {
       this.alertService.addAlert(
         'You can only vote for one option',
         2000,
-        'error'
+        true
       );
       return;
     }
@@ -111,19 +121,10 @@ export class VotingComponent {
       type: 'vote',
       pollId: this.pollData.pollId,
       optionId: optionId,
-      userId: this.userIdService.userId,
+      userId: this.userId,
     });
   }
 
-  approveDenyOption(payload: BooleanEmitPayload) {
-    this.wsPollService.updates?.next({
-      type: 'approveDenyOption',
-      pollId: this.pollData.pollId,
-      optionId: payload.identifier,
-      userId: this.userIdService.userId,
-      approved: payload.newValue,
-    });
-  }
 
   setSortingMethod(method: string) {
     this.sortingMethod = method as SortingMethod;
@@ -132,5 +133,4 @@ export class VotingComponent {
   setFilterMethod(method: string) {
     this.filterMethod = method as FilterMethod;
   }
-  
 }

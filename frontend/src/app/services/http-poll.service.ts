@@ -7,10 +7,7 @@ import { CreatedPoll, StoredPoll } from '../types/types';
 @Injectable({
   providedIn: 'root'
 })
-
-
-
-export class PollService {
+export class HttpPollService {
   constructor(private http: HttpClient) { }
 
   createPoll(title: string, userId: string): Observable<Object> {

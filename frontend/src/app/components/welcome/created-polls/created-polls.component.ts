@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CreatedPoll } from '../../../types/types';
-import { PollService } from '../../../services/poll.service';
+import { HttpPollService } from '../../../services/http-poll.service';
 import { AlertService } from '../../../services/alert.service';
 
 @Component({
@@ -12,8 +12,8 @@ export class CreatedPollsComponent {
 
   createdPolls: CreatedPoll[];
 
-  constructor(private pollService: PollService, private alertService: AlertService) {
-    this.createdPolls = this.pollService.getCreatedPolls()
+  constructor(private httpPollService: HttpPollService, private alertService: AlertService) {
+    this.createdPolls = this.httpPollService.getCreatedPolls()
   }
 
   get pollsSelected(): number {
@@ -35,10 +35,10 @@ export class CreatedPollsComponent {
   deletePolls() {
     const selected = this.createdPolls.filter((p) => p.selected);
 
-    this.pollService.deletePolls(selected, this.userId)?.subscribe({
+    this.httpPollService.deletePolls(selected, this.userId)?.subscribe({
       next: (response) => {
         this.alertService.addAlert("Polls deleted")
-        this.createdPolls = this.pollService.getCreatedPolls()
+        this.createdPolls = this.httpPollService.getCreatedPolls()
       },
       error: (response) => {console.log(response)},
     });

@@ -2,7 +2,7 @@
 export interface Alert {
     msg: string,
     id: number,
-    type: string
+    error: boolean
 }
 
 
@@ -15,7 +15,6 @@ export interface StoredPoll {
 export interface CreatedPoll extends StoredPoll {
     selected: boolean
 }
-
 
 
 export interface PollSettings {
@@ -51,8 +50,8 @@ export interface WSMessage extends Partial<PollData> {
     success?: string
 }
 
-export interface BooleanEmitPayload {
-    identifier: string
+export interface ToggleSettingEmit {
+    setting: string
     newValue: boolean
 }
 

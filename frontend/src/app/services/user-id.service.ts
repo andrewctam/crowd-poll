@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,14 +9,12 @@ import { Observable, of } from 'rxjs';
 export class UserIDService {
   constructor(private http: HttpClient) { }
 
-  userId: string = "";
+  private userIdSubject = new BehaviorSubject<string>("");
+
+  private userId: string = "";
+  userId$ = this.userIdSubject.asObservable();
 
   queryId(): Observable<Object> {
-    if (this.userId !== "") {
-      //already queryied before, use old userId
-      return of(this.userId);
-    }
-
     const storedUserId = localStorage.getItem("userId");
 
     //can't have an empty string or it fetches an invalid API "api/users/" isntead of "api/users/:id"
@@ -27,22 +25,20 @@ export class UserIDService {
     return this.http.get(url);
   }
 
-  saveId(id: string): void {
-    if (this.userId == id) {
-      return;
-    }
-    
-    this.userId = id;
+  updateUserId(id: string): void {    
     //user id found in db, no change
-    if (id === localStorage.getItem("userId")) 
+    if (id === localStorage.getItem("userId"))  {
       console.log("R " + id);
 
     //new user id created, either none provided or invalid one provided
-    else { 
+    } else { 
       console.log("N " + id);
       localStorage.setItem("userId", id);
       localStorage.removeItem("createdPolls"); //remove created polls since userId changed
     }
+
+    this.userIdSubject.next(id);
+    this.userId = id;
   }
 
 

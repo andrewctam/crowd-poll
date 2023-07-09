@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer, map } from 'rxjs';
 import { AnonymousSubject, Subject } from 'rxjs/internal/Subject';
 import { environment } from 'src/environments/environment';
-import { AlertService } from './alert.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +11,6 @@ export class WsPollService {
   private subject: AnonymousSubject<MessageEvent> | null = null;
   updates: Subject<Object> | null = null;
   ping: ReturnType<typeof setInterval> | null = null;
-  
-  constructor(private alertService: AlertService) {}
 
   public connect(pollId: string, userId: string): Subject<Object> {
     if (this.updates) {
@@ -50,8 +47,9 @@ export class WsPollService {
 
     this.updates = <Subject<Object>>this.subject.pipe(
       map((response: MessageEvent): Object => {
-        console.log(response.data);
-        return JSON.parse(response.data);
+        const parsed = JSON.parse(response.data);
+        console.log(parsed);
+        return parsed;
     }));
 
     this.ping = setInterval(() => {

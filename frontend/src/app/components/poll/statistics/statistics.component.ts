@@ -1,29 +1,39 @@
 import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { PieArcDatum, Option } from 'src/app/types/types';
 import * as d3 from 'd3';
+import { PollDataService } from 'src/app/services/poll-data.service';
+import { SelectedChartService } from 'src/app/services/selected-chart.service';
+import { CHART_RADIUS } from 'src/app/constants/constants';
 
 @Component({
   selector: 'statistics',
   templateUrl: './statistics.component.html',
 })
 export class StatisticsComponent {
-  @Input() options!: Option[];
-  @Output() setSelectedSlice = new EventEmitter<string>();
+  constructor(
+    private pollDataService: PollDataService,
+    private selectedChartService: SelectedChartService
+  ) {}
 
-  setSlice(optionId: string) {
-    this.setSelectedSlice.emit(optionId);
+  ngOnInit() {
+    this.pollDataService.pollData$.subscribe((pollData) => {
+      if (pollData) {
+        this.constructPie(pollData.options);
+      }
+    })
   }
 
-  RADIUS = 200;
-  voteSum: number = 0;
+  setSelected(optionId: string) {
+    this.selectedChartService.setSelected(optionId);
+  }
 
+  voteSum: number = 0;
   data: Option[] = [];
   arcs: PieArcDatum[] = [];
   arc = d3
     .arc<PieArcDatum>()
     .innerRadius(80)
-    .outerRadius(this.RADIUS);
-  
+    .outerRadius(CHART_RADIUS);
   colors = d3.scaleOrdinal([
       '#c2d9f2',
       '#afcbe6',
@@ -33,11 +43,11 @@ export class StatisticsComponent {
       '#88d4d9',
     ]);
 
-  constructPie() {
+  constructPie(options: Option[]) {
     this.voteSum = 0;
 
     //filter data, truncate titles, count votes
-    this.data = this.options
+    this.data = options
       .filter((option) => option.votes > 0 && option.approved)
       .map((option) => {
         this.voteSum += option.votes;
@@ -58,12 +68,6 @@ export class StatisticsComponent {
     this.arcs = pie(this.data);
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes["options"]) {
-      this.constructPie();
-    }
-  }
-
   label(title: string, votes: number) {
     return `${title} ${Math.round((votes / this.voteSum) * 100)}%`;
   }
@@ -79,8 +83,8 @@ export class StatisticsComponent {
   arcLabelTranslate(d: PieArcDatum) {
     const amount = d3
       .arc<PieArcDatum>()
-      .outerRadius(this.RADIUS - 60)
-      .innerRadius(this.RADIUS - 60)
+      .outerRadius(CHART_RADIUS - 60)
+      .innerRadius(CHART_RADIUS - 60)
       .centroid(d);
 
     return `translate(${amount})`;

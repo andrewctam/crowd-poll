@@ -1,19 +1,19 @@
 <button
-  *ngIf="data.approved; else elseBlock"
+  *ngIf="option.approved; else elseBlock"
   (click)="(castVote)"
   (mouseenter)="showBox = true"
   (mouseleave)="showBox = false"
   class="w-5/6 mx-auto rounded-xl text-white border-l-4 mb-4 grid items-center bg-slate-400/10 py-3 shadow-md"
-  [ngStyle]="{ backgroundImage, transform, borderColor }"
-  (click)="vote($event)"
+  [ngStyle]="style"
+  (click)="castVote($event)"
 >
   <div class="text-xl px-10 relative text-left text-ellipsis overflow-hidden">
-    {{ data.optionTitle }}
+    {{ option.optionTitle }}
 
     <input
-      *ngIf="showBox || (isOwner && (selectedDelete || touchscreen))"
+      *ngIf="showBox || (pollData.isOwner && (selectedForDelete || touchscreen))"
       type="checkbox"
-      [checked]="selectedDelete"
+      [checked]="selectedForDelete"
       (click)="toggleSelection($event)"
       class="absolute top-0 left-2 text-sm w-4 h-4 rounded-xl"
     />
@@ -21,8 +21,8 @@
 
   <div class="grid-row w-full px-10 rounded-xl text-left">
     {{
-      data.votes >= 0
-        ? data.votes + (data.votes === 1 ? " vote" : " votes")
+      option.votes >= 0
+        ? option.votes + (option.votes === 1 ? " vote" : " votes")
         : "Votes Hidden"
     }}
   </div>
@@ -33,7 +33,7 @@
     class="w-5/6 mx-auto rounded-xl text-white border-l-4 border-rose-300 mb-4 py-3 grid items-center bg-gradient-to-r from-rose-400/20 via-rose-400/10 to-slate-400/10 shadow-md"
   >
     <div class="text-xl px-10 w-full relative text-left">
-      {{ data.optionTitle }}
+      {{ option.optionTitle }}
     </div>
     <div class="px-10 w-full relative text-left text-sm">
       Pending Approval. Only you can see this option.

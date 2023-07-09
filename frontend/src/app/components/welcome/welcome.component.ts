@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from 'src/app/services/alert.service';
-import { PollService } from 'src/app/services/poll.service';
+import { HttpPollService } from 'src/app/services/http-poll.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 
 @Component({
@@ -10,45 +10,38 @@ import { UserIDService } from 'src/app/services/user-id.service';
 })
 export class WelcomeComponent {
   constructor(
-    private userIdService: UserIDService, 
-    private pollService: PollService, 
+    private userIdService: UserIDService,
+    private httpPollService: HttpPollService,
     private alertService: AlertService,
-    private router: Router) { }
+    private router: Router
+  ) {}
 
-  titleInput: string = "";
-  userId: string = "";
+  titleInput: string = '';
+  userId: string = '';
 
   ngOnInit() {
-    this.userIdService.queryId().subscribe({
-      next: (response) => { 
-        this.userId = response as string,
-        this.userIdService.saveId(this.userId)
-      },
-      error: (response) => {
-        console.log(response)
-        this.alertService.addAlert("Can not connect to server. Please refresh or try again later", 10000, "error");
-        this.userId = "";
-      }
-    });
+    this.userIdService.userId$.subscribe((userId) => {
+      this.userId = userId;
+   });
   }
 
   createPoll() {
-    this.pollService.createPoll(this.titleInput, this.userId).subscribe({
+    this.httpPollService.createPoll(this.titleInput, this.userId).subscribe({
       next: (response) => {
-        type Payload = { pollId: string }
+        type Payload = { pollId: string };
         const pollId = (response as Payload).pollId;
-        console.log(response)
 
-        this.pollService.storeCreatedPoll(pollId, this.titleInput);
-        this.router.navigate(["poll", pollId])
-       },
+        this.httpPollService.storeCreatedPoll(pollId, this.titleInput);
+        this.router.navigate(['poll', pollId]);
+      },
       error: (response) => {
         console.log(response)
-        this.alertService.addAlert("Error creating poll, please try again", 2000, "error")
-      }
+        this.alertService.addAlert(
+          'Error creating poll, please try again',
+          2000,
+          true
+        );
+      },
     });
-
   }
-
-
 }

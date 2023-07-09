@@ -1,5 +1,5 @@
 <div
-  *ngIf="isOwner; else elseBlock"
+  *ngIf="pollData.isOwner && !userView; else elseBlock"
   class="bg-slate-600 mt-4 p-3 w-fit mx-auto rounded-xl shadow-md"
 >
   <h1 class="text-white text-2xl mb-2 font-semibold">Settings</h1>
@@ -7,51 +7,47 @@
   <settings-checkbox
     text="Disable Voting"
     name="disableVoting"
-    [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [checked]="settings['disableVoting']"
+    [checked]="pollData.settings['disableVoting']"
   />
 
   <settings-checkbox
     text="Hide Vote Count"
     name="hideVotes"
-    [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [checked]="settings['hideVotes']"
+    [checked]="pollData.settings['hideVotes']"
   />
 
   <settings-checkbox
-    *ngIf="settings['hideVotes']"
+    *ngIf="pollData.settings['hideVotes']"
     text="Hide Vote Count For You"
     name="hideVotesForOwner"
     (toggleSetting)="setSetting($event)"
     [indent]="true"
-    [checked]="settings['hideVotesForOwner']"
+    [checked]="pollData.settings['hideVotesForOwner']"
   />
 
   <settings-checkbox
     text="Limit Users To One Vote"
     name="limitOneVote"
-    [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [checked]="settings['limitOneVote']"
+    [checked]="pollData.settings['limitOneVote']"
   />
 
   <settings-checkbox
     text="New Options Require Approval"
     name="approvalRequired"
-    [indent]="false"
     (toggleSetting)="setSetting($event)"
-    [checked]="settings['approvalRequired']"
+    [checked]="pollData.settings['approvalRequired']"
   />
 
   <settings-checkbox
-    *ngIf="settings['approvalRequired']"
+    *ngIf="pollData.settings['approvalRequired']"
     text="Auto Approve Your Options"
     name="autoApproveOwner"
     [indent]="true"
     (toggleSetting)="setSetting($event)"
-    [checked]="settings['autoApproveOwner']"
+    [checked]="pollData.settings['autoApproveOwner']"
   />
 </div>
 
@@ -67,14 +63,14 @@
     </h1>
 
     <ul class="text-left text-white text-md">
-      <li *ngIf="settings['disableVoting']">
+      <li *ngIf="pollData.settings['disableVoting']">
         Adding and removing votes is disabled
       </li>
-      <li *ngIf="settings['hideVotes']">Vote counts are hidden</li>
-      <li *ngIf="settings['limitOneVote']">
+      <li *ngIf="pollData.settings['hideVotes']">Vote counts are hidden</li>
+      <li *ngIf="pollData.settings['limitOneVote']">
         You may only cast one vote at a time
       </li>
-      <li *ngIf="settings['approvalRequired']">
+      <li *ngIf="pollData.settings['approvalRequired']">
         New options require approval from the owner
       </li>
     </ul>

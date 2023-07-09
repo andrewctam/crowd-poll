@@ -7,8 +7,13 @@ import { Alert } from '../../types/types';
   templateUrl: './alerts.component.html',
 })
 export class AlertsComponent {
+  alerts: Alert[] = [];
+
   constructor(private alertsService: AlertService) {}
 
-  alerts: Alert[] = this.alertsService.getAlerts();
-
+  ngOnInit() {
+    this.alertsService.alerts$.subscribe((alerts) => {
+      this.alerts = alerts;
+    })
+  }
 }

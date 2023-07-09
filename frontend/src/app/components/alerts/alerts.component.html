@@ -2,7 +2,7 @@
   <div
     *ngFor="let alert of alerts"
     class="rounded px-4 py-3 w-fit h-fit p-5 m-2 text-black z-20 shadow-md"
-    [ngClass]="alert.type === 'error' ? 'bg-rose-300' : 'bg-sky-200'"
+    [ngClass]="alert.error ? 'bg-rose-300' : 'bg-sky-200'"
   >
     {{ alert.msg }}
   </div>
