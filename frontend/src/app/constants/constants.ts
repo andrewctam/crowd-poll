@@ -19,7 +19,7 @@ export const EMPTY_POLL: PollData = {
 export const COLORS = {
     RED: "rgb(255, 0, 0)",
     PINK: "rgb(255, 127, 127)",
-    LIGHER_GREEN: "rgb(134, 216, 160)",
+    LIGTHER_GREEN: "rgb(134, 216, 160)",
     GREEN: "rgb(154, 236, 180)",
     WHITE: "rgb(255, 255, 255)",
 }

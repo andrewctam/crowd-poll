@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { COLORS, EMPTY_POLL, GREEN_GRADIENT, LIGHTER_GREEN_GRADIENT } from 'src/app/constants/constants';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
@@ -25,7 +25,7 @@ export class PollOptionComponent {
   @Input() option!: Option;
 
   pollData: PollData = EMPTY_POLL;
-  voted: boolean = false;
+  isVoted: boolean = false;
   userId: string = "";
   selectedForDelete: boolean = false;
   selectedInChart: boolean = false;
@@ -40,7 +40,7 @@ export class PollOptionComponent {
     this.pollDataService.pollData$.subscribe((pollData) => {
       if (pollData) {
         this.pollData = pollData;
-        this.voted = pollData.votedFor.includes(this.option._id);
+        this.isVoted = pollData.votedFor.includes(this.option._id);
         this.currentlyVoting = false;
         this.updateStyles();
       }
@@ -63,12 +63,12 @@ export class PollOptionComponent {
     this.style =  {
       borderColor: this.option?.approved === false ? COLORS.RED :
                     this.selectedForDelete ? COLORS.PINK :
-                    this.currentlyVoting ? COLORS.LIGHER_GREEN :
-                    this.voted ? COLORS.GREEN :
+                    this.currentlyVoting ? COLORS.LIGTHER_GREEN :
+                    this.isVoted ? COLORS.GREEN :
                                COLORS.WHITE,
 
       backgroundImage: this.currentlyVoting ? LIGHTER_GREEN_GRADIENT :
-                      this.voted ? GREEN_GRADIENT
+                      this.isVoted ? GREEN_GRADIENT
                           : "",
 
       transform: this.selectedInChart ? "scale(1.1)" : ""
@@ -87,7 +87,7 @@ export class PollOptionComponent {
   castVote(event: MouseEvent) {
     event?.stopPropagation();
 
-    if (!this.voted && this.pollData.votedFor.length > 0 && this.pollData.settings["limitOneVote"]) {
+    if (!this.isVoted && this.pollData.votedFor.length > 0 && this.pollData.settings["limitOneVote"]) {
       this.alertService.addAlert("Already voted for another option!", 2000, true);
       return;
     }
@@ -104,10 +104,9 @@ export class PollOptionComponent {
       console.log("Wait for vote to finish");
     }
 
-    const votedForThis = this.pollData.votedFor.includes(this.option._id);
     const votedForAny = this.pollData.votedFor.length > 0;
 
-    if (this.pollData.settings.limitOneVote && !votedForThis && votedForAny) {
+    if (this.pollData.settings.limitOneVote && !this.isVoted && votedForAny) {
       this.alertService.addAlert(
         'You can only vote for one option',
         2000,

@@ -13,9 +13,11 @@ const sendUpdatedPoll = async (pollId: string) => {
     console.log(wsConnections)
     const connectedUsers = wsConnections.get(pollId);
 
+    const poll: Poll = await Poll.findOne({_id: pollId})
+
     if (connectedUsers) {
         connectedUsers.forEach( async (user: UserConnection) => { //send updated poll to all connected users
-            user["ws"].send(await getPoll(user["userId"], pollId))
+            user["ws"].send(await getPoll(user["userId"], pollId, poll))
         });
     }
 }
@@ -28,7 +30,7 @@ const checkUserId = async (userId: string) => {
     return ObjectId.isValid(userId) && await User.exists({_id: userId})
 }
 
-const getPoll = async (userId: string, pollId: string) => {
+const getPoll = async (userId: string, pollId: string, useThisPoll?: Poll) => {
     if (!await checkPollId(pollId)) {
         return JSON.stringify({"error": "Invalid Poll ID"})
     }
@@ -37,7 +39,7 @@ const getPoll = async (userId: string, pollId: string) => {
         return JSON.stringify({"error": "Invalid User ID"})
     }
 
-    const poll: Poll = await Poll.findOne({_id: pollId})    
+    const poll: Poll = useThisPoll ?? await Poll.findOne({_id: pollId});
     if (!poll) {
         return JSON.stringify({"error": "Poll expired or Invalid ID."})
     }
@@ -50,7 +52,7 @@ const getPoll = async (userId: string, pollId: string) => {
     let optionsVotedFor: ObjectIdType[] = [];
 
     //check if the user voted before
-    if (await Poll.exists({_id: pollId, "votes.userId": userId})) { //check if the poll has an array of votedFor for the user
+    if (poll.votes.find((v) => v.userId.toString() === userId) !== undefined) { //check if the poll has an array of votedFor for the user
         const votes: VotedFor[] = poll["votes"]
 
         //find the user's ids and get the options they voted for

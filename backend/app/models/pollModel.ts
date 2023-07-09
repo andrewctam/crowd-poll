@@ -12,7 +12,7 @@ export type Option = {
 }
 
 export type VotedFor = {
-    userId: string,
+    userId: ObjectId,
     optionIds: ObjectId[]
 };
 
