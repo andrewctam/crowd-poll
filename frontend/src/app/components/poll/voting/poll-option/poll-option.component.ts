@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { COLORS, EMPTY_POLL, GREEN_GRADIENT } from 'src/app/constants/constants';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
+import { PollErrorService } from 'src/app/services/poll-error.service';
 import { SelectedChartService } from 'src/app/services/selected-chart.service';
 import { SelectedDeleteService } from 'src/app/services/selected-delete.service';
 import { UserIDService } from 'src/app/services/user-id.service';
@@ -14,13 +15,13 @@ import { Option, PollData } from 'src/app/types/types';
 })
 export class PollOptionComponent {
   constructor(
-      private alertService: AlertService,
-      private pollDataService: PollDataService,
-      private wsPollService: WsPollService,
-      private userIdService: UserIDService,
-      private selectedDeleteService: SelectedDeleteService,
-      private selectedChartService: SelectedChartService
-      ) { }
+    private alertService: AlertService,
+    private pollDataService: PollDataService,
+    private wsPollService: WsPollService,
+    private userIdService: UserIDService,
+    private selectedDeleteService: SelectedDeleteService,
+    private selectedChartService: SelectedChartService,
+    private pollErrorService: PollErrorService) {}
 
   @Input() option!: Option;
 
@@ -53,6 +54,14 @@ export class PollOptionComponent {
         this.updateStyles();
       }
     });
+
+    this.pollErrorService.pollError$.subscribe((error) => {
+      if (error !== "") {
+        this.currentlyVoting = false;
+        this.voteAdjustment = 0;
+        this.updateStyles();
+      }
+    })
 
     this.userIdService.userId$.subscribe((userId) => {
       this.userId = userId;

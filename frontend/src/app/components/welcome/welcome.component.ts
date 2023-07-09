@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from 'src/app/services/alert.service';
+import { CreatedPollsService } from 'src/app/services/created-polls.service';
 import { HttpPollService } from 'src/app/services/http-poll.service';
 import { UserIDService } from 'src/app/services/user-id.service';
+import { StoredPoll } from 'src/app/types/types';
 
 @Component({
   selector: 'welcome',
@@ -11,6 +13,7 @@ import { UserIDService } from 'src/app/services/user-id.service';
 export class WelcomeComponent {
   constructor(
     private userIdService: UserIDService,
+    private createdPollService: CreatedPollsService,
     private httpPollService: HttpPollService,
     private alertService: AlertService,
     private router: Router
@@ -31,7 +34,7 @@ export class WelcomeComponent {
         type Payload = { pollId: string };
         const pollId = (response as Payload).pollId;
 
-        this.httpPollService.storeCreatedPoll(pollId, this.titleInput);
+        this.createdPollService.storeCreatedPoll(pollId, this.titleInput);
         this.router.navigate(['poll', pollId]);
       },
       error: (response) => {
@@ -44,4 +47,5 @@ export class WelcomeComponent {
       },
     });
   }
+
 }

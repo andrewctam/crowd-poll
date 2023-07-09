@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
+import { PollErrorService } from 'src/app/services/poll-error.service';
 import { UserIDService } from 'src/app/services/user-id.service';
 import { WsPollService } from 'src/app/services/ws-poll.service';
 import { PollData, WSMessage } from 'src/app/types/types';
@@ -28,6 +29,7 @@ export class PollComponent {
     private userIdService: UserIDService,
     private alertService: AlertService,
     private pollDataService: PollDataService,
+    private pollErrorService: PollErrorService,
     private router: Router
   ) {}
 
@@ -62,6 +64,8 @@ export class PollComponent {
           this.alertService.addAlert(data.success, 2000);
         } else if (data.error) {
           this.showError = true;
+
+          this.pollErrorService.setError(data.error);
 
           if (data.error === "Poll Deleted") {
             this.alertService.addAlert("Poll Has Been Deleted", 2000, true);

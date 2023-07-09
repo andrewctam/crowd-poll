@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { CreatedPoll, StoredPoll } from '../types/types';
+import { CreatedPollsService } from './created-polls.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HttpPollService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private createdPollService: CreatedPollsService) { }
 
   createPoll(title: string, userId: string): Observable<Object> {
     const url = `${environment.http_url}/api/polls/create`
@@ -25,38 +26,6 @@ export class HttpPollService {
     return this.http.post(url, body, { headers });
   }
 
-  getCreatedPolls(): CreatedPoll[] {
-    const storage = localStorage.getItem("createdPolls");
-    if (storage == null)
-      return [];
-    else {
-      const stored: StoredPoll[] = JSON.parse(storage);
-
-      return stored.reverse().map((p) => {
-        return {
-          ...p,
-          selected: false
-        }
-      });
-    }
-  }
-
-
-  storeCreatedPoll(pollId: string, title: string): void {
-    let polls: StoredPoll[] = [];
-
-    const storage = localStorage.getItem("createdPolls");
-    if (storage != null)
-      polls = JSON.parse(storage);
-
-    polls.push({
-      pollId,
-      title
-    });
-
-    localStorage.setItem("createdPolls", JSON.stringify(polls));
-  }
-
   deletePolls(polls: StoredPoll[], userId: string): Observable<Object> | undefined {
     const toDelete = polls.map((p) => p.pollId).join(".");
 
@@ -64,7 +33,7 @@ export class HttpPollService {
       return;
     }
 
-    const storedCreated = this.getCreatedPolls();
+    const storedCreated = this.createdPollService.getCreatedPolls();
 
     if (toDelete.length === storedCreated.length) {
       localStorage.removeItem("createdPolls")

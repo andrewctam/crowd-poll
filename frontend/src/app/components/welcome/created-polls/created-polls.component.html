@@ -44,7 +44,8 @@
         <input
           type="checkbox"
           [id]="poll.pollId"
-          [(ngModel)]="poll.selected"
+          (click)="toggleSelected(poll.pollId)"
+          [checked]="poll.selected"
           class="border border-black ml-2 self-center"
         />
       </li>
