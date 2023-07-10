@@ -13,15 +13,12 @@ export class SelectedDeleteService {
 
   private options: Option[] = [];
 
-  constructor(
-    private pollDataService: PollDataService) {}
-
-  ngOnInit() {
+  constructor(private pollDataService: PollDataService) {
     this.pollDataService.pollData$.subscribe((pollData) => {
       if (pollData) {
         this.options = pollData.options;
       }
-    })
+    });
   }
 
   toggleSelected(optionId: string) {

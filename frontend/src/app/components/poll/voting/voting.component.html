@@ -86,7 +86,7 @@
       "
       class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-stone-600 w-fit mx-auto shadow-md"
     >
-      <label htmlFor="selectAll"> Select All </label>
+      <label htmlFor="selectAll" (click)="selectAll()"> Select All </label>
 
       <input
         class="w-4 h-4 rounded-xl ml-1 self-center"
@@ -114,8 +114,8 @@
       *ngFor="
         let o of pollData.options
           | filter : filterMethod : pollData.votedFor
-          | sort : sortingMethod; 
-          trackBy: trackOption
+          | sort : sortingMethod;
+        trackBy: trackOption
       "
       [option]="o"
     />

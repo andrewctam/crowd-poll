@@ -97,6 +97,8 @@ export class StatisticsComponent {
       .outerRadius(0)
       .centroid(d);
 
+    amount[1] += 8
+
     return `translate(${amount})`
   }
 

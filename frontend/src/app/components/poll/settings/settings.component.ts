@@ -19,7 +19,6 @@ export class SettingsComponent {
   constructor(
     private userIdService: UserIDService,
     private pollDataService: PollDataService,
-    private wsPollService: WsPollService
   ) {}
 
   ngOnInit() {
@@ -39,13 +38,4 @@ export class SettingsComponent {
     });
   }
 
-  setSetting(payload: ToggleSettingEmit) {
-    this.wsPollService.updates?.next({
-      type: 'updateSetting',
-      pollId: this.pollData.pollId,
-      userId: this.userId,
-      setting: payload.setting,
-      newValue: payload.newValue,
-    });
-  }
 }

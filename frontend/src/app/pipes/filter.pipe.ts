@@ -17,7 +17,7 @@ export class FilterPipe implements PipeTransform {
         break;
       case "Not Voted For":
         filtered = value.filter((option) => {
-          return !votedFor.includes(option["_id"]) && option["approved"];
+          return !votedFor.includes(option["_id"]) && option["approved"]; //not approved can't be voted for
         });
         break;
       case "Approved":
@@ -26,7 +26,7 @@ export class FilterPipe implements PipeTransform {
         });
         break;
       case "Pending Approval":
-        filtered =  value.filter((option) => {
+        filtered = value.filter((option) => {
           return !option["approved"];
         });
         break;

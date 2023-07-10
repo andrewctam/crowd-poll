@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { COLORS, EMPTY_POLL, GREEN_GRADIENT } from 'src/app/constants/constants';
 import { AlertService } from 'src/app/services/alert.service';
 import { PollDataService } from 'src/app/services/poll-data.service';
@@ -50,8 +50,6 @@ export class PollOptionComponent {
         }
 
         this.isVoted = newVoteStatus;
-
-        this.updateStyles();
       }
     });
 
@@ -59,7 +57,7 @@ export class PollOptionComponent {
       if (error !== "") {
         this.currentlyVoting = false;
         this.voteAdjustment = 0;
-        this.updateStyles();
+  
       }
     })
 
@@ -76,13 +74,14 @@ export class PollOptionComponent {
     })
   }
 
-  updateStyles() {
+  ngDoCheck() {
+    console.log("A")
     const showVote = (this.currentlyVoting && !this.isVoted) || (!this.currentlyVoting && this.isVoted);
     this.style = {
       borderColor: (this.option?.approved === false ? COLORS.RED :
                    this.selectedForDelete ? COLORS.PINK :
                    showVote ? COLORS.GREEN :
-                               COLORS.WHITE),
+                              COLORS.WHITE),
 
       backgroundImage: showVote ? GREEN_GRADIENT : "",
 
@@ -93,11 +92,8 @@ export class PollOptionComponent {
 
   toggleSelection(event: MouseEvent) {
     event?.stopPropagation();
-
     this.selectedDeleteService.toggleSelected(this.option._id);
-    this.updateStyles();
   }
-
 
   castVote(event: MouseEvent) {
     event?.stopPropagation();
@@ -114,7 +110,7 @@ export class PollOptionComponent {
     
     if (!this.currentlyVoting) {
       this.currentlyVoting = true;
-      this.updateStyles();
+
     } else {
       console.log("Wait for vote to finish");
     }
@@ -155,9 +151,10 @@ export class PollOptionComponent {
   }
 
   getLabel() {
-    if (this.option.votes < 0)
+    if (this.option.votes < 0) {
       return "Votes Hidden";
-
+    }
+    
     const effectiveVotes = this.option.votes + this.voteAdjustment; 
     return `${effectiveVotes} ${effectiveVotes === 1 ? " vote" : " votes"}`;
   }

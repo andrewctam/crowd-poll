@@ -7,38 +7,28 @@
   <settings-checkbox
     text="Disable Voting"
     name="disableVoting"
-    (toggleSetting)="setSetting($event)"
-    [checked]="pollData.settings['disableVoting']"
   />
 
   <settings-checkbox
     text="Hide Vote Count"
     name="hideVotes"
-    (toggleSetting)="setSetting($event)"
-    [checked]="pollData.settings['hideVotes']"
   />
 
   <settings-checkbox
     *ngIf="pollData.settings['hideVotes']"
     text="Hide Vote Count For You"
     name="hideVotesForOwner"
-    (toggleSetting)="setSetting($event)"
     [indent]="true"
-    [checked]="pollData.settings['hideVotesForOwner']"
   />
 
   <settings-checkbox
     text="Limit Users To One Vote"
     name="limitOneVote"
-    (toggleSetting)="setSetting($event)"
-    [checked]="pollData.settings['limitOneVote']"
   />
 
   <settings-checkbox
     text="New Options Require Approval"
     name="approvalRequired"
-    (toggleSetting)="setSetting($event)"
-    [checked]="pollData.settings['approvalRequired']"
   />
 
   <settings-checkbox
@@ -46,8 +36,6 @@
     text="Auto Approve Your Options"
     name="autoApproveOwner"
     [indent]="true"
-    (toggleSetting)="setSetting($event)"
-    [checked]="pollData.settings['autoApproveOwner']"
   />
 </div>
 
