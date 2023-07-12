@@ -54,4 +54,8 @@ export class UserIDService {
 
     return this.http.put(url, body, { headers });
   }
+
+  setError() {
+    this.userIdSubject.next("ERROR");
+  }
 }

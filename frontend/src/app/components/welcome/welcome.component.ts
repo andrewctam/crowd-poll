@@ -48,4 +48,14 @@ export class WelcomeComponent {
     });
   }
 
+  getConnectionStatus() {
+    if (this.userId === "ERROR") {
+      return "Failed to Connect to Server"
+    } else if (this.userId !== "") {
+      return "Connected to Server"
+    } else {
+      return "Connecting to Server..."
+    }
+  }
+
 }

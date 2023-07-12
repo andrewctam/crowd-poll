@@ -75,7 +75,6 @@ export class PollOptionComponent {
   }
 
   ngDoCheck() {
-    console.log("A")
     const showVote = (this.currentlyVoting && !this.isVoted) || (!this.currentlyVoting && this.isVoted);
     this.style = {
       borderColor: (this.option?.approved === false ? COLORS.RED :
@@ -154,7 +153,7 @@ export class PollOptionComponent {
     if (this.option.votes < 0) {
       return "Votes Hidden";
     }
-    
+
     const effectiveVotes = this.option.votes + this.voteAdjustment; 
     return `${effectiveVotes} ${effectiveVotes === 1 ? " vote" : " votes"}`;
   }

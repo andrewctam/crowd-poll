@@ -7,28 +7,37 @@
   </p>
 
   <ul class="overflow-y-auto mx-auto w-fit px-6">
-    <div *ngIf="pollsSelected > 0"
-        class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-gray-600 w-fit mx-auto shadow-md">
-        <label htmlFor="selectAll">
-            Select All
-        </label>
+    <div
+      *ngIf="pollsSelected > 0"
+      class="text-white mt-2 justify-center flex px-4 py-2 rounded-xl bg-gray-600 w-fit mx-auto shadow-md"
+    >
+      <label htmlFor="selectAll"> Select All </label>
 
-        <input class="w-4 h-4 rounded-xl ml-1 self-center" id="selectAll" type="checkbox"
-            [checked]="isAllSelected"
-            (click)="setAll()" />
+      <input
+        class="w-4 h-4 rounded-xl ml-1 self-center"
+        id="selectAll"
+        type="checkbox"
+        [checked]="isAllSelected"
+        (click)="setAll()"
+      />
 
+      <label class="px-1 ml-6 text-red-200 pointer" (click)="deletePolls()">
+        Delete Selected Polls
+      </label>
 
-        <label class="px-1 ml-6 text-red-200" (click)="deletePolls()">
-            Delete Selected Polls
-        </label>
-
-        <button (click)="deletePolls()"
-            class="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs">
-            {{pollsSelected}}
-        </button>
+      <button
+        (click)="deletePolls()"
+        class="bg-red-200 rounded border border-black h-fit self-center px-2 text-black text-xs"
+      >
+        {{ pollsSelected }}
+      </button>
     </div>
     <a
-      *ngFor="let poll of createdPolls; let i = index; trackBy:trackCreatedPolls"
+      *ngFor="
+        let poll of createdPolls;
+        let i = index;
+        trackBy: trackCreatedPolls
+      "
       href="poll/{{ poll.pollId }}"
     >
       <li
