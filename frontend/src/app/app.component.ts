@@ -11,10 +11,7 @@ export class AppComponent {
   constructor(private userIdService: UserIDService, private alertService: AlertService) {}
 
   ngOnInit() {
-    this.userIdService.queryId().pipe(
-      retry(3),
-      delay(2000)
-    ).subscribe({
+    this.userIdService.queryId().subscribe({
       next: (response) => {
         const userId = response as string;
         this.userIdService.updateUserId(userId);
