@@ -20,7 +20,7 @@ Owner View                   |  User View
 Clone this repository. Then, in the backend folder, update the environmental variables in .env.template (and rename it to .env).
 
 ```
-git clone https://github.com/tamandrew/CrowdPoll.git
+git clone https://github.com/andrewctam/CrowdPoll.git
 ```
 
 To run the local servers, in each of the backend and frontend folders install npm dependencies with `npm install` and run `npm start` in the backend and `ng serve` in the frontend.
